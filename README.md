@@ -4,7 +4,7 @@ Full-Stack Software Engineer focused on scalable SaaS platforms, distributed sys
 
 I specialize in building production-ready applications using:
 
-- ⚙️ NestJS + TypeORM + MySQL / Firebird
+- ⚙️ NestJS + TypeORM + MySQL / PostgreSQL
 - ⚛️ React, Next.js & Angular
 - 📱 React Native (Expo)
 - 🧱 Domain-Driven Design (DDD)
