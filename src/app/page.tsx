@@ -6,10 +6,15 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/motion/Reveal";
 import { getPortfolio } from "@/lib/get-portfolio";
-import { li } from "framer-motion/m";
 
-export default function HomePage({ params }: { params?: { locale?: string } }) {
-  const portfolio = getPortfolio(params?.locale);
+type PageProps = {
+  params?: Promise<{ locale?: string }>;
+};
+
+export default async function HomePage({ params }: PageProps) {
+  const { locale } = (await params) ?? {};
+  const portfolio = getPortfolio(locale);
+
   const featured = portfolio.projects.filter((p) => p.featured).slice(0, 3);
   const wide = featured.find((p) => p.featuredSize === "wide") ?? featured[0];
   const normals = featured.filter((p) => p.slug !== wide.slug);
