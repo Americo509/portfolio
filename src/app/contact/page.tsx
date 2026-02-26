@@ -10,8 +10,14 @@ export const metadata: Metadata = {
   description: buildDescription("Formulário de contato com validação e estado de sucesso.")
 };
 
-export default function ContactPage({ params }: { params?: { locale?: string } }) {
-  const portfolio = getPortfolio(params?.locale);
+type PageProps = {
+  params?: Promise<{ locale?: string }>;
+};
+
+export default async function ContactPage({ params }: PageProps) {
+  const { locale } = (await params) ?? {};
+  const portfolio = getPortfolio(locale);
+
   return (
     <section className="pt-12 sm:pt-14 pb-20">
       <Container>

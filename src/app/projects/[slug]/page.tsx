@@ -9,16 +9,20 @@ import { Reveal } from "@/components/motion/Reveal";
 import { getPortfolio } from "@/lib/get-portfolio";
 import { buildTitle, buildDescription } from "@/lib/seo";
 
-type Props = { params: { slug: string } };
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
 export function generateStaticParams() {
   const portfolio = getPortfolio(); // PT por padrão
   return portfolio.projects.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+
   const portfolio = getPortfolio();
-  const p = portfolio.projects.find((x) => x.slug === params.slug);
+  const p = portfolio.projects.find((x) => x.slug === slug);
 
   if (!p) {
     return {
@@ -38,9 +42,10 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function ProjectCasePage({ params }: Props) {
+export default async function ProjectCasePage({ params }: Props) {
+  const { slug } = await params;
   const portfolio = getPortfolio();
-  const p = portfolio.projects.find((x) => x.slug === params.slug);
+  const p = portfolio.projects.find((x) => x.slug === slug);
 
   if (!p) return notFound();
 

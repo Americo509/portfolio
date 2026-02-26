@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   description: buildDescription("O que eu valorizo, como penso produto e uma timeline com marcos (placeholders).")
 };
 
+type PageProps = {
+  params?: Promise<{ locale?: string }>;
+};
+
 const values = [
   {
     title: "Qualidade e previsibilidade",
@@ -64,8 +68,10 @@ const timeline = [
   }
 ];
 
-export default function AboutPage({ params }: { params?: { locale?: string } }) {
-  const portfolio = getPortfolio(params?.locale);
+export default async function AboutPage({ params }: PageProps) {
+  const { locale } = (await params) ?? {};
+  const portfolio = getPortfolio(locale);
+
   return (
     <section className="pt-12 sm:pt-14 pb-20">
       <Container>

@@ -10,8 +10,14 @@ export const metadata: Metadata = {
   description: buildDescription("Grid com busca e filtros por tags. Abra um case study para ver decisões técnicas.")
 };
 
-export default function ProjectsPage({ params }: { params?: { locale?: string } }) {
-  const portfolio = getPortfolio(params?.locale);
+type PageProps = {
+  params?: Promise<{ locale?: string }>;
+};
+
+export default async function ProjectsPage({ params }: PageProps) {
+  const { locale } = (await params) ?? {};
+  const portfolio = getPortfolio(locale);
+
   return (
     <section className="pt-12 sm:pt-14 pb-20">
       <Container>
