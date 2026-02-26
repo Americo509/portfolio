@@ -1,50 +1,27 @@
-# Gustavo Américo Rosa — Portfolio (Next.js)
+# 🚀 Gustavo Américo Rosa
 
-Portfólio premium/minimalista (Apple-like) em **Next.js (App Router) + TypeScript + Tailwind + Framer Motion**.
+Full-Stack Software Engineer focused on scalable SaaS platforms, distributed systems, and clean architecture.
 
-## Rodar localmente
+I specialize in building production-ready applications using:
 
-> Recomendado: **pnpm** (mas funciona com npm também)
+- ⚙️ NestJS + TypeORM + MySQL / Firebird
+- ⚛️ React, Next.js & Angular
+- 📱 React Native (Expo)
+- 🧱 Domain-Driven Design (DDD)
+- 🔄 Event-Driven Architecture (Redis / Queues)
+- 🐳 Docker & CI/CD pipelines
+- ☁️ Cloud deployments (AWS / Azure / Vercel)
 
-```bash
-pnpm install
-pnpm dev
-```
+I build real-world systems:
+- Multi-tenant ERP platforms
+- Financial workflow engines
+- Payment automation systems
+- On-demand marketplace mobile apps
 
-Abrir: http://localhost:3000
+Currently improving my expertise in:
+- Distributed transactions
+- System design & scalability
+- Cloud architecture
+- Artificial Intelligence integration
 
-### Build
-
-```bash
-pnpm build
-pnpm start
-```
-
-## Onde editar conteúdo (IMPORTANTE)
-
-Tudo fica centralizado em **`src/data/portfolio.ts`**:
-
-- `profile`: nome, headline, bio curta/longa, hero, localização
-- `links`: GitHub / LinkedIn / email
-- `education`: formação (Unicesumar)
-- `skills`: toolbox por categoria
-- `projects`: lista completa (cards + case study)
-
-## Imagens / prints (galeria)
-
-Substitua os placeholders em:
-
-- `public/images/placeholder-*.jpg`
-
-E ajuste as entradas `gallery` dentro de cada projeto no `portfolio.ts`.
-
-## Tema claro/escuro
-
-- Toggle no header
-- Persistência via `next-themes` (storage key: `gustavo-portfolio-theme`)
-
-## Notas
-
-- O formulário de contato é **frontend-only** (placeholder).  
-  Para envio real, você pode criar um endpoint em `src/app/api/contact/route.ts` ou integrar com um serviço gratuito.
-
+📫 Let’s build something scalable.
