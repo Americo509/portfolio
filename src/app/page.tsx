@@ -156,7 +156,7 @@ export default async function HomePage({ params }: PageProps) {
           />
           <div className="mt-7">
             <Button as="link" href="/about" variant="secondary">
-              Ir para /sobre
+              Ir para tela sobre
             </Button>
           </div>
         </Container>

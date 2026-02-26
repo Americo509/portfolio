@@ -26,7 +26,7 @@ export const portfolioPT  = {
     email: "americorosagustavo@gmail.com"
   },
   education: {
-  title: "Engenheiro de Software — UniCesumar",
+  title: "Engenheiro de Software",
   detail:
     "Formação com foco em arquitetura de software, estruturas de dados, modelagem de sistemas e práticas de engenharia orientadas à qualidade e escalabilidade."
 },
@@ -144,7 +144,14 @@ export const portfolioPT  = {
           "Sistema seguro com autenticação reforçada"
         ],
         gallery: [
-          { src: "/projects/yourbest/cover.png", alt: "YourBest - capa do projeto" }
+          { src: "/images/yourbest/yourbest.png", alt: "YourBest - capa do projeto" },
+          { src: "/images/yourbest/tela-principal.jpg", alt: "YourBest - home" },
+          { src: "/images/yourbest/agenda.jpg", alt: "YourBest - agenda" },
+          { src: "/images/yourbest/servicos-ativos.jpg", alt: "YourBest - tela de serviços ativos" },
+          { src: "/images/yourbest/aceitar-servico.jpg", alt: "YourBest - tela de aceitação de serviço" },
+          { src: "/images/yourbest/financeiro.jpg", alt: "YourBest - tela de financeiro" },
+          { src: "/images/yourbest/conta-bancaria.jpg", alt: "YourBest - tela de conta bancária" },
+          { src: "/images/yourbest/profile.jpg", alt: "YourBest - tela de perfil" },
         ]
       }
     },
@@ -196,7 +203,7 @@ export const portfolioPT  = {
           "Projeto robusto que demonstra domínio de arquitetura e testes"
         ],
         gallery: [
-          { src: "/projects/cookshow/cover.png", alt: "CookShow - capa do projeto" }
+          { src: "/images/cookshow.jpg", alt: "CookShow - capa do projeto" }
         ]
       }
     },
@@ -236,7 +243,7 @@ export const portfolioPT  = {
           "Demonstração sólida de fundamentos de frontend"
         ],
         gallery: [
-          { src: "/projects/apple-watch/cover.png", alt: "Apple Watch Sales Page - capa" }
+          { src: "/images/pagina-apple-watch.png", alt: "Apple Watch Sales Page - capa" }
         ]
       }
     },
@@ -271,7 +278,7 @@ export const portfolioPT  = {
           "Projeto preparado para futuras extensões (busca e filtros)"
         ],
         gallery: [
-          { src: "/projects/cardapio/cover.png", alt: "Cardápio Digital - capa" }
+          { src: "/images/cardapio-digital.png", alt: "Cardápio Digital - capa" }
         ]
       }
     },
@@ -306,7 +313,7 @@ export const portfolioPT  = {
           "Demonstração sólida de fundamentos JavaScript"
         ],
         gallery: [
-          { src: "/projects/audiobook/cover.png", alt: "Audio Book - capa" }
+          { src: "/images/audio-book.png", alt: "Audio Book - capa" }
         ]
       }
     },
@@ -342,7 +349,7 @@ export const portfolioPT  = {
           "Demonstra domínio de layouts complexos em React"
         ],
         gallery: [
-          { src: "/projects/spotify/cover.png", alt: "Spotify UI - capa" }
+          { src: "/images/spotify.png", alt: "Spotify UI - capa" }
         ]
       }
     }

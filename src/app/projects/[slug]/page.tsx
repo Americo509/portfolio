@@ -8,6 +8,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/motion/Reveal";
 import { getPortfolio } from "@/lib/get-portfolio";
 import { buildTitle, buildDescription } from "@/lib/seo";
+import { ProjectGallery } from "@/components/ProjectGallery";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -138,28 +139,20 @@ export default async function ProjectCasePage({ params }: Props) {
 
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
+                <h2 className="text-lg font-semibold tracking-tight">Resultados</h2>
+                <ul className="mt-3 space-y-2 text-sm text-ink-4 dark:text-paper-1/70">
+                  {p.caseStudy.results.map((r) => (
+                    <li key={r}>• {r}</li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+
+            <Reveal>
+              <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
                 <h2 className="text-lg font-semibold tracking-tight">Galeria</h2>
 
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {p.caseStudy.gallery.map((g) => (
-                    <div
-                      key={g.src}
-                      className="relative aspect-[16/10] overflow-hidden rounded-xl2 border border-borderSubtle bg-paper-3 dark:bg-ink-3"
-                    >
-                      <Image
-                        src={g.src}
-                        alt={g.alt}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 100vw, 50vw"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <p className="mt-3 text-xs text-ink-4 dark:text-paper-1/60">
-                  Dica: substitua as imagens em <code>/public/images</code>.
-                </p>
+                <ProjectGallery items={p.caseStudy.gallery} />
               </div>
             </Reveal>
           </div>

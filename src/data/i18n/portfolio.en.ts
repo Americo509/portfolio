@@ -33,7 +33,7 @@ export const portfolioEN = {
   },
 
   education: {
-    title: "Bachelor’s Degree in Software Engineering — UniCesumar",
+    title: "Bachelor’s Degree in Software Engineering",
     detail:
       "Strong foundation in software architecture, system design, data structures, and engineering best practices."
   },
