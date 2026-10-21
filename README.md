@@ -63,6 +63,12 @@ pnpm test:e2e   # smoke tests com Playwright (desktop e mobile) contra o build d
 - A cena só compila depois que o preloader sai de cena (`bootDone`), para não travar a abertura.
 - Os testes funcionais rodam com `--disable-webgl` (fallback); o projeto `webgl` do Playwright testa a cena.
 
+### Home em capítulos (Fase 3)
+
+- `ChapterTracker` publica o capítulo ativo; a câmera do estádio tem um enquadramento por capítulo (`CHAPTER_PRESETS`): vista tática na Escalação, travelling nos Jogos históricos, câmera rasteira na Preleção, e os refletores apagam no Apito final.
+- **Escalação:** prancheta em SVG com traço de giz e jogadores como botões; o pulso vermelho percorre o caminho de uma requisição (auth → tenant → enqueue → render).
+- **Jogos históricos:** súmulas com as key arts desenhadas por um canvas WebGL sobreposto e sincronizado com o DOM (`src/components/fx`). Ripple no mouse, RGB shift, curvatura pela velocidade do scroll e reveal. Sem WebGL, com reduced motion ou no tier baixo, fica a `next/image` normal.
+
 ### Fallbacks
 
 - Sem WebGL, com falha da cena ou antes de ela carregar: estádio estático em CSS (`StaticStadium`).

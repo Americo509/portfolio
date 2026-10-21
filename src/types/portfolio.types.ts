@@ -146,6 +146,11 @@ export type Portfolio = {
       base: { eyebrow: string; title: string; description: string };
     };
     footer: { statement: [string, string, string] };
+    /** Títulos de capítulo da home (a partida). */
+    chapters: Record<"lineup" | "matches" | "method" | "academy" | "final", { number: string; title: string; kicker: string }>;
+    lineup: { hint: string; flow: [string, string, string, string]; sectorLabel: string; formationLabel: string };
+    matchCard: { full: string; open: string };
+    final: { title: string; accent: string; body: string; cta: string; secondary: string; email: string };
     notFound: { title: string; body: string; home: string; projects: string };
   };
 };

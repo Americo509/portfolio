@@ -243,6 +243,7 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 - [ ] **Horários da pelada:** a quarta às 20h foi confirmada. Terça (20h) e sábado (9h) foram assumidos; confirmar em `resenha.nextMatchDays`.
 - [ ] **YourBest:** confirmar o status (hoje "Em desenvolvimento") e se o repositório é privado.
 - [x] **Key arts:** geradas e aplicadas (`public/images/<slug>/cover.jpg`, e `cover-clinico.jpg` para a Sol Poretti). Os originais e as variações ficam em `design/key-art/` (fora do `public/`, então não são publicados). A OG image é `src/app/opengraph-image.jpg`.
+- [ ] **Key art do YourBest:** a capa atual é o logo em fundo branco e destoa do site. Gerar `public/images/yourbest/cover.jpg` (prompt no apêndice, item 6). Até lá, a súmula usa a capa de prancheta.
 - [ ] **Mapas de profundidade (opcional):** `cover-depth.png` para o parallax 2.5D (veja o pedido de mapa de profundidade no apêndice).
 - [ ] **Estádio:** variação das key arts inspirada na arquitetura da arena do Corinthians, sem marca e sem nome de patrocinador.
 
@@ -263,6 +264,9 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 
 4. **Sol Poretti / Nutrição clínica** (só se não usarmos o print real):
    > …a top-down still life on matte black stone: a plate divided into geometric sections by thin chalk lines like a design canvas, fresh vegetables and grains rendered in silver-grey monochrome, a single red tomato as the only color, subtle grid guides and measurement marks around the plate, studio light.
+
+6. **YourBest** (marketplace mobile de beleza on-demand):
+   > …a dark apartment doorway at night seen from the hallway, a professional's beauty kit case resting on the floor with brushes and tools rendered in silver-grey monochrome, a smartphone on top glowing with a map route drawn in chalk leading to the door, chalk tactical arrows on the floor connecting small circles (professional → client), one single red dot marking the destination, soft fog, floodlight-like beam from the left.
 
 5. **OG image** (prévia ao compartilhar o link, 1200×630):
    > …a night stadium seen from the tunnel exit, four floodlight beams cutting dense fog, one red flare glowing in the stands, a diagonal black-and-white band crossing the frame, large empty space on the left half for the name to be added later in code. 1200×630.

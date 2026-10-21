@@ -288,7 +288,7 @@ export const portfolioPT: Portfolio = {
       position: "Co-founder · Arquiteto · Full Stack",
       featured: true,
       featuredSize: "wide",
-      cover: { src: "/images/yourbest/yourbest.png", alt: "YourBest - capa do projeto" },
+      cover: { src: "/images/yourbest/cover.jpg", alt: "YourBest - key art" },
       tags: ["Backend", "Mobile", "Fullstack", "Arquitetura", "Produto", "Frontend", "AppSec"],
       stack: ["React Native", "Expo", "TypeScript", "NestJS", "Next.js", "Drizzle ORM", "PostgreSQL", "Zod", "Zustand", "Tailwind CSS"],
       links: {},
@@ -708,6 +708,28 @@ export const portfolioPT: Portfolio = {
       }
     },
     footer: { statement: ["Vamos construir", "algo", "que escala."] },
+    chapters: {
+      lineup: { number: "02", title: "Escalação", kicker: "4-3-3 · defesa fechada, meio organizado, ataque que entrega" },
+      matches: { number: "03", title: "Jogos históricos", kicker: "Súmulas das partidas que eu joguei" },
+      method: { number: "04", title: "Preleção", kicker: "Do apito inicial ao apito final" },
+      academy: { number: "05", title: "Categorias de base", kicker: "Onde tudo começou" },
+      final: { number: "06", title: "Apito final", kicker: "Fim de jogo" }
+    },
+    lineup: {
+      hint: "Toque num jogador para ver a ficha.",
+      flow: ["auth ok", "tenant", "enqueue", "render"],
+      sectorLabel: "Setor",
+      formationLabel: "Formação"
+    },
+    matchCard: { full: "Súmula completa →", open: "Abrir súmula" },
+    final: {
+      title: "O jogo acabou.",
+      accent: "Bora pra resenha?",
+      body: "Me conte sobre o produto, o problema e o prazo. Eu respondo com clareza e próximos passos.",
+      cta: "Falar comigo",
+      secondary: "Ficha do jogador",
+      email: "Ou direto no email:"
+    },
     notFound: {
       title: "Impedimento.",
       body: "Lance anulado: essa rota estava em posição irregular.",

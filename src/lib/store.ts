@@ -12,8 +12,13 @@ export const motionState = {
   /** Progresso do scroll da página em [0, 1]. */
   progress: 0,
   /** Ponteiro normalizado em [-1, 1]. */
-  pointer: { x: 0, y: 0 }
+  pointer: { x: 0, y: 0 },
+  /** Capítulo da home em cena (dirige a câmera do estádio) e o progresso dentro dele. */
+  chapter: "hero" as ChapterKey,
+  chapterProgress: 0
 };
+
+export type ChapterKey = "hero" | "lineup" | "matches" | "method" | "academy" | "final";
 
 export type SceneStatus = "idle" | "loading" | "ready" | "fallback";
 
@@ -23,6 +28,9 @@ type AppState = {
   /** O preloader saiu de cena por completo: só então a cena 3D compila (evita travar a abertura). */
   bootDone: boolean;
   sceneStatus: SceneStatus;
+  /** O canvas de efeitos de imagem está ativo (FxImage passa a se registrar). */
+  fxEnabled: boolean;
+  setFxEnabled: (v: boolean) => void;
   setBooted: (v: boolean) => void;
   setBootDone: (v: boolean) => void;
   setSceneStatus: (s: SceneStatus) => void;
@@ -32,6 +40,8 @@ export const useApp = create<AppState>((set) => ({
   booted: false,
   bootDone: false,
   sceneStatus: "idle",
+  fxEnabled: false,
+  setFxEnabled: (fxEnabled) => set({ fxEnabled }),
   setBooted: (booted) => set({ booted }),
   setBootDone: (bootDone) => set({ bootDone }),
   setSceneStatus: (sceneStatus) => set({ sceneStatus })

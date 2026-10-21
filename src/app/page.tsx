@@ -1,12 +1,13 @@
-import Link from "next/link";
-import { Container } from "@/components/Container";
 import { Button } from "@/components/ui/Button";
-import { SectionHeader } from "@/components/SectionHeader";
-import { ProjectCard } from "@/components/ProjectCard";
-import { Chip } from "@/components/ui/Chip";
-import { Reveal } from "@/components/motion/Reveal";
 import { getPortfolio } from "@/lib/get-portfolio";
 import { HeroIntro } from "@/components/home/HeroIntro";
+import { ChapterTracker } from "@/components/home/ChapterTracker";
+import { ChapterTitle } from "@/components/home/ChapterTitle";
+import { Lineup } from "@/components/home/Lineup";
+import { MatchReports } from "@/components/home/MatchReports";
+import { TeamTalk } from "@/components/home/TeamTalk";
+import { Academy } from "@/components/home/Academy";
+import { FinalWhistle } from "@/components/home/FinalWhistle";
 
 type PageProps = {
   params?: Promise<{ locale?: string }>;
@@ -15,19 +16,20 @@ type PageProps = {
 export default async function HomePage({ params }: PageProps) {
   const { locale } = (await params) ?? {};
   const portfolio = getPortfolio(locale);
-
   const { copy } = portfolio;
-  const featured = portfolio.projects.filter((p) => p.featured).slice(0, 3);
-  const wide = featured.find((p) => p.featuredSize === "wide") ?? featured[0];
-  const normals = featured.filter((p) => p.slug !== wide.slug);
+  const sumulas = portfolio.projects.filter((p) => p.tier === "sumula");
+  const base = portfolio.projects.filter((p) => p.tier === "base");
   const [first, ...rest] = portfolio.profile.name.split(" ");
   const last = rest.pop() ?? "";
   const middle = rest.join(" ");
+  const ch = copy.chapters;
 
   return (
     <div>
+      <ChapterTracker />
+
       {/* Hero */}
-      <section className="relative flex min-h-[100svh] flex-col justify-end overflow-x-clip pb-[calc(var(--hud-inset)+64px)] pt-32">
+      <section data-chapter="hero" className="relative flex min-h-[100svh] flex-col justify-end overflow-x-clip pb-[calc(var(--hud-inset)+64px)] pt-32">
         {/* Véu de legibilidade: os textos pequenos do hero nunca brigam com os refletores. */}
         <div
           aria-hidden="true"
@@ -79,146 +81,41 @@ export default async function HomePage({ params }: PageProps) {
         </HeroIntro>
       </section>
 
-      {/* Featured Projects */}
-      <section className="pt-14 sm:pt-18">
-        <Container>
-          <SectionHeader
-            eyebrow={copy.sections.featured.eyebrow}
-            title={copy.sections.featured.title}
-            description={copy.sections.featured.description}
-          />
-
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <ProjectCard project={wide} variant="wide" copy={copy} />
-            {normals.map((p) => (
-              <ProjectCard key={p.slug} project={p} variant="normal" copy={copy} />
-            ))}
-          </div>
-
-          <div className="mt-8">
-            <Button as="link" href="/projects" variant="ghost">
-              {copy.sections.featured.cta}
-            </Button>
-          </div>
-        </Container>
+      {/* 02 — Escalação: a rede vira prancheta */}
+      <section data-chapter="lineup" aria-labelledby="ch-lineup" className="pb-32 pt-24">
+        <ChapterTitle id="ch-lineup" number={ch.lineup.number} title={ch.lineup.title} kicker={ch.lineup.kicker} />
+        <div className="mt-10">
+          <Lineup lineup={portfolio.lineup} copy={copy.lineup} />
+        </div>
       </section>
 
-      {/* Skills */}
-      <section className="pt-14 sm:pt-18">
-        <Container>
-          <SectionHeader
-            eyebrow={copy.sections.toolbox.eyebrow}
-            title={copy.sections.toolbox.title}
-            description={copy.sections.toolbox.description}
-          />
-
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {portfolio.skills.map((cat) => (
-              <Reveal key={cat.label}>
-                <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-6 shadow-soft">
-                  <h3 className="text-sm font-semibold tracking-tight">{cat.label}</h3>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {cat.items.map((i) => (
-                      <Chip key={i}>{i}</Chip>
-                    ))}
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </Container>
+      {/* 03 — Jogos históricos: as súmulas */}
+      <section data-chapter="matches" aria-labelledby="ch-matches" className="pb-32 pt-24">
+        <ChapterTitle id="ch-matches" number={ch.matches.number} title={ch.matches.title} kicker={ch.matches.kicker} />
+        <div className="mt-14">
+          <MatchReports projects={sumulas} copy={copy} />
+        </div>
       </section>
 
-      {/* Impact / Approach */}
-      <section className="pt-14 sm:pt-18">
-        <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <Reveal>
-              <div className="prose-senior">
-                <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">{portfolio.principles.title}</h2>
-                <p className="mt-4">{portfolio.principles.body}</p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={0.05}>
-              <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h3 className="label text-muted">
-                  {portfolio.method.title} · {portfolio.method.steps.length} {portfolio.locale === "en" ? "steps" : "fases"}
-                </h3>
-                <ol className="mt-4 space-y-3 text-sm text-ink-4 dark:text-paper-1/70">
-                  {portfolio.method.steps.map((step) => (
-                    <li key={step.number}>
-                      <span className="label mr-2 text-fg">
-                        {`${step.number} // ${step.name}`}
-                      </span>
-                      {step.body}
-                    </li>
-                  ))}
-                </ol>
-                <ul className="mt-6 space-y-2 border-t border-line pt-6 text-sm text-ink-4 dark:text-paper-1/70">
-                  {portfolio.principles.items.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
-                <div className="mt-6">
-                  <Link className="focus-ring text-sm underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href="/about">
-                    {copy.sections.about.cta} →
-                  </Link>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </Container>
+      {/* 04 — Preleção: o método */}
+      <section data-chapter="method" aria-labelledby="ch-method" className="pb-32 pt-24">
+        <ChapterTitle id="ch-method" number={ch.method.number} title={ch.method.title} kicker={ch.method.kicker} />
+        <div className="mt-14">
+          <TeamTalk method={portfolio.method} principles={portfolio.principles} />
+        </div>
       </section>
 
-      {/* Short About */}
-      <section className="pt-14 sm:pt-18">
-        <Container>
-          <SectionHeader
-            eyebrow={copy.sections.about.eyebrow}
-            title={copy.sections.about.title}
-            description={portfolio.profile.bioShort}
-          />
-          <div className="mt-7">
-            <Button as="link" href="/about" variant="secondary">
-              {copy.sections.about.cta}
-            </Button>
-          </div>
-        </Container>
+      {/* 05 — Categorias de base */}
+      <section data-chapter="academy" aria-labelledby="ch-academy" className="pb-24 pt-24">
+        <ChapterTitle id="ch-academy" number={ch.academy.number} title={ch.academy.title} kicker={ch.academy.kicker} />
+        <div className="mt-10">
+          <Academy projects={base} openLabel={copy.matchCard.open} />
+        </div>
       </section>
 
-      {/* Contact */}
-      <section className="pt-14 sm:pt-18 pb-20">
-        <Container>
-          <SectionHeader
-            eyebrow={copy.sections.contact.eyebrow}
-            title={copy.sections.contact.title}
-            description={copy.sections.contact.description}
-          />
-          <div className="mt-8">
-            <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-6 sm:p-7 shadow-soft">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <p className="text-sm text-ink-4 dark:text-paper-1/70">
-                  {copy.sections.contact.direct}{" "}
-                  <a className="underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href={`mailto:${portfolio.links.email}`}>
-                    {portfolio.links.email}
-                  </a>
-                </p>
-                <div className="flex gap-2">
-                  <Button as="link" href={portfolio.links.github} variant="ghost">
-                    GitHub
-                  </Button>
-                  <Button as="link" href={portfolio.links.linkedin} variant="ghost">
-                    LinkedIn
-                  </Button>
-                  <Button as="link" href="/contact" variant="secondary">
-                    {copy.sections.contact.form}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Container>
+      {/* 06 — Apito final */}
+      <section data-chapter="final" aria-label={ch.final.title} className="relative">
+        <FinalWhistle copy={copy.final} email={portfolio.links.email} />
       </section>
     </div>
   );

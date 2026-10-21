@@ -59,6 +59,7 @@ export const noise = /* glsl */ `
 export const floodlights = /* glsl */ `
   uniform vec3 uLightPos[4];
   uniform vec3 uLightDir[4];
+  uniform float uLightOn[4];
   uniform float uConeTan;
   float floodlight(vec3 p) {
     float light = 0.0;
@@ -69,7 +70,7 @@ export const floodlights = /* glsl */ `
         float perp = length(v - uLightDir[i] * along);
         float r = along * uConeTan;
         float beam = 1.0 - smoothstep(r * 0.45, r, perp);
-        light += beam * exp(-along * 0.009);
+        light += beam * exp(-along * 0.009) * uLightOn[i];
       }
     }
     return light;
@@ -95,6 +96,7 @@ export const fogFragment = /* glsl */ `
   uniform vec3 uFlarePos;
   uniform float uFlare;
   uniform float uOpacity;
+  uniform float uFogMul;
   uniform float uDim;
   uniform float uSeed;
   varying vec3 vWorld;
@@ -111,7 +113,7 @@ export const fogFragment = /* glsl */ `
     float flareGlow = exp(-pow(distance(p, uFlarePos) * 0.06, 2.0)) * uFlare;
 
     vec3 color = uFg * (0.04 + light * 1.1) + uSignal * flareGlow * 2.2;
-    float alpha = density * (0.012 + light * 0.3 + flareGlow * 0.7) * uOpacity * (1.0 - uDim);
+    float alpha = density * (0.012 + light * 0.3 + flareGlow * 0.7) * uOpacity * uFogMul * (1.0 - uDim);
     alpha *= smoothstep(0.0, 0.18, vUv.x) * (1.0 - smoothstep(0.82, 1.0, vUv.x)) * smoothstep(0.0, 0.12, vUv.y) * (1.0 - smoothstep(0.6, 1.0, vUv.y));
     gl_FragColor = vec4(color, alpha);
   }
@@ -224,6 +226,8 @@ export const beamFragment = /* glsl */ `
   uniform float uLength;
   uniform float uDim;
   uniform float uStrength;
+  uniform float uLightOn[4];
+  uniform int uIndex;
   varying vec3 vWorld;
   varying vec3 vNormal;
   ${noise}
@@ -239,7 +243,7 @@ export const beamFragment = /* glsl */ `
     float fall = pow(1.0 - along, 1.6) * smoothstep(0.0, 0.04, along);
     float dust = 0.65 + 0.35 * snoise(vWorld * 0.06 + vec3(0.0, -uTime * 0.15, uTime * 0.05));
     float ground = smoothstep(0.0, 4.0, vWorld.y);
-    float a = body * fall * dust * ground * uStrength * (1.0 - uDim);
+    float a = body * fall * dust * ground * uStrength * uLightOn[uIndex] * (1.0 - uDim * 0.8);
     gl_FragColor = vec4(uFg, a);
   }
 `;
@@ -248,27 +252,34 @@ export const beamFragment = /* glsl */ `
 export const glowVertex = /* glsl */ `
   attribute float aSize;
   attribute vec3 aColor;
+  attribute float aLight;
   uniform float uScale;
   uniform float uTime;
   uniform float uFlicker;
+  uniform float uLightOn[4];
   varying vec3 vColor;
+  varying float vOn;
   void main() {
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     float flicker = 1.0 + uFlicker * 0.25 * sin(uTime * 23.0 + position.x) * sin(uTime * 7.0);
     gl_PointSize = aSize * flicker * uScale / -mv.z;
     gl_Position = projectionMatrix * mv;
     vColor = aColor;
+    // aLight: índice do refletor (0-3) ou 4 para o sinalizador (sempre aceso).
+    int li = int(aLight + 0.5);
+    vOn = li < 4 ? uLightOn[li] : 1.0;
   }
 `;
 
 export const glowFragment = /* glsl */ `
   uniform float uDim;
   varying vec3 vColor;
+  varying float vOn;
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float core = 1.0 - smoothstep(0.02, 0.12, d);
     float halo = pow(1.0 - smoothstep(0.0, 0.5, d), 3.0) * 0.5;
-    float a = (core + halo) * (1.0 - uDim);
+    float a = (core + halo) * (1.0 - uDim) * vOn;
     if (a < 0.01) discard;
     gl_FragColor = vec4(vColor * (core * 2.0 + halo), a);
   }

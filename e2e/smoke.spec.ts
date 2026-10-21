@@ -164,3 +164,38 @@ test.describe("sem WebGL", () => {
     await expect(page.locator("canvas")).toHaveCount(0);
   });
 });
+
+test.describe("home em capítulos", () => {
+  test.beforeEach(async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/");
+  });
+
+  test("tem os 6 capítulos da partida", async ({ page }) => {
+    await expect(page.locator("[data-chapter]")).toHaveCount(6);
+    for (const name of ["Escalação", "Jogos históricos", "Preleção", "Categorias de base"]) {
+      await expect(page.getByRole("heading", { level: 2, name })).toBeAttached();
+    }
+  });
+
+  test("escalação: escolher um jogador mostra a ficha", async ({ page }) => {
+    // Os jogadores entram em cena quando a prancheta chega na tela.
+    await page.locator("#ch-lineup").scrollIntoViewIfNeeded();
+    const nine = page.getByRole("button", { name: /^09 — Centroavante/ });
+    await expect(nine).toBeVisible({ timeout: 10_000 });
+    await nine.click();
+    await expect(nine).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText("#09")).toBeVisible();
+    await expect(page.getByText("Offline-first", { exact: true })).toBeVisible();
+  });
+
+  test("súmula da home leva ao case", async ({ page }) => {
+    await page.getByRole("link", { name: "Abrir súmula: CONECTA Plantão" }).click();
+    await expect(page).toHaveURL(/\/projects\/conecta-plantao$/);
+  });
+
+  test("categorias de base listam os projetos de estudo", async ({ page }) => {
+    const section = page.locator("[data-chapter=academy]");
+    await expect(section.getByRole("link")).toHaveCount(5);
+  });
+});

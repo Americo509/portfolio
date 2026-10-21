@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { MotionRoot } from "@/components/motion/MotionConfig";
 import { RouteTransition } from "@/components/transition/RouteTransition";
 import { SceneRoot } from "@/components/scene/SceneRoot";
+import { FxRoot } from "@/components/fx/FxRoot";
 import { HudFrame } from "@/components/hud/HudFrame";
 import { Cursor } from "@/components/cursor/Cursor";
 import { Preloader, bootScript } from "@/components/preloader/Preloader";
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </main>
                 <Footer />
               </RouteTransition>
+              <FxRoot />
               <div className="grain" aria-hidden="true" />
               <Cursor />
               <Preloader handle={portfolio.profile.handle} copy={portfolio.copy.boot} />

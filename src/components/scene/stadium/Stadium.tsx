@@ -6,7 +6,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { gsap } from "@/lib/gsap";
 import { motionState } from "@/lib/store";
 import type { GpuTier } from "@/lib/webgl";
-import { CAMERA, CONE_TAN, FLARE, FLOODLIGHTS, TIER_SETTINGS } from "./config";
+import { CAMERA, CHAPTER_PRESETS, CONE_TAN, FLARE, FLOODLIGHTS, TIER_SETTINGS } from "./config";
 import {
   beamFragment,
   beamVertex,
@@ -40,6 +40,8 @@ function createShared() {
     uFlarePos: { value: FLARE.clone() },
     uFlare: { value: 1 },
     uDim: { value: 0 },
+    uFogMul: { value: 1 },
+    uLightOn: { value: [1, 1, 1, 1] },
     uScale: { value: 1 },
     uCamPos: { value: new THREE.Vector3() }
   };
@@ -83,6 +85,8 @@ function Beams({ shared, blending, strength }: { shared: Shared; blending: THREE
         const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), l.dir.clone().negate());
         const position = l.pos.clone().addScaledVector(l.dir, length / 2);
         const uniforms = {
+          uIndex: { value: FLOODLIGHTS.indexOf(l) },
+          uLightOn: shared.uLightOn,
           uTime: shared.uTime,
           uFg: shared.uFg,
           uCamPos: shared.uCamPos,
@@ -177,7 +181,8 @@ function Glows({ shared, palette }: { shared: Shared; palette: StadiumPalette })
     const pos: number[] = [];
     const size: number[] = [];
     const color: number[] = [];
-    FLOODLIGHTS.forEach((l) => {
+    const light: number[] = [];
+    FLOODLIGHTS.forEach((l, li) => {
       const side = new THREE.Vector3().crossVectors(l.dir, new THREE.Vector3(0, 1, 0)).normalize();
       const up = new THREE.Vector3().crossVectors(side, l.dir).normalize();
       for (let c = -1; c <= 1; c++)
@@ -186,24 +191,28 @@ function Glows({ shared, palette }: { shared: Shared; palette: StadiumPalette })
           pos.push(p.x, p.y, p.z);
           size.push(4.5);
           color.push(1, 1, 1);
+          light.push(li);
         }
       // Clarão (glare) de cada refletor.
       const glare = l.pos.clone().addScaledVector(l.dir, 1.2);
       pos.push(glare.x, glare.y, glare.z);
       size.push(26);
       color.push(0.55, 0.55, 0.55);
+      light.push(li);
     });
     pos.push(FLARE.x, FLARE.y, FLARE.z);
     size.push(9);
+    light.push(4);
     color.push(palette.signal.r * 1.4, palette.signal.g * 1.4 + 0.15, palette.signal.b * 1.4 + 0.1);
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute("aSize", new THREE.Float32BufferAttribute(size, 1));
     g.setAttribute("aColor", new THREE.Float32BufferAttribute(color, 3));
+    g.setAttribute("aLight", new THREE.Float32BufferAttribute(light, 1));
     return g;
   }, [palette]);
   const uniforms = React.useMemo(
-    () => ({ uScale: shared.uScale, uTime: shared.uTime, uDim: shared.uDim, uFlicker: { value: 1 } }),
+    () => ({ uScale: shared.uScale, uTime: shared.uTime, uDim: shared.uDim, uLightOn: shared.uLightOn, uFlicker: { value: 1 } }),
     [shared]
   );
   React.useEffect(() => () => geo.dispose(), [geo]);
@@ -244,13 +253,18 @@ function Smoke({ shared, count, blending }: { shared: Shared; count: number; ble
 }
 
 /**
- * Câmera: descida do alto do refletor até o nível do campo (uma vez), depois
- * dirigida pelo scroll (avança pelo campo), pelo mouse (parallax) e pela
- * velocidade do scroll (abre o FOV, efeito "warp").
+ * Câmera: descida do alto do refletor até o enquadramento do capítulo atual
+ * (uma vez); depois desliza entre os presets de cada capítulo da home, com
+ * parallax do mouse e "warp" de FOV pela velocidade do scroll.
  */
 function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
   const intro = React.useRef({ t: 0 });
-  const smooth = React.useRef({ x: 0, y: 0, dim: 0 });
+  const s = React.useRef({ x: 0, y: 0, dim: 0, fog: 1, fov: CAMERA.end.fov, lights: [1, 1, 1, 1] });
+  const target = React.useMemo(() => ({ pos: new THREE.Vector3(), look: new THREE.Vector3() }), []);
+  const cur = React.useMemo(
+    () => ({ pos: CAMERA.end.pos.clone(), look: CAMERA.end.look.clone() }),
+    []
+  );
   const pos = React.useMemo(() => new THREE.Vector3(), []);
   const look = React.useMemo(() => new THREE.Vector3(), []);
 
@@ -261,34 +275,52 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
     };
   }, []);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const cam = state.camera as THREE.PerspectiveCamera;
     const t = intro.current.t;
-    const p = mode === "hero" ? motionState.progress : 0;
-    const s = smooth.current;
-    s.x += (motionState.pointer.x - s.x) * 0.04;
-    s.y += (motionState.pointer.y - s.y) * 0.04;
+    const st = s.current;
+    const chapter = mode === "hero" ? motionState.chapter : "ambient";
+    const cp = motionState.chapterProgress;
+    const preset = CHAPTER_PRESETS[chapter];
 
-    pos.lerpVectors(CAMERA.start.pos, CAMERA.end.pos, t);
-    look.lerpVectors(CAMERA.start.look, CAMERA.end.look, t);
-    pos.z -= p * 26 * t;
-    pos.y -= p * 1.4 * t;
-    look.y -= p * 5 * t;
-    pos.x += s.x * 2.4 * t;
-    pos.y += s.y * 1.0 * t;
+    target.pos.set(...preset.pos);
+    target.look.set(...preset.look);
+    if (chapter === "hero") target.pos.z -= cp * 14;
+    if (chapter === "matches") target.pos.x += cp * 46;
+    if (chapter === "final") target.pos.z -= cp * 6;
+
+    // Amortecimento independente de framerate.
+    const k = 1 - Math.exp(-delta * 2.2);
+    cur.pos.lerp(target.pos, k);
+    cur.look.lerp(target.look, k);
+    st.x += (motionState.pointer.x - st.x) * 0.04;
+    st.y += (motionState.pointer.y - st.y) * 0.04;
+    st.fov += (preset.fov - st.fov) * k;
+    st.dim += (preset.dim - st.dim) * k;
+    st.fog += (preset.fog - st.fog) * k;
+
+    // Apito final: os refletores apagam um a um conforme o capítulo avança.
+    for (let i = 0; i < 4; i++) {
+      const on = chapter === "final" ? 1 - THREE.MathUtils.smoothstep(cp, 0.12 + i * 0.14, 0.24 + i * 0.14) : 1;
+      st.lights[i] += (on - st.lights[i]) * k * 2;
+      shared.uLightOn.value[i] = st.lights[i];
+    }
+
+    pos.lerpVectors(CAMERA.start.pos, cur.pos, t);
+    look.lerpVectors(CAMERA.start.look, cur.look, t);
+    pos.x += st.x * 2.4 * t;
+    pos.y += st.y * 1.0 * t;
 
     cam.position.copy(pos);
     cam.lookAt(look);
-    const fov = THREE.MathUtils.lerp(CAMERA.start.fov, CAMERA.end.fov, t) + Math.abs(motionState.velocityNorm) * 12;
+    const fov = THREE.MathUtils.lerp(CAMERA.start.fov, st.fov, t) + Math.abs(motionState.velocityNorm) * 12;
     if (Math.abs(cam.fov - fov) > 0.01) {
       cam.fov = fov;
       cam.updateProjectionMatrix();
     }
 
-    // Fora do hero (e nas outras páginas) a cena vira pano de fundo: baixa bastante para o texto respirar.
-    const dimTarget = mode === "hero" ? THREE.MathUtils.smoothstep(p, 0.04, 0.18) * 0.85 : 0.82;
-    s.dim += (dimTarget - s.dim) * 0.06;
-    shared.uDim.value = s.dim;
+    shared.uDim.value = st.dim;
+    shared.uFogMul.value = st.fog;
     shared.uCamPos.value.copy(pos);
     shared.uScale.value = (state.size.height * state.gl.getPixelRatio()) / (2 * Math.tan((cam.fov * Math.PI) / 360));
   });

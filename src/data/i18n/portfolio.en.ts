@@ -287,7 +287,7 @@ export const portfolioEN: Portfolio = {
       position: "Co-founder · Architect · Full Stack",
       featured: true,
       featuredSize: "wide",
-      cover: { src: "/images/yourbest/yourbest.png", alt: "YourBest - project cover" },
+      cover: { src: "/images/yourbest/cover.jpg", alt: "YourBest - key art" },
       tags: ["Backend", "Mobile", "Fullstack", "Architecture", "Product", "Frontend", "AppSec"],
       stack: ["React Native", "Expo", "TypeScript", "NestJS", "Next.js", "Drizzle ORM", "PostgreSQL", "Zod", "Zustand", "Tailwind CSS"],
       links: {},
@@ -694,6 +694,28 @@ export const portfolioEN: Portfolio = {
       }
     },
     footer: { statement: ["Let's build", "something", "that scales."] },
+    chapters: {
+      lineup: { number: "02", title: "Starting XI", kicker: "4-3-3 · tight defence, organised midfield, an attack that delivers" },
+      matches: { number: "03", title: "Classic matches", kicker: "Match reports from the games I've played" },
+      method: { number: "04", title: "Team talk", kicker: "From kick-off to the final whistle" },
+      academy: { number: "05", title: "Academy", kicker: "Where it all started" },
+      final: { number: "06", title: "Final whistle", kicker: "Full-time" }
+    },
+    lineup: {
+      hint: "Tap a player to see their profile.",
+      flow: ["auth ok", "tenant", "enqueue", "render"],
+      sectorLabel: "Line",
+      formationLabel: "Formation"
+    },
+    matchCard: { full: "Full match report →", open: "Open match report" },
+    final: {
+      title: "Full-time.",
+      accent: "Fancy a chat after the match?",
+      body: "Tell me about the product, the problem and the deadline. I'll reply with clarity and next steps.",
+      cta: "Get in touch",
+      secondary: "Player profile",
+      email: "Or straight to my inbox:"
+    },
     notFound: {
       title: "Offside.",
       body: "Goal disallowed: that route was in an offside position.",
