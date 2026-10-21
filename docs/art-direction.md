@@ -239,7 +239,7 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 
 ## 13. Lembretes (ajustar depois)
 
-- [ ] **Sol Poretti:** os prints atuais são da **landing page** pública (`solporettinutri.com.br`). O trabalho principal foi o **site/sistema clínico** desenvolvido para ela. Ajustar a súmula (contexto, papel, decisões e imagens) para destacar o sistema clínico, e tratar a landing page como parte secundária.
+- [x] **Sol Poretti:** virou duas súmulas. `sol-poretti-clinico` é o case principal (SaaS clínico: arquitetura, segurança e o assistente de prontuário com IA, sem prints, porque as telas têm dado de paciente) e `sol-poretti` ficou só com a landing page pública e os prints dela.
 - [ ] **Horários da pelada:** a quarta às 20h foi confirmada. Terça (20h) e sábado (9h) foram assumidos; confirmar em `resenha.nextMatchDays`.
 - [ ] **YourBest:** confirmar o status (hoje "Em desenvolvimento") e se o repositório é privado.
 - [x] **Key arts:** geradas e aplicadas (`public/images/<slug>/cover.jpg`, e `cover-clinico.jpg` para a Sol Poretti). Os originais e as variações ficam em `design/key-art/` (fora do `public/`, então não são publicados). A OG image é `src/app/opengraph-image.jpg`.

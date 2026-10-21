@@ -149,6 +149,14 @@ test.describe("súmulas", () => {
     await expect(page.getByRole("heading", { name: "VAR" })).toHaveCount(0);
   });
 
+  test("sistema clínico da Sol Poretti: privado, sem link público, com a decisão de IA", async ({ page }) => {
+    await page.goto("/projects/sol-poretti-clinico");
+    await expect(page.getByRole("heading", { level: 1, name: /Sistema Clínico/ })).toBeVisible();
+    await expect(page.getByText(/Repositório privado/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ver ao vivo →" })).toHaveCount(0);
+    await expect(page.getByText(/nada vira prontuário sem o "Aprovar"/)).toBeVisible();
+  });
+
   test("Sol Poretti aponta para o site público", async ({ page }) => {
     await page.goto("/projects/sol-poretti");
     await expect(page.getByRole("link", { name: "Ver ao vivo →" })).toHaveAttribute("href", "https://solporettinutri.com.br");

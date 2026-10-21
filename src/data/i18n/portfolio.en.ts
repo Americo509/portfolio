@@ -377,36 +377,92 @@ export const portfolioEN: Portfolio = {
       }
     },
     {
-      slug: "sol-poretti",
-      title: "Sol Poretti — Clinical Nutrition",
+      slug: "sol-poretti-clinico",
+      title: "Sol Poretti — Clinical System",
       summary:
-        "Clinical nutrition ecosystem: an interactive visual meal-plan editor (Canva/Figma-style) and a high-performance public website.",
+        "Clinical SaaS for a nutrition practice: pre-consultation by link, scheduling with self-booking, clinical notes with an AI draft that only counts once the nutritionist approves it, ISAK body assessment, meal plans with branded PDFs and a patient portal.",
       tier: "sumula",
       status: "production",
-      competition: "Clinical platform + public website",
-      position: "Full Stack · Performance front-end",
+      competition: "Clinical SaaS · health data and LGPD",
+      position: "End-to-end product · Architect · Full Stack",
       featured: true,
-      featuredSize: "normal",
+      featuredSize: "wide",
       privateRepo: true,
       cover: { src: "/images/sol-poretti/cover-clinico.jpg", alt: "Sol Poretti - clinical system key art" },
-      tags: ["Frontend", "Fullstack", "Product"],
-      stack: ["React", "Next.js", "Astro", "GSAP", "TypeScript", "Tailwind CSS"],
+      tags: ["Fullstack", "Architecture", "AppSec", "AI", "Product", "Frontend"],
+      stack: [
+        "React 19",
+        "Vite",
+        "TypeScript",
+        "Supabase (Postgres, Auth, Storage, Edge Functions)",
+        "Row Level Security",
+        "TanStack Query",
+        "Tiptap",
+        "Recharts",
+        "Cloudflare Workers AI",
+        "Sentry",
+        "Vitest",
+        "Playwright"
+      ],
+      links: {},
+      caseStudy: {
+        context:
+          "The practice ran on loose forms, spreadsheets and hand-made PDFs. The system brings the whole care cycle into one place: pre-consultation questionnaire, diary, consultation notes, body assessment, meal plans in the nutritionist's own visual identity, finances and a patient portal. Because it is health data, LGPD (Brazil's data protection law) was part of the design from day one, not a fix at the end.",
+        role:
+          "End-to-end product: discovery with the client, specification, database modelling, security policies, front end, Edge Functions, testing and deployment. I also built the practice's landing page.",
+        technicalDecisions: [
+          "Static SPA (React 19 + Vite) on Supabase with no server of its own: Postgres with Row Level Security and RPC functions as the only gateway to sensitive rules",
+          "Patient links use a random single-use token, one per appointment; clinical files (photos, lab results, ebooks) are served only through short-lived signed URLs",
+          "AI notes assistant in an Edge Function: credentials stay on the server, consent is checked first, output is validated against a schema and checked against the consultation text; nothing reaches the record without the nutritionist's \"Approve\", and the audit trail stores no clinical content",
+          "Near-free AI without paying with patient data: a free-tier provider that does not train on the content, behind an adapter with a pennies-a-month paid fallback; free tiers that use the data were ruled out",
+          "Anthropometry following the ISAK protocol in pure, tested functions: skinfolds, girths, body fat percentage, somatotype and Phantom z-scores",
+          "Meal plans with accent- and typo-tolerant food search (pg_trgm), macro calculation and a branded PDF, either in a fixed layout or through the visual editor with data binding",
+          "Diary with availability in time ranges, public self-booking with a lock against double booking, confirmation and rescheduling by link, and time zones handled in the database",
+          "Patient portal on its own subdomain; WhatsApp messages with editable variables, birthday reminders and re-engagement for patients who drifted away"
+        ],
+        challenges: [
+          "Two PDF engines (fixed layout and visual editor) could drift apart on display rules: a recorded decision not to migrate mid-delivery and to freeze new features until there is usage data",
+          "Self-booking slots showed up shifted: free-slot calculation now handles the time zone inside the database",
+          "Browser dictation does not work in every browser: the AI draft accepts pasted text and does not depend on audio capture",
+          "Single-tenant permissions documented as a conscious decision, with the RLS redesign path ready if a second practitioner joins"
+        ],
+        results: [
+          "In daily use at the practice: pre-consultation, diary, notes, body assessment, meal plans, finances and patient portal",
+          "Database evolved through 60+ versioned migrations; around 560 Vitest tests, SQL security tests and Playwright end-to-end tests",
+          "AI cost projected at R$ 0 on the free tier and under US$ 1 a month on the paid fallback"
+        ],
+        gallery: []
+      }
+    },
+    {
+      slug: "sol-poretti",
+      title: "Sol Poretti — Landing Page",
+      summary: "Public website for the nutrition practice, built to load fast and take visitors to booking.",
+      tier: "sumula",
+      status: "production",
+      competition: "Landing page · conversion",
+      position: "Performance front end",
+      featured: true,
+      featuredSize: "normal",
+      cover: { src: "/images/sol-poretti/home-desktop.jpg", alt: "Sol Poretti landing page - home (desktop)" },
+      tags: ["Frontend", "Product"],
+      stack: ["Astro", "GSAP", "TypeScript", "Tailwind CSS"],
       links: { demo: "https://solporettinutri.com.br" },
       caseStudy: {
         context:
-          "A specialised clinical nutrition system with an interactive visual editor for building meal plans, plus a high-conversion public website.",
-        role: "Development of the app, the visual editor and the public website.",
+          "The practice's front door: it introduces the nutritionist and her method and takes visitors to booking, which happens in the clinical system.",
+        role: "Interface design on top of the brand, development and launch.",
         technicalDecisions: [
-          "Interactive canvas for nutritionists to build menus and handouts visually",
-          "App and visual editor in React/Next.js",
-          "Astro + GSAP landing page with extreme Core Web Vitals optimisation"
+          "Astro with static HTML and JavaScript only where there is interaction",
+          "GSAP animation without hurting Core Web Vitals",
+          "Hooked into the clinical system's self-booking"
         ],
         challenges: [],
-        results: ["Public website live at solporettinutri.com.br"],
+        results: ["Live at solporettinutri.com.br"],
         gallery: [
-          { src: "/images/sol-poretti/home-desktop.jpg", alt: "Sol Poretti website - home (desktop)" },
-          { src: "/images/sol-poretti/secoes-desktop.jpg", alt: "Sol Poretti website - sections (desktop)" },
-          { src: "/images/sol-poretti/home-mobile.jpg", alt: "Sol Poretti website - home (mobile)" }
+          { src: "/images/sol-poretti/home-desktop.jpg", alt: "Sol Poretti landing page - home (desktop)" },
+          { src: "/images/sol-poretti/secoes-desktop.jpg", alt: "Sol Poretti landing page - sections (desktop)" },
+          { src: "/images/sol-poretti/home-mobile.jpg", alt: "Sol Poretti landing page - home (mobile)" }
         ]
       }
     },

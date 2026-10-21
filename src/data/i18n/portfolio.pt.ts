@@ -383,36 +383,93 @@ export const portfolioPT: Portfolio = {
     },
     {
       // LEMBRETE: os prints são da landing page; o foco deve ser o site clínico (docs/art-direction.md §13).
-      slug: "sol-poretti",
-      title: "Sol Poretti — Nutrição Clínica",
+      slug: "sol-poretti-clinico",
+      title: "Sol Poretti — Sistema Clínico",
       summary:
-        "Ecossistema para nutrição clínica: editor visual interativo de planos alimentares (estilo Canva/Figma) e portal público de alta performance.",
+        "SaaS clínico do consultório de nutrição: pré-consulta por link, agenda com autoagendamento, prontuário com rascunho por IA que só vale com a aprovação da nutricionista, avaliação corporal ISAK, plano alimentar com PDF da marca e portal do paciente.",
       tier: "sumula",
       status: "production",
-      competition: "Plataforma clínica + portal público",
-      position: "Full Stack · Front-end de performance",
+      competition: "SaaS clínico · saúde e LGPD",
+      position: "Produto de ponta a ponta · Arquiteto · Full Stack",
       featured: true,
-      featuredSize: "normal",
+      featuredSize: "wide",
       privateRepo: true,
       cover: { src: "/images/sol-poretti/cover-clinico.jpg", alt: "Sol Poretti - key art do sistema clínico" },
-      tags: ["Frontend", "Fullstack", "Produto"],
-      stack: ["React", "Next.js", "Astro", "GSAP", "TypeScript", "Tailwind CSS"],
+      tags: ["Fullstack", "Arquitetura", "AppSec", "IA", "Produto", "Frontend"],
+      stack: [
+        "React 19",
+        "Vite",
+        "TypeScript",
+        "Supabase (Postgres, Auth, Storage, Edge Functions)",
+        "Row Level Security",
+        "TanStack Query",
+        "Tiptap",
+        "Recharts",
+        "Cloudflare Workers AI",
+        "Sentry",
+        "Vitest",
+        "Playwright"
+      ],
+      links: {},
+      caseStudy: {
+        context:
+          "O consultório funcionava com formulários soltos, planilhas e PDFs montados à mão. O sistema reúne o ciclo inteiro do atendimento num lugar só: questionário pré-consulta, agenda, anotação da consulta, avaliação corporal, plano alimentar com a identidade visual da nutricionista, financeiro e um portal para o paciente. Como é dado de saúde, a LGPD entrou no desenho desde o começo, não como ajuste no fim.",
+        role:
+          "Produto de ponta a ponta: levantamento com a cliente, especificação, modelagem do banco, políticas de segurança, front-end, Edge Functions, testes e deploy. Também fiz a landing page do consultório.",
+        technicalDecisions: [
+          "SPA estática (React 19 + Vite) sobre Supabase, sem servidor próprio: Postgres com Row Level Security e funções RPC como única porta para as regras sensíveis",
+          "Link do paciente por token aleatório de uso único, um por consulta; arquivos clínicos (fotos, exames, ebooks) servidos só por URL assinada temporária",
+          "Assistente de prontuário com IA numa Edge Function: credenciais só no servidor, consentimento verificado antes, saída validada por schema e conferida contra o texto da consulta; nada vira prontuário sem o \"Aprovar\" da nutricionista, e a trilha de auditoria não guarda conteúdo clínico",
+          "IA quase de graça sem pagar com os dados do paciente: provedor em cota gratuita que não treina com o conteúdo, atrás de um adaptador com reserva paga de centavos; planos gratuitos que usam os dados foram descartados",
+          "Antropometria pelo protocolo ISAK em funções puras e testadas: dobras, perímetros, percentual de gordura, somatotipo e escore Phantom",
+          "Plano alimentar com busca de alimentos tolerante a acento e erro de digitação (pg_trgm), cálculo de macros e PDF com a marca, em layout fixo ou no editor visual com data-binding",
+          "Agenda com disponibilidade por intervalos, autoagendamento público com trava contra horário duplicado, confirmação e remarcação por link, e fuso horário resolvido no banco",
+          "Portal do paciente em subdomínio próprio; mensagens de WhatsApp com variáveis editáveis, lembretes de aniversário e reengajamento de quem sumiu"
+        ],
+        challenges: [
+          "Dois motores de PDF (layout fixo e editor visual) podiam divergir nas regras de exibição: decisão registrada de não migrar no meio das entregas e de congelar a expansão até haver dado de uso",
+          "Horários do autoagendamento apareciam deslocados: o cálculo de horários livres passou a tratar o fuso dentro do banco",
+          "Ditado da consulta pelo navegador não funciona em todos os navegadores: o rascunho por IA aceita texto colado e não depende da captura de áudio",
+          "Permissões single-tenant documentadas como decisão consciente, com o caminho de redesenho do RLS caso entre um segundo profissional"
+        ],
+        results: [
+          "Em uso no consultório: pré-consulta, agenda, prontuário, avaliação corporal, plano alimentar, financeiro e portal do paciente",
+          "Banco evoluído por mais de 60 migrations versionadas; cerca de 560 testes com Vitest, testes de segurança em SQL e e2e com Playwright",
+          "Custo de IA projetado em R$ 0 na cota gratuita e abaixo de US$ 1 por mês na reserva paga"
+        ],
+        gallery: []
+      }
+    },
+    {
+      slug: "sol-poretti",
+      title: "Sol Poretti — Landing Page",
+      summary:
+        "Site público do consultório de nutrição, feito para carregar rápido e levar a visita até o agendamento.",
+      tier: "sumula",
+      status: "production",
+      competition: "Landing page · conversão",
+      position: "Front-end de performance",
+      featured: true,
+      featuredSize: "normal",
+      cover: { src: "/images/sol-poretti/home-desktop.jpg", alt: "Landing page Sol Poretti - home (desktop)" },
+      tags: ["Frontend", "Produto"],
+      stack: ["Astro", "GSAP", "TypeScript", "Tailwind CSS"],
       links: { demo: "https://solporettinutri.com.br" },
       caseStudy: {
         context:
-          "Sistema especializado para nutrição clínica, com um editor visual interativo para montagem de planos alimentares e um portal público de alta conversão.",
-        role: "Desenvolvimento do app, do editor visual e do portal público.",
+          "Porta de entrada do consultório: apresenta a nutricionista e o método e leva a visita até o agendamento, que acontece no sistema clínico.",
+        role: "Design de interface em cima da marca, desenvolvimento e publicação.",
         technicalDecisions: [
-          "Canvas interativo para os nutricionistas montarem cardápios e lâminas visualmente",
-          "App e editor visual em React/Next.js",
-          "Landing page em Astro + GSAP com otimização extrema de Core Web Vitals"
+          "Astro com HTML estático e JavaScript só onde há interação",
+          "Animações com GSAP sem prejudicar os Core Web Vitals",
+          "Integração com o autoagendamento do sistema clínico"
         ],
         challenges: [],
-        results: ["Portal público no ar em solporettinutri.com.br"],
+        results: ["No ar em solporettinutri.com.br"],
         gallery: [
-          { src: "/images/sol-poretti/home-desktop.jpg", alt: "Portal Sol Poretti - home (desktop)" },
-          { src: "/images/sol-poretti/secoes-desktop.jpg", alt: "Portal Sol Poretti - seções (desktop)" },
-          { src: "/images/sol-poretti/home-mobile.jpg", alt: "Portal Sol Poretti - home (mobile)" }
+          { src: "/images/sol-poretti/home-desktop.jpg", alt: "Landing page Sol Poretti - home (desktop)" },
+          { src: "/images/sol-poretti/secoes-desktop.jpg", alt: "Landing page Sol Poretti - seções (desktop)" },
+          { src: "/images/sol-poretti/home-mobile.jpg", alt: "Landing page Sol Poretti - home (mobile)" }
         ]
       }
     },
