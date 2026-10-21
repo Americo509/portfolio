@@ -154,8 +154,12 @@ export default async function ProjectCasePage({ params }: Props) {
                 {p.caseStudy.gallery.length > 0 ? (
                   <ProjectGallery items={p.caseStudy.gallery} />
                 ) : (
-                  <div className="mt-4 aspect-[16/10] overflow-hidden border border-line">
-                    <BlueprintCover slug={p.slug} label={`${mr.title} · ${p.title}`} />
+                  <div className="relative mt-4 aspect-[16/10] overflow-hidden border border-line">
+                    {p.cover ? (
+                      <Image src={p.cover.src} alt={p.cover.alt} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 60vw" />
+                    ) : (
+                      <BlueprintCover slug={p.slug} label={`${mr.title} · ${p.title}`} />
+                    )}
                   </div>
                 )}
               </div>

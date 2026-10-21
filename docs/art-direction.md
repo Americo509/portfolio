@@ -242,7 +242,9 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 - [ ] **Sol Poretti:** os prints atuais são da **landing page** pública (`solporettinutri.com.br`). O trabalho principal foi o **site/sistema clínico** desenvolvido para ela. Ajustar a súmula (contexto, papel, decisões e imagens) para destacar o sistema clínico, e tratar a landing page como parte secundária.
 - [ ] **Horários da pelada:** a quarta às 20h foi confirmada. Terça (20h) e sábado (9h) foram assumidos; confirmar em `resenha.nextMatchDays`.
 - [ ] **YourBest:** confirmar o status (hoje "Em desenvolvimento") e se o repositório é privado.
-- [ ] **Key arts:** subir `public/images/{conecta-plantao,sentinela,gustavo-os}/cover.jpg`, geradas a partir dos prompts do apêndice.
+- [x] **Key arts:** geradas e aplicadas (`public/images/<slug>/cover.jpg`, e `cover-clinico.jpg` para a Sol Poretti). Os originais e as variações ficam em `design/key-art/` (fora do `public/`, então não são publicados). A OG image é `src/app/opengraph-image.jpg`.
+- [ ] **Mapas de profundidade (opcional):** `cover-depth.png` para o parallax 2.5D (veja o pedido de mapa de profundidade no apêndice).
+- [ ] **Estádio:** variação das key arts inspirada na arquitetura da arena do Corinthians, sem marca e sem nome de patrocinador.
 
 ## Apêndice — prompts para o Nano Banana
 

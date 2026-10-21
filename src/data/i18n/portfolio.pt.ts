@@ -394,7 +394,7 @@ export const portfolioPT: Portfolio = {
       featured: true,
       featuredSize: "normal",
       privateRepo: true,
-      cover: { src: "/images/sol-poretti/home-desktop.jpg", alt: "Portal Sol Poretti - home" },
+      cover: { src: "/images/sol-poretti/cover-clinico.jpg", alt: "Sol Poretti - key art do sistema clínico" },
       tags: ["Frontend", "Fullstack", "Produto"],
       stack: ["React", "Next.js", "Astro", "GSAP", "TypeScript", "Tailwind CSS"],
       links: { demo: "https://solporettinutri.com.br" },
