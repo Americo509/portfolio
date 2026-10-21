@@ -243,7 +243,7 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 - [ ] **Horários da pelada:** a quarta às 20h foi confirmada. Terça (20h) e sábado (9h) foram assumidos; confirmar em `resenha.nextMatchDays`.
 - [ ] **YourBest:** confirmar o status (hoje "Em desenvolvimento") e se o repositório é privado.
 - [x] **Key arts:** geradas e aplicadas (`public/images/<slug>/cover.jpg`, e `cover-clinico.jpg` para a Sol Poretti). Os originais e as variações ficam em `design/key-art/` (fora do `public/`, então não são publicados). A OG image é `src/app/opengraph-image.jpg`.
-- [ ] **Key art do YourBest:** a capa atual é o logo em fundo branco e destoa do site. Gerar `public/images/yourbest/cover.jpg` (prompt no apêndice, item 6). Até lá, a súmula usa a capa de prancheta.
+- [x] **Key art do YourBest:** aplicada (`public/images/yourbest/cover.jpg`). a capa atual é o logo em fundo branco e destoa do site. Gerar `public/images/yourbest/cover.jpg` (prompt no apêndice, item 6). Até lá, a súmula usa a capa de prancheta.
 - [ ] **Mapas de profundidade (opcional):** `cover-depth.png` para o parallax 2.5D (veja o pedido de mapa de profundidade no apêndice).
 - [ ] **Estádio:** variação das key arts inspirada na arquitetura da arena do Corinthians, sem marca e sem nome de patrocinador.
 

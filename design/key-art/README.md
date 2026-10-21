@@ -9,6 +9,7 @@ Ficam fora de `public/` de propósito: só as versões otimizadas e escolhidas s
 | Sentinela | `sentinela/…rl3z…jpg` | `public/images/sentinela/cover.jpg` |
 | Gustavo OS | `gustavo-os/…x1gw…jpg` | `public/images/gustavo-os/cover.jpg` |
 | Sol Poretti (sistema clínico) | `gustavo-os/…wcm6…jpg` | `public/images/sol-poretti/cover-clinico.jpg` |
+| YourBest | `yourbest/…5ry0…jpg` | `public/images/yourbest/cover.jpg` |
 | OG image | `og-image/…plx3…jpg` | `src/app/opengraph-image.jpg` (1200×630) |
 
 Os demais arquivos são variações alternativas.
