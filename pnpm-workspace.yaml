@@ -1,0 +1,3 @@
+# Política de cadeia de suprimentos: não instala versões publicadas há menos de 24 h
+# (mesma regra do pnpm local; evita lockfile com pacote recém-publicado).
+minimumReleaseAge: 1440
