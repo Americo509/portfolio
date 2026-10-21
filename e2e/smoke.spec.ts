@@ -33,7 +33,7 @@ test.describe("rotas", () => {
     await skipBoot(page);
     const res = await page.goto("/nao-existe");
     expect(res?.status()).toBe(404);
-    await expect(page.getByRole("heading", { name: "Página não encontrada" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Impedimento." })).toBeVisible();
   });
 });
 
@@ -130,5 +130,27 @@ test.describe("preloader e fallbacks", () => {
     const html = await (await request.get("/")).text();
     expect(html).toContain("Gustavo Américo Rosa");
     expect(html).toContain("Projeto e construo sistemas escaláveis");
+  });
+});
+
+test.describe("súmulas", () => {
+  test.beforeEach(async ({ page }) => skipBoot(page));
+
+  test("sistema privado: selo, sem botão de código e capa de prancheta", async ({ page }) => {
+    await page.goto("/projects/conecta-plantao");
+    await expect(page.getByText(/Repositório privado/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Código →" })).toHaveCount(0);
+    await expect(page.getByRole("img", { name: /CONECTA Plantão/ })).toBeVisible();
+  });
+
+  test("sem desafios informados, a seção VAR não aparece", async ({ page }) => {
+    await page.goto("/projects/gustavo-os");
+    await expect(page.getByRole("heading", { name: "Lances decisivos" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "VAR" })).toHaveCount(0);
+  });
+
+  test("Sol Poretti aponta para o site público", async ({ page }) => {
+    await page.goto("/projects/sol-poretti");
+    await expect(page.getByRole("link", { name: "Ver ao vivo →" })).toHaveAttribute("href", "https://solporettinutri.com.br");
   });
 });

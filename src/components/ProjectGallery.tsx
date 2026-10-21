@@ -43,7 +43,7 @@ export function ProjectGallery({ items }: { items: Item[] }) {
                             src={g.src}
                             alt={g.alt}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                            className="object-cover object-top grayscale contrast-125 transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0 group-focus-visible:grayscale-0"
                             sizes="(max-width: 640px) 100vw, 50vw"
                         />
                         <div className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/10" />

@@ -19,7 +19,7 @@ export default async function ProjectsPage({ params }: PageProps) {
   const portfolio = getPortfolio(locale);
 
   return (
-    <section className="pt-12 sm:pt-14 pb-20">
+    <section className="pt-32 sm:pt-40 pb-20">
       <Container>
         <SectionHeader
           eyebrow="Projetos"
@@ -27,7 +27,7 @@ export default async function ProjectsPage({ params }: PageProps) {
           description="Use busca e filtros. Abra um projeto para ver contexto, papel, decisões técnicas e resultados."
         />
         <div className="mt-8">
-          <ProjectsExplorer projects={portfolio.projects} tags={[...portfolio.projectTags]} />
+          <ProjectsExplorer projects={portfolio.projects} tags={portfolio.projectTags} copy={portfolio.copy} />
         </div>
       </Container>
     </section>

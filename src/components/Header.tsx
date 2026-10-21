@@ -6,18 +6,19 @@ import * as React from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/cn";
 
-const nav = [
-  { href: "/", label: "Index" },
-  { href: "/projects", label: "Projetos" },
-  { href: "/about", label: "Sobre" },
-  { href: "/contact", label: "Contato" }
-];
+type NavCopy = { index: string; projects: string; about: string; contact: string; menu: string; close: string };
 
 const isActive = (pathname: string, href: string) =>
   href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
-export function Header({ handle }: { handle: string }) {
+export function Header({ handle, copy }: { handle: string; copy: NavCopy }) {
   const pathname = usePathname();
+  const nav = [
+    { href: "/", label: copy.index },
+    { href: "/projects", label: copy.projects },
+    { href: "/about", label: copy.about },
+    { href: "/contact", label: copy.contact }
+  ];
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => setOpen(false), [pathname]);
@@ -32,8 +33,8 @@ export function Header({ handle }: { handle: string }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       {/* Véu para o conteúdo que rola por baixo não brigar com a navegação. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-28 bg-gradient-to-b from-bg via-bg/70 to-transparent" />
-      <div className="grid-editorial items-center pt-[calc(var(--hud-inset)+14px)]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-bg from-40% to-transparent" />
+      <div className="grid-editorial relative items-center pt-[calc(var(--hud-inset)+14px)]">
         <Link href="/" className="label col-span-6 text-fg md:col-span-3" aria-label="Ir para o início">
           <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-signal" />
           {handle}
@@ -71,7 +72,7 @@ export function Header({ handle }: { handle: string }) {
             aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? "Fechar" : "Menu"}
+            {open ? copy.close : copy.menu}
           </button>
         </div>
       </div>

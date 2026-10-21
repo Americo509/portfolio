@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { Project } from "../../types/portfolio.types";
+import type { Portfolio, Project } from "../../types/portfolio.types";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Chip } from "@/components/ui/Chip";
 
@@ -11,10 +11,12 @@ function normalize(s: string) {
 
 export function ProjectsExplorer({
   projects,
-  tags
+  tags,
+  copy
 }: {
   projects: Project[];
   tags: string[];
+  copy: Pick<Portfolio["copy"], "status" | "privateRepo" | "matchReport">;
 }) {
   const [q, setQ] = React.useState("");
   const [active, setActive] = React.useState<string | null>(null);
@@ -56,7 +58,7 @@ export function ProjectsExplorer({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {filtered.map((p) => (
-          <ProjectCard key={p.slug} project={p} variant="normal" />
+          <ProjectCard key={p.slug} project={p} variant="normal" copy={copy} />
         ))}
       </div>
 

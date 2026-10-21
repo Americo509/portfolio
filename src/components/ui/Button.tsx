@@ -8,7 +8,10 @@ import { Magnetic } from "@/components/ui/Magnetic";
 type Variant = "primary" | "secondary" | "ghost";
 
 const styles: Record<Variant, string> = {
-  primary: "bg-signal text-[#07080A] hover:bg-fg hover:text-bg",
+  // Off-white sobre preto; o vermelho do sinalizador entra como barra no hover
+  // (texto pequeno sobre vermelho não passa em contraste AA).
+  primary:
+    "relative overflow-hidden bg-fg text-bg after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:origin-left after:scale-x-0 after:bg-signal after:transition-transform after:duration-500 after:ease-cine after:content-[''] hover:after:scale-x-100",
   secondary: "border border-fg/25 text-fg hover:border-fg hover:bg-fg hover:text-bg",
   ghost: "text-fg underline decoration-fg/30 underline-offset-[6px] hover:decoration-signal"
 };

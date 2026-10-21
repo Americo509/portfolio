@@ -7,14 +7,16 @@ export function Footer({ params }: { params?: { locale?: string } }) {
     { href: portfolio.links.github, label: "GitHub", external: true },
     { href: portfolio.links.linkedin, label: "LinkedIn", external: true },
     { href: `mailto:${portfolio.links.email}`, label: "Email", external: true },
-    { href: "/contact", label: "Contato", external: false }
+    { href: "/contact", label: portfolio.copy.nav.contact, external: false }
   ];
 
   return (
-    <footer className="relative z-10 border-t border-line pb-[calc(var(--hud-inset)+40px)] pt-16">
+    <footer className="relative z-10 border-t border-line pb-[calc(var(--hud-inset)+72px)] pt-16">
       <div className="grid-editorial gap-y-10">
         <p className="col-span-12 font-display text-[clamp(3rem,9vw,9rem)] md:col-span-8">
-          Vamos construir <span className="font-accent text-signal-ink">algo</span> que escala.
+          {portfolio.copy.footer.statement[0]}{" "}
+          <span className="font-accent text-signal-ink">{portfolio.copy.footer.statement[1]}</span>{" "}
+          {portfolio.copy.footer.statement[2]}
         </p>
 
         <ul className="col-span-12 flex flex-col gap-3 self-end md:col-span-3 md:col-start-10">

@@ -21,23 +21,24 @@ export default {
         line: "var(--line)",
         signal: token("signal"),
         "signal-ink": token("signal-ink"),
+        amber: token("amber"),
         alert: token("alert"),
 
         // Legado: usados pelas páginas que ainda serão redesenhadas (Fases 3 e 4).
         ink: {
-          1: "#07080A",
-          2: "#0E1014",
-          3: "#171A1F",
-          4: "#5A5E66"
+          1: "#080808",
+          2: "#111111",
+          3: "#1A1A1A",
+          4: "#5C5C58"
         },
         paper: {
-          1: "#ECE9E2",
-          2: "#E2DED5",
-          3: "#D8D3C8"
+          1: "#F5F5F0",
+          2: "#EAEAE4",
+          3: "#DEDED8"
         },
         accent: {
-          DEFAULT: "#D4FF3A",
-          soft: "rgb(212 255 58 / 0.14)"
+          DEFAULT: "#E61919",
+          soft: "rgb(230 25 25 / 0.14)"
         },
         borderSubtle: "var(--line)"
       },

@@ -3,15 +3,29 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { Chip } from "@/components/ui/Chip";
-import type { Project } from "../types/portfolio.types";
+import type { Portfolio, Project } from "../types/portfolio.types";
 import { motion, useReducedMotion } from "motion/react";
+
+type CardCopy = Pick<Portfolio["copy"], "status" | "privateRepo" | "matchReport">;
+
+export function StatusBadge({ project, copy }: { project: Project; copy: CardCopy }) {
+  const live = project.status === "production" || project.status === "operating";
+  return (
+    <span className="label inline-flex items-center gap-2 text-muted">
+      <span className={cn("h-1.5 w-1.5 rounded-full", live ? "animate-pulse bg-signal" : "bg-muted")} />
+      {copy.status[project.status]}
+    </span>
+  );
+}
 
 export function ProjectCard({
   project,
-  variant = "normal"
+  variant = "normal",
+  copy
 }: {
   project: Project;
   variant?: "normal" | "wide";
+  copy: CardCopy;
 }) {
   const reduce = useReducedMotion();
   return (
@@ -36,6 +50,10 @@ export function ProjectCard({
       <div className="relative">
         <header className="flex items-start justify-between gap-4">
           <div>
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <StatusBadge project={project} copy={copy} />
+              <span className="label text-muted">{project.competition}</span>
+            </div>
             <h3 className="text-lg sm:text-xl font-semibold tracking-tight">
               <Link
                 className="focus-ring"
@@ -50,9 +68,9 @@ export function ProjectCard({
           </div>
           <Link
             href={`/projects/${project.slug}`}
-            className="focus-ring hidden sm:inline-flex text-xs text-ink-4 dark:text-paper-1/60 hover:underline underline-offset-4"
+            className="focus-ring hidden shrink-0 whitespace-nowrap sm:inline-flex text-xs text-ink-4 dark:text-paper-1/60 hover:underline underline-offset-4"
           >
-            Ver case →
+            {copy.matchReport.title} →
           </Link>
         </header>
 

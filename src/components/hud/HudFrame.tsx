@@ -5,17 +5,23 @@ import { usePathname } from "next/navigation";
 import { gsap } from "@/lib/gsap";
 import { motionState } from "@/lib/store";
 
-const ROUTES: Record<string, string> = {
-  "/": "01 / index",
-  "/projects": "02 / projects",
-  "/about": "03 / about",
-  "/contact": "04 / contact"
+type HudCopy = {
+  build: string;
+  node: string;
+  port: string;
+  live: string;
+  firstHalf: string;
+  halfTime: string;
+  secondHalf: string;
+  addedTime: string;
 };
 
-function routeLabel(pathname: string) {
-  if (ROUTES[pathname]) return ROUTES[pathname];
-  if (pathname.startsWith("/projects/")) return `02 / case — ${pathname.split("/")[2]}`;
-  return "00 / 404";
+/** O scroll da página vira o relógio da partida: 0' → 90' + acréscimos. */
+export function matchClock(progress: number, hud: HudCopy) {
+  if (progress >= 0.985) return `+3' ${hud.addedTime}`;
+  if (progress >= 0.49 && progress <= 0.51) return hud.halfTime;
+  const minute = Math.max(0, Math.min(90, Math.round(progress * 90)));
+  return `${progress < 0.5 ? hud.firstHalf : hud.secondHalf} — ${String(minute).padStart(2, "0")}'`;
 }
 
 const Corner = ({ className }: { className: string }) => (
@@ -26,18 +32,18 @@ const Corner = ({ className }: { className: string }) => (
 );
 
 /** Moldura de HUD fixa (docs/art-direction.md §4). Puramente decorativa. */
-export function HudFrame() {
+export function HudFrame({ hud }: { hud: HudCopy }) {
   const pathname = usePathname();
   const clock = React.useRef<HTMLSpanElement>(null);
-  const scroll = React.useRef<HTMLSpanElement>(null);
+  const match = React.useRef<HTMLSpanElement>(null);
 
   React.useEffect(() => {
     let last = -1;
     let lastSecond = -1;
     const tick = () => {
-      const pct = Math.round(motionState.progress * 100);
-      if (pct !== last && scroll.current) {
-        scroll.current.textContent = String(pct).padStart(3, "0");
+      const pct = Math.round(motionState.progress * 200);
+      if (pct !== last && match.current) {
+        match.current.textContent = matchClock(motionState.progress, hud);
         last = pct;
       }
       const now = new Date();
@@ -48,7 +54,7 @@ export function HudFrame() {
     };
     gsap.ticker.add(tick);
     return () => gsap.ticker.remove(tick);
-  }, []);
+  }, [hud]);
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-[var(--hud-inset)] z-40 text-fg">
@@ -58,19 +64,23 @@ export function HudFrame() {
       <Corner className="-bottom-1.5 -right-1.5" />
 
       <div className="label absolute bottom-0 left-4 hidden items-center gap-3 text-muted md:flex">
-        <span className="text-fg">{routeLabel(pathname)}</span>
+        <span>
+          {hud.node}
+          {hud.port} · {hud.build}
+        </span>
+        <span className="text-fg">{pathname}</span>
       </div>
 
       <div className="label absolute bottom-0 right-4 hidden items-center gap-5 text-muted md:flex">
-        <span>
-          scroll <span ref={scroll} className="tabular-nums text-fg">000</span>%
+        <span ref={match} className="tabular-nums text-fg">
+          {matchClock(0, hud)}
         </span>
         <span className="tabular-nums" ref={clock}>
           --:--:--
         </span>
         <span className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-signal" />
-          system online
+          {hud.live}
         </span>
       </div>
     </div>

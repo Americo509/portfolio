@@ -9,6 +9,8 @@ import { Reveal } from "@/components/motion/Reveal";
 import { getPortfolio } from "@/lib/get-portfolio";
 import { buildTitle, buildDescription } from "@/lib/seo";
 import { ProjectGallery } from "@/components/ProjectGallery";
+import { BlueprintCover } from "@/components/projects/BlueprintCover";
+import { StatusBadge } from "@/components/ProjectCard";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -49,9 +51,10 @@ export default async function ProjectCasePage({ params }: Props) {
   const p = portfolio.projects.find((x) => x.slug === slug);
 
   if (!p) return notFound();
+  const mr = portfolio.copy.matchReport;
 
   return (
-    <section className="pt-12 sm:pt-14 pb-20">
+    <section className="pt-32 sm:pt-40 pb-20">
       <Container>
         <Reveal>
           <div className="max-w-3xl">
@@ -59,8 +62,19 @@ export default async function ProjectCasePage({ params }: Props) {
               className="focus-ring text-sm text-ink-4 dark:text-paper-1/70 hover:underline underline-offset-4"
               href="/projects"
             >
-              ← Voltar para Projetos
+              {mr.back}
             </Link>
+
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
+              <span className="label text-fg">{mr.title}</span>
+              <StatusBadge project={p} copy={portfolio.copy} />
+              <span className="label text-muted">
+                {mr.competition}: {p.competition}
+              </span>
+              <span className="label text-muted">
+                {mr.position}: {p.position}
+              </span>
+            </div>
 
             <h1 className="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">
               {p.title}
@@ -82,9 +96,7 @@ export default async function ProjectCasePage({ params }: Props) {
           <div className="space-y-8">
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Contexto e problema
-                </h2>
+                <h2 className="text-lg font-semibold tracking-tight">{mr.context}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-ink-4 dark:text-paper-1/70 whitespace-pre-line">
                   {p.caseStudy.context}
                 </p>
@@ -93,7 +105,7 @@ export default async function ProjectCasePage({ params }: Props) {
 
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">Meu papel</h2>
+                <h2 className="text-lg font-semibold tracking-tight">{mr.role}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-ink-4 dark:text-paper-1/70 whitespace-pre-line">
                   {p.caseStudy.role}
                 </p>
@@ -102,9 +114,7 @@ export default async function ProjectCasePage({ params }: Props) {
 
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Decisões técnicas
-                </h2>
+                <h2 className="text-lg font-semibold tracking-tight">{mr.keyMoments}</h2>
                 <ul className="mt-3 space-y-2 text-sm text-ink-4 dark:text-paper-1/70">
                   {p.caseStudy.technicalDecisions.map((d) => (
                     <li key={d}>• {d}</li>
@@ -113,22 +123,22 @@ export default async function ProjectCasePage({ params }: Props) {
               </div>
             </Reveal>
 
-            <Reveal>
-              <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Desafios e soluções
-                </h2>
-                <ul className="mt-3 space-y-2 text-sm text-ink-4 dark:text-paper-1/70">
-                  {p.caseStudy.challenges.map((c) => (
-                    <li key={c}>• {c}</li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
+            {p.caseStudy.challenges.length > 0 ? (
+              <Reveal>
+                <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
+                  <h2 className="text-lg font-semibold tracking-tight">{mr.var}</h2>
+                  <ul className="mt-3 space-y-2 text-sm text-ink-4 dark:text-paper-1/70">
+                    {p.caseStudy.challenges.map((c) => (
+                      <li key={c}>• {c}</li>
+                    ))}
+                  </ul>
+                </div>
+              </Reveal>
+            ) : null}
 
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">Resultados</h2>
+                <h2 className="text-lg font-semibold tracking-tight">{mr.fullTime}</h2>
                 <ul className="mt-3 space-y-2 text-sm text-ink-4 dark:text-paper-1/70">
                   {p.caseStudy.results.map((r) => (
                     <li key={r}>• {r}</li>
@@ -139,16 +149,22 @@ export default async function ProjectCasePage({ params }: Props) {
 
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">Galeria</h2>
+                <h2 className="text-lg font-semibold tracking-tight">{mr.coverage}</h2>
 
-                <ProjectGallery items={p.caseStudy.gallery} />
+                {p.caseStudy.gallery.length > 0 ? (
+                  <ProjectGallery items={p.caseStudy.gallery} />
+                ) : (
+                  <div className="mt-4 aspect-[16/10] overflow-hidden border border-line">
+                    <BlueprintCover slug={p.slug} label={`${mr.title} · ${p.title}`} />
+                  </div>
+                )}
               </div>
             </Reveal>
           </div>
 
           <Reveal delay={0.05}>
             <aside className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft sticky top-24">
-              <h3 className="text-sm font-semibold tracking-tight">Stack</h3>
+              <h3 className="text-sm font-semibold tracking-tight">{mr.lineup}</h3>
               <div className="mt-4 flex flex-wrap gap-2">
                 {p.stack.map((s) => (
                   <span
@@ -162,19 +178,26 @@ export default async function ProjectCasePage({ params }: Props) {
 
               <div className="mt-6 grid grid-cols-1 gap-2">
                 <Button as="link" href="/contact" variant="primary">
-                  Vamos conversar
+                  {mr.talk}
                 </Button>
 
-                {p.links.github ? (
+                {p.links.github && !p.privateRepo ? (
                   <Button as="link" href={p.links.github} variant="secondary">
-                    GitHub →
+                    {mr.code}
                   </Button>
                 ) : null}
 
                 {p.links.demo ? (
                   <Button as="link" href={p.links.demo} variant="secondary">
-                    Demo →
+                    {mr.live}
                   </Button>
+                ) : null}
+
+                {p.privateRepo ? (
+                  <p className="label mt-2 flex gap-2 leading-relaxed text-muted">
+                    <span aria-hidden="true">🔒</span>
+                    {portfolio.copy.privateRepo}
+                  </p>
                 ) : null}
               </div>
             </aside>

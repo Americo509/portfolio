@@ -1,21 +1,20 @@
-import Link from "next/link";
 import { Container } from "@/components/Container";
 import { Button } from "@/components/ui/Button";
+import { getPortfolio } from "@/lib/get-portfolio";
 
 export default function NotFound() {
+  const { copy } = getPortfolio();
   return (
-    <section className="pt-16 pb-24">
+    <section className="pb-24 pt-40">
       <Container>
-        <h1 className="text-3xl font-semibold tracking-tight">Página não encontrada</h1>
-        <p className="mt-3 text-ink-4 dark:text-paper-1/70">
-          O conteúdo que você tentou acessar não existe (ou foi movido).
-        </p>
+        <h1 className="font-display text-chapter">{copy.notFound.title}</h1>
+        <p className="mt-6 max-w-[40ch] text-muted">{copy.notFound.body}</p>
         <div className="mt-6 flex gap-3">
           <Button as="link" href="/" variant="primary">
-            Voltar para Home
+            {copy.notFound.home}
           </Button>
           <Button as="link" href="/projects" variant="secondary">
-            Ver projetos
+            {copy.notFound.projects}
           </Button>
         </div>
       </Container>

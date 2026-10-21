@@ -4,18 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- Tokens (docs/art-direction.md §2) ---------- */
+/* ---------- Tokens "Noite de Jogo" (docs/art-direction.md §2) ---------- */
 :root {
   color-scheme: light;
-  --c-bg: 236 233 226;
-  --c-surface: 226 222 213;
-  --c-fg: 11 12 14;
-  --c-muted: 90 94 102;
-  --c-signal: 212 255 58;
-  /* Accent quando usado como TEXTO: no tema claro vira oliva escuro (contraste AA). */
-  --c-signal-ink: 79 104 0;
-  --c-alert: 224 64 28;
-  --line: rgb(11 12 14 / 0.12);
+  /* "Jogo de dia": giz preto sobre papel. */
+  --c-bg: 245 245 240;
+  --c-surface: 234 234 228;
+  --c-fg: 8 8 8;
+  --c-muted: 92 92 88;
+  /* Sinalizador: só preenchimento/gráfico. */
+  --c-signal: 230 25 25;
+  /* O vermelho quando é TEXTO (contraste AA em cada tema). */
+  --c-signal-ink: 194 20 20;
+  /* Exclusivo do Modo Resenha. */
+  --c-amber: 180 83 9;
+  --c-alert: 194 20 20;
+  --line: rgb(8 8 8 / 0.12);
 
   --gutter: clamp(16px, 2vw, 28px);
   --margin: clamp(16px, 4vw, 56px);
@@ -27,13 +31,15 @@
 
 .dark {
   color-scheme: dark;
-  --c-bg: 7 8 10;
-  --c-surface: 14 16 20;
-  --c-fg: 237 234 227;
-  --c-muted: 139 144 153;
-  --c-signal-ink: 212 255 58;
-  --c-alert: 255 90 54;
-  --line: rgb(237 234 227 / 0.09);
+  /* "Noite de jogo" (padrão). */
+  --c-bg: 8 8 8;
+  --c-surface: 17 17 17;
+  --c-fg: 245 245 240;
+  --c-muted: 140 140 136;
+  --c-signal-ink: 255 46 46;
+  --c-amber: 245 158 11;
+  --c-alert: 255 46 46;
+  --line: rgb(245 245 240 / 0.09);
 }
 
 @layer base {
@@ -56,8 +62,8 @@
   }
 
   ::selection {
-    background: rgb(var(--c-signal));
-    color: #07080a;
+    background: rgb(var(--c-fg));
+    color: rgb(var(--c-bg));
   }
 }
 
@@ -167,8 +173,8 @@ select:focus-visible {
   top: 12px;
   z-index: 100;
   transform: translateY(-200%);
-  background: rgb(var(--c-signal));
-  color: #07080a;
+  background: rgb(var(--c-fg));
+  color: rgb(var(--c-bg));
   padding: 10px 14px;
 }
 

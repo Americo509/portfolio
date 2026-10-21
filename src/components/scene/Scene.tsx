@@ -229,8 +229,8 @@ export default function Scene({
   const palette = React.useMemo<Palette>(
     () =>
       theme === "dark"
-        ? { fg: new THREE.Color("#EDEAE3"), signal: new THREE.Color("#D4FF3A"), additive: true }
-        : { fg: new THREE.Color("#0B0C0E"), signal: new THREE.Color("#6E8F00"), additive: false },
+        ? { fg: new THREE.Color("#F5F5F0"), signal: new THREE.Color("#E61919"), additive: true }
+        : { fg: new THREE.Color("#080808"), signal: new THREE.Color("#C21414"), additive: false },
     [theme]
   );
 

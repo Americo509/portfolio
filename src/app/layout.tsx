@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07080A",
+  themeColor: "#080808",
   colorScheme: "dark light"
 };
 
@@ -52,8 +52,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Pular para o conteúdo
               </a>
               <SceneRoot />
-              <HudFrame />
-              <Header handle={portfolio.profile.handle} />
+              <HudFrame hud={portfolio.hud} />
+              <Header handle={portfolio.profile.handle} copy={portfolio.copy.nav} />
               <RouteTransition>
                 <main id="conteudo" className="relative z-10">
                   {children}
@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </RouteTransition>
               <div className="grain" aria-hidden="true" />
               <Cursor />
-              <Preloader handle={portfolio.profile.handle} services={portfolio.skills.map((s) => s.label.split(" ")[0])} />
+              <Preloader handle={portfolio.profile.handle} copy={portfolio.copy.boot} />
             </SmoothScroll>
           </MotionRoot>
         </ThemeProvider>

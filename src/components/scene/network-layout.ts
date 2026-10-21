@@ -14,7 +14,8 @@ function mulberry32(seed: number) {
   };
 }
 
-export function buildNetwork(count = 42, seed = 509) {
+// seed #1977 (docs/art-direction.md §4).
+export function buildNetwork(count = 42, seed = 1977) {
   const rand = mulberry32(seed);
   const nodes: NetNode[] = [{ x: 0, y: 0, z: 0, r: 1, hub: true }];
 

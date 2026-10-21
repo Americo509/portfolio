@@ -18,7 +18,9 @@ export const bootScript = `try{if(!matchMedia('(prefers-reduced-motion: reduce)'
 
 const pad = (n: number) => String(Math.round(n)).padStart(3, "0");
 
-export function Preloader({ handle, services }: { handle: string; services: string[] }) {
+type BootCopy = { title: string; skip: string; loading: string; lines: string[] };
+
+export function Preloader({ handle, copy }: { handle: string; copy: BootCopy }) {
   const root = React.useRef<HTMLDivElement>(null);
   const counter = React.useRef<HTMLSpanElement>(null);
   const setBooted = useApp((s) => s.setBooted);
@@ -26,16 +28,9 @@ export function Preloader({ handle, services }: { handle: string; services: stri
   const [done, setDone] = React.useState(false);
   const finishRef = React.useRef<(fast?: boolean) => void>(undefined);
 
-  const lines = React.useMemo(
-    () => [
-      `> boot ${handle} --env=production`,
-      `> mounting services: ${services.map((s) => s.toLowerCase()).join(" · ")}`,
-      "> connecting event bus .............. ok",
-      "> warming caches .................... ok",
-      `> ${services.length}/${services.length} services healthy`
-    ],
-    [handle, services]
-  );
+  // Túnel: os refletores acendem conforme o carregamento real avança.
+  const linesKey = copy.lines.join("\n");
+  const lines = React.useMemo(() => linesKey.split("\n").map((l) => l.replace("{handle}", handle)), [linesKey, handle]);
 
   React.useEffect(() => {
     const html = document.documentElement;
@@ -134,9 +129,9 @@ export function Preloader({ handle, services }: { handle: string; services: stri
       <div data-content className="absolute inset-0 flex flex-col justify-between p-[var(--margin)] text-fg">
         <div className="label flex items-center justify-between text-muted">
           <span>{handle}</span>
-          <span className="hidden sm:inline">boot sequence</span>
+          <span className="hidden sm:inline">{copy.title}</span>
           <button type="button" onClick={() => finishRef.current?.(true)} className="label text-fg underline underline-offset-4">
-            Pular [esc]
+            {copy.skip}
           </button>
         </div>
 
@@ -153,7 +148,7 @@ export function Preloader({ handle, services }: { handle: string; services: stri
           <span ref={counter} className="font-display text-chapter tabular-nums">
             000
           </span>
-          <span className="label pb-[0.6em] text-muted">loading %</span>
+          <span className="label pb-[0.6em] text-muted">{copy.loading}</span>
         </div>
       </div>
     </div>

@@ -16,6 +16,7 @@ export default async function HomePage({ params }: PageProps) {
   const { locale } = (await params) ?? {};
   const portfolio = getPortfolio(locale);
 
+  const { copy } = portfolio;
   const featured = portfolio.projects.filter((p) => p.featured).slice(0, 3);
   const wide = featured.find((p) => p.featuredSize === "wide") ?? featured[0];
   const normals = featured.filter((p) => p.slug !== wide.slug);
@@ -52,10 +53,10 @@ export default async function HomePage({ params }: PageProps) {
             <p className="label leading-relaxed text-muted">{portfolio.profile.heroSubheadline}</p>
             <div className="flex flex-wrap gap-3">
               <Button as="link" href="/projects">
-                Ver projetos
+                {copy.hero.primaryCta}
               </Button>
               <Button as="link" href="/contact" variant="secondary">
-                Falar comigo
+                {copy.hero.secondaryCta}
               </Button>
             </div>
           </div>
@@ -66,21 +67,21 @@ export default async function HomePage({ params }: PageProps) {
       <section className="pt-14 sm:pt-18">
         <Container>
           <SectionHeader
-            eyebrow="Destaques"
-            title="Projetos com foco em produto, arquitetura e entrega."
-            description="Cases selecionados para mostrar decisões técnicas, trade-offs e acabamento."
+            eyebrow={copy.sections.featured.eyebrow}
+            title={copy.sections.featured.title}
+            description={copy.sections.featured.description}
           />
 
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <ProjectCard project={wide} variant="wide" />
+            <ProjectCard project={wide} variant="wide" copy={copy} />
             {normals.map((p) => (
-              <ProjectCard key={p.slug} project={p} variant="normal" />
+              <ProjectCard key={p.slug} project={p} variant="normal" copy={copy} />
             ))}
           </div>
 
           <div className="mt-8">
             <Button as="link" href="/projects" variant="ghost">
-              Ver todos os projetos →
+              {copy.sections.featured.cta}
             </Button>
           </div>
         </Container>
@@ -90,9 +91,9 @@ export default async function HomePage({ params }: PageProps) {
       <section className="pt-14 sm:pt-18">
         <Container>
           <SectionHeader
-            eyebrow="Toolbox"
-            title="Stack que uso no dia a dia."
-            description="Organizada por domínios — com foco em previsibilidade, performance e DX."
+            eyebrow={copy.sections.toolbox.eyebrow}
+            title={copy.sections.toolbox.title}
+            description={copy.sections.toolbox.description}
           />
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,35 +119,34 @@ export default async function HomePage({ params }: PageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <Reveal>
               <div className="prose-senior">
-                <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                  Como eu penso produto
-                </h2>
-                <p className="mt-4">
-                  Busco unir base técnica sólida e experiência sem fricção.
-                  Isso significa modelagem de domínio clara, contratos bem definidos, observabilidade real
-                  em produção e interfaces consistentes.
-                  Engenharia, para mim, é criar sistemas previsíveis, evolutivos e bem resolvidos nos
-                  detalhes — do backend à experiência final do usuário.
-                </p>
+                <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">{portfolio.principles.title}</h2>
+                <p className="mt-4">{portfolio.principles.body}</p>
               </div>
             </Reveal>
 
             <Reveal delay={0.05}>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h3 className="text-lg font-semibold tracking-tight">Arquitetura e qualidade</h3>
-                <ul className="mt-4 space-y-3 text-sm text-ink-4 dark:text-paper-1/70">
-                  <li>• Domain-driven modeling e separação clara de responsabilidades.</li>
-                  <li>• Service boundaries bem definidos e contratos explícitos entre camadas.</li>
-                  <li>• APIs previsíveis e versionamento consciente.</li>
-                  <li>• Performance e escalabilidade tratadas como requisitos desde o design.</li>
-                  <li>• Observabilidade por padrão (logs estruturados, tracing e métricas acionáveis).</li>
-                  <li>• Resiliência: retries, timeouts e tratamento consistente de falhas.</li>
-                  <li>• Código evolutivo com baixo acoplamento e alta coesão.</li>
-                  <li>• Developer Experience forte: automação, padrões e testes que sustentam crescimento.</li>
+                <h3 className="label text-muted">
+                  {portfolio.method.title} · {portfolio.method.steps.length} {portfolio.locale === "en" ? "steps" : "fases"}
+                </h3>
+                <ol className="mt-4 space-y-3 text-sm text-ink-4 dark:text-paper-1/70">
+                  {portfolio.method.steps.map((step) => (
+                    <li key={step.number}>
+                      <span className="label mr-2 text-fg">
+                        {`${step.number} // ${step.name}`}
+                      </span>
+                      {step.body}
+                    </li>
+                  ))}
+                </ol>
+                <ul className="mt-6 space-y-2 border-t border-line pt-6 text-sm text-ink-4 dark:text-paper-1/70">
+                  {portfolio.principles.items.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
                 </ul>
                 <div className="mt-6">
                   <Link className="focus-ring text-sm underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href="/about">
-                    Ler sobre minha abordagem →
+                    {copy.sections.about.cta} →
                   </Link>
                 </div>
               </div>
@@ -159,13 +159,13 @@ export default async function HomePage({ params }: PageProps) {
       <section className="pt-14 sm:pt-18">
         <Container>
           <SectionHeader
-            eyebrow="Sobre"
-            title="Cuidado com detalhes. Pragmatismo na entrega."
+            eyebrow={copy.sections.about.eyebrow}
+            title={copy.sections.about.title}
             description={portfolio.profile.bioShort}
           />
           <div className="mt-7">
             <Button as="link" href="/about" variant="secondary">
-              Ir para tela sobre
+              {copy.sections.about.cta}
             </Button>
           </div>
         </Container>
@@ -175,15 +175,15 @@ export default async function HomePage({ params }: PageProps) {
       <section className="pt-14 sm:pt-18 pb-20">
         <Container>
           <SectionHeader
-            eyebrow="Contato"
-            title="Vamos conversar."
-            description="Me conte sobre o produto, o problema e o prazo. Eu respondo com clareza e próximos passos."
+            eyebrow={copy.sections.contact.eyebrow}
+            title={copy.sections.contact.title}
+            description={copy.sections.contact.description}
           />
           <div className="mt-8">
             <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-6 sm:p-7 shadow-soft">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <p className="text-sm text-ink-4 dark:text-paper-1/70">
-                  Prefere ir direto?{" "}
+                  {copy.sections.contact.direct}{" "}
                   <a className="underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href={`mailto:${portfolio.links.email}`}>
                     {portfolio.links.email}
                   </a>
@@ -196,7 +196,7 @@ export default async function HomePage({ params }: PageProps) {
                     LinkedIn
                   </Button>
                   <Button as="link" href="/contact" variant="secondary">
-                    Abrir formulário →
+                    {copy.sections.contact.form}
                   </Button>
                 </div>
               </div>

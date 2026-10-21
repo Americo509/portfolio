@@ -19,7 +19,7 @@ export default async function ContactPage({ params }: PageProps) {
   const portfolio = getPortfolio(locale);
 
   return (
-    <section className="pt-12 sm:pt-14 pb-20">
+    <section className="pt-32 sm:pt-40 pb-20">
       <Container>
         <SectionHeader
           eyebrow="Contato"

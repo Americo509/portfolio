@@ -75,7 +75,7 @@ export function Cursor() {
         ref={ring}
         className="invisible absolute -left-5 -top-5 flex h-10 w-10 items-center justify-center rounded-full border border-fg/50 opacity-0 transition-colors duration-300 data-[state=hover]:border-signal data-[state=label]:border-signal data-[state=label]:bg-signal"
       >
-        <span className="label scale-[0.4] whitespace-nowrap font-semibold text-[#07080A]">{label}</span>
+        <span className="label scale-[0.4] whitespace-nowrap font-semibold text-[#F5F5F0]">{label}</span>
       </div>
       <div ref={dot} className="invisible absolute -left-[3px] -top-[3px] h-1.5 w-1.5 rounded-full bg-signal opacity-0" />
     </div>
