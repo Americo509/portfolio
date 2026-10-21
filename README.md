@@ -69,6 +69,14 @@ pnpm test:e2e   # smoke tests com Playwright (desktop e mobile) contra o build d
 - **Escalação:** prancheta em SVG com traço de giz e jogadores como botões; o pulso vermelho percorre o caminho de uma requisição (auth → tenant → enqueue → render).
 - **Jogos históricos:** súmulas com as key arts desenhadas por um canvas WebGL sobreposto e sincronizado com o DOM (`src/components/fx`). Ripple no mouse, RGB shift, curvatura pela velocidade do scroll e reveal. Sem WebGL, com reduced motion ou no tier baixo, fica a `next/image` normal.
 
+### Disputa de pênaltis (Fase 4)
+
+- Lógica pura e testada em `src/lib/penalty/engine.ts`: zonas 3 × 3, goleiro que decide antes de ver a bola lendo a frequência das suas zonas (90% leitura, 10% aleatório), regras oficiais (5 cobranças, decisão antecipada e morte súbita) e o **Modo Muralha 2012** (2 defesas seguidas = mais alcance).
+- Cena 3D própria (`src/components/penalty/PenaltyScene.tsx`): goleiro estilizado (alto, camisa 12, luvas grandes e arquinho; sem rosto e sem marca), rede que deforma no gol, trajetória com efeito, câmera lenta, tremor e flashes no gol. O estádio de fundo pausa enquanto o jogo está na tela.
+- Controles: mouse/toque (mirar, segurar para força, arrastar para efeito) e teclado (setas + espaço). Som procedural (Web Audio), desligado por padrão.
+- Sem WebGL, o gol vira uma grade 3 × 3 de botões com a mesma lógica.
+- Teaser de uma cobrança na home e a disputa completa em `/penalti`.
+
 ### Fallbacks
 
 - Sem WebGL, com falha da cena ou antes de ela carregar: estádio estático em CSS (`StaticStadium`).

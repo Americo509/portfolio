@@ -8,6 +8,7 @@ import { MatchReports } from "@/components/home/MatchReports";
 import { TeamTalk } from "@/components/home/TeamTalk";
 import { Academy } from "@/components/home/Academy";
 import { FinalWhistle } from "@/components/home/FinalWhistle";
+import { PenaltyGame } from "@/components/penalty/PenaltyGame";
 
 type PageProps = {
   params?: Promise<{ locale?: string }>;
@@ -113,7 +114,18 @@ export default async function HomePage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* 06 — Apito final */}
+      {/* 06 — Disputa de pênaltis (uma cobrança aqui; a disputa completa em /penalti) */}
+      <section data-chapter="penalties" aria-labelledby="ch-penalties" className="pb-24 pt-24">
+        <ChapterTitle id="ch-penalties" number={ch.penalties.number} title={ch.penalties.title} kicker={ch.penalties.kicker} />
+        <div className="grid-editorial mt-10">
+          <p className="col-span-12 max-w-[52ch] text-[clamp(1.1rem,1.6vw,1.35rem)] leading-snug text-muted md:col-span-5">
+            {copy.penalty.intro}
+          </p>
+          <PenaltyGame copy={copy.penalty} mode="single" className="col-span-12 mt-8 md:col-span-10 md:col-start-2" />
+        </div>
+      </section>
+
+      {/* 07 — Apito final */}
       <section data-chapter="final" aria-label={ch.final.title} className="relative">
         <FinalWhistle copy={copy.final} email={portfolio.links.email} />
       </section>

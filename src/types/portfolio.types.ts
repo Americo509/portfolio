@@ -147,7 +147,36 @@ export type Portfolio = {
     };
     footer: { statement: [string, string, string] };
     /** Títulos de capítulo da home (a partida). */
-    chapters: Record<"lineup" | "matches" | "method" | "academy" | "final", { number: string; title: string; kicker: string }>;
+    chapters: Record<
+      "lineup" | "matches" | "method" | "academy" | "penalties" | "final",
+      { number: string; title: string; kicker: string }
+    >;
+    penalty: {
+      title: string;
+      intro: string;
+      howTo: { pointer: string; keyboard: string };
+      you: string;
+      opponent: string;
+      start: string;
+      fullGame: string;
+      again: string;
+      power: string;
+      aimHint: string;
+      results: { goal: string; save: string; post: string; miss: string };
+      opponentKick: string;
+      opponentResults: { goal: string; miss: string };
+      suddenDeath: string;
+      muralha: string;
+      win: string;
+      lose: string;
+      readRate: string;
+      cta: string;
+      best: string;
+      sound: string;
+      soundOff: string;
+      fallbackHint: string;
+      zones: string[];
+    };
     lineup: { hint: string; flow: [string, string, string, string]; sectorLabel: string; formationLabel: string };
     matchCard: { full: string; open: string };
     final: { title: string; accent: string; body: string; cta: string; secondary: string; email: string };

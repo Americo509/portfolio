@@ -39,7 +39,7 @@ type Preset = { pos: [number, number, number]; look: [number, number, number]; f
  * Enquadramento por capítulo da home (docs/art-direction.md §5). A câmera
  * desliza suavemente de um para o outro conforme o scroll.
  */
-export const CHAPTER_PRESETS: Record<"hero" | "lineup" | "matches" | "method" | "academy" | "final" | "ambient", Preset> = {
+export const CHAPTER_PRESETS: Record<"hero" | "lineup" | "matches" | "method" | "academy" | "penalties" | "final" | "ambient", Preset> = {
   hero: { pos: [-10, 3.4, 56], look: [18, 8, -30], fov: 42, dim: 0, fog: 1 },
   // Vista tática de cima: o gramado vira a prancheta.
   lineup: { pos: [0, 66, 38], look: [0, 0, -6], fov: 44, dim: 0.35, fog: 0.2 },
@@ -48,6 +48,8 @@ export const CHAPTER_PRESETS: Record<"hero" | "lineup" | "matches" | "method" | 
   // Câmera rasteira, quase parada, no círculo central.
   method: { pos: [0, 1.8, 20], look: [0, 3, -30], fov: 34, dim: 0.8, fog: 1 },
   academy: { pos: [18, 4, 8], look: [-20, 6, -40], fov: 38, dim: 0.84, fog: 1 },
+  // Pênaltis: a cena do estádio pausa (o jogo tem o próprio canvas); só o enquadramento de volta à grande área.
+  penalties: { pos: [0, 2.2, 40], look: [0, 1.5, 52.5], fov: 38, dim: 0.85, fog: 1 },
   // Apito final: a câmera vira para o sinalizador enquanto os refletores apagam.
   final: { pos: [-4, 3, 18], look: [-20, 11, -61], fov: 34, dim: 0.15, fog: 1 },
   ambient: { pos: [-10, 3.4, 56], look: [18, 8, -30], fov: 42, dim: 0.82, fog: 1 }

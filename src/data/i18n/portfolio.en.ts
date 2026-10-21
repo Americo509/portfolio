@@ -699,7 +699,47 @@ export const portfolioEN: Portfolio = {
       matches: { number: "03", title: "Classic matches", kicker: "Match reports from the games I've played" },
       method: { number: "04", title: "Team talk", kicker: "From kick-off to the final whistle" },
       academy: { number: "05", title: "Academy", kicker: "Where it all started" },
-      final: { number: "06", title: "Final whistle", kicker: "Full-time" }
+      penalties: { number: "06", title: "Penalty shootout", kicker: "You against my defence" },
+      final: { number: "07", title: "Final whistle", kicker: "Full-time" }
+    },
+    penalty: {
+      title: "Penalty shootout",
+      intro: "Five penalties each. The keeper is my defence: he reads your pattern and dives before he sees the ball.",
+      howTo: {
+        pointer: "Aim at the goal, hold to build power and release to shoot. Drag sideways while holding to add curl.",
+        keyboard: "Keyboard: arrows pick the corner, hold space for power and release to shoot."
+      },
+      you: "You",
+      opponent: "Gustavo",
+      start: "Shoot",
+      fullGame: "Play the full shootout →",
+      again: "Play again",
+      power: "Power",
+      aimHint: "Aim and hold",
+      results: { goal: "Goal!", save: "Saved!", post: "Off the post!", miss: "Wide!" },
+      opponentKick: "Gustavo steps up…",
+      opponentResults: { goal: "Gustavo scores.", miss: "Gustavo skies it!" },
+      suddenDeath: "Sudden death",
+      muralha: "Wall Mode 2012 activated",
+      win: "You won the shootout.",
+      lose: "The defence held firm.",
+      readRate: "The keeper read {pct}% of your penalties from the frequency distribution of your zones.",
+      cta: "Nice strike. Now let's talk.",
+      best: "Best score",
+      sound: "Sound",
+      soundOff: "Muted",
+      fallbackHint: "Pick a corner to shoot.",
+      zones: [
+        "low left",
+        "low centre",
+        "low right",
+        "mid-height left",
+        "down the middle",
+        "mid-height right",
+        "top left corner",
+        "high, centre",
+        "top right corner"
+      ]
     },
     lineup: {
       hint: "Tap a player to see their profile.",

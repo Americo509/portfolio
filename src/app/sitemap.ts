@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const portfolio = getPortfolio();
-  const staticRoutes = ["", "/projects", "/about", "/contact"].map((p) => ({
+  const staticRoutes = ["", "/projects", "/about", "/contact", "/penalti"].map((p) => ({
     url: `${SITE_URL}${p}`,
     lastModified: new Date()
   }));

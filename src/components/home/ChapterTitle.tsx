@@ -10,7 +10,7 @@ import { useReducedMotion } from "@/lib/use-media";
  */
 export function ChapterTitle({
   number,
-  total = "06",
+  total = "07",
   title,
   kicker,
   id

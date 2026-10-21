@@ -713,7 +713,47 @@ export const portfolioPT: Portfolio = {
       matches: { number: "03", title: "Jogos históricos", kicker: "Súmulas das partidas que eu joguei" },
       method: { number: "04", title: "Preleção", kicker: "Do apito inicial ao apito final" },
       academy: { number: "05", title: "Categorias de base", kicker: "Onde tudo começou" },
-      final: { number: "06", title: "Apito final", kicker: "Fim de jogo" }
+      penalties: { number: "06", title: "Disputa de pênaltis", kicker: "Você contra a minha defesa" },
+      final: { number: "07", title: "Apito final", kicker: "Fim de jogo" }
+    },
+    penalty: {
+      title: "Disputa de pênaltis",
+      intro: "Cinco cobranças para cada lado. O goleiro é a minha defesa: ele lê o seu padrão e pula antes de ver a bola.",
+      howTo: {
+        pointer: "Mire no gol, segure para dar força e solte para bater. Arraste para o lado enquanto segura para dar efeito.",
+        keyboard: "Teclado: setas escolhem o canto, segure espaço para a força e solte para bater."
+      },
+      you: "Você",
+      opponent: "Gustavo",
+      start: "Bater",
+      fullGame: "Jogar a disputa completa →",
+      again: "Jogar de novo",
+      power: "Força",
+      aimHint: "Mire e segure",
+      results: { goal: "Gol!", save: "Defendeu!", post: "Na trave!", miss: "Pra fora!" },
+      opponentKick: "Gustavo na bola…",
+      opponentResults: { goal: "Gustavo converte.", miss: "Gustavo isola!" },
+      suddenDeath: "Morte súbita",
+      muralha: "Modo Muralha 2012 ativado",
+      win: "Você venceu a disputa.",
+      lose: "A defesa segurou.",
+      readRate: "O goleiro leu {pct}% das suas cobranças pela distribuição de frequência das zonas.",
+      cta: "Bateu bem. Agora bate um papo.",
+      best: "Melhor placar",
+      sound: "Som",
+      soundOff: "Sem som",
+      fallbackHint: "Escolha o canto para bater.",
+      zones: [
+        "rasteiro à esquerda",
+        "rasteiro no meio",
+        "rasteiro à direita",
+        "meia altura à esquerda",
+        "no meio",
+        "meia altura à direita",
+        "ângulo esquerdo",
+        "no alto, no meio",
+        "ângulo direito"
+      ]
     },
     lineup: {
       hint: "Toque num jogador para ver a ficha.",

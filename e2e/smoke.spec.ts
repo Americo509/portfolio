@@ -171,8 +171,8 @@ test.describe("home em capítulos", () => {
     await page.goto("/");
   });
 
-  test("tem os 6 capítulos da partida", async ({ page }) => {
-    await expect(page.locator("[data-chapter]")).toHaveCount(6);
+  test("tem os 7 capítulos da partida", async ({ page }) => {
+    await expect(page.locator("[data-chapter]")).toHaveCount(7);
     for (const name of ["Escalação", "Jogos históricos", "Preleção", "Categorias de base"]) {
       await expect(page.getByRole("heading", { level: 2, name })).toBeAttached();
     }
@@ -197,5 +197,51 @@ test.describe("home em capítulos", () => {
   test("categorias de base listam os projetos de estudo", async ({ page }) => {
     const section = page.locator("[data-chapter=academy]");
     await expect(section.getByRole("link")).toHaveCount(5);
+  });
+});
+
+test.describe("pênaltis (sem WebGL: gol em grade)", () => {
+  test("disputa completa em /penalti até o fim", async ({ page }) => {
+    test.setTimeout(90_000);
+    await skipBoot(page);
+    await page.goto("/penalti");
+    await expect(page.getByRole("heading", { level: 1, name: "Disputa de pênaltis" })).toBeVisible();
+    const field = page.getByRole("application");
+    const again = page.getByRole("button", { name: "Jogar de novo" });
+    for (let i = 0; i < 14; i++) {
+      const zone = field.getByRole("button", { name: i % 2 ? "ângulo direito" : "rasteiro à esquerda" });
+      // Espera a próxima cobrança liberar (ou o fim da disputa).
+      await expect(zone.and(page.locator(":enabled")).or(again)).toBeVisible({ timeout: 15_000 });
+      if (await again.isVisible()) break;
+      await zone.click();
+    }
+    await expect(again).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/O goleiro leu \d+% das suas cobranças/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Bateu bem. Agora bate um papo." })).toHaveAttribute("href", "/contact");
+  });
+
+  test("teaser na home: uma cobrança e link para a disputa completa", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/");
+    const section = page.locator("[data-chapter=penalties]");
+    await section.scrollIntoViewIfNeeded();
+    await section.getByRole("button", { name: "no meio", exact: true }).click();
+    await expect(section.getByRole("link", { name: "Jogar a disputa completa →" })).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("teclado: setas escolhem o canto e espaço bate", async ({ page, isMobile }) => {
+    test.skip(isMobile, "teclado só no desktop");
+    await skipBoot(page);
+    await page.goto("/penalti");
+    const field = page.getByRole("application");
+    await field.focus();
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#penalty-status")).toHaveText("ângulo direito");
+    await page.keyboard.down("Space");
+    await page.waitForTimeout(400);
+    await page.keyboard.up("Space");
+    await expect(page.locator("#penalty-status")).toHaveText(/Gol!|Defendeu!|Na trave!|Pra fora!/, { timeout: 5000 });
   });
 });

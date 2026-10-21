@@ -6,7 +6,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import { Bloom, ChromaticAberration, EffectComposer, Vignette } from "@react-three/postprocessing";
 import type { ChromaticAberrationEffect } from "postprocessing";
-import { motionState } from "@/lib/store";
+import { motionState, useApp } from "@/lib/store";
 import type { GpuTier } from "@/lib/webgl";
 import { TIER_SETTINGS } from "./stadium/config";
 import { Stadium, type SceneMode, type StadiumPalette } from "./stadium/Stadium";
@@ -69,6 +69,7 @@ export default function Scene({
   const [dpr, setDpr] = React.useState(() => Math.min(settings.dpr, window.devicePixelRatio || 1));
   const [post, setPost] = React.useState(settings.post);
   const [hidden, setHidden] = React.useState(false);
+  const gameActive = useApp((s) => s.gameActive);
 
   React.useEffect(() => {
     const onVis = () => setHidden(document.hidden);
@@ -87,7 +88,7 @@ export default function Scene({
   return (
     <Canvas
       dpr={dpr}
-      frameloop={hidden ? "never" : "always"}
+      frameloop={hidden || gameActive ? "never" : "always"}
       camera={{ position: [40, 46, 66], fov: 58, near: 0.5, far: 600 }}
       gl={{ antialias: false, powerPreference: "high-performance" }}
       style={{ position: "absolute", inset: 0 }}

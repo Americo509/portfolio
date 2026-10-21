@@ -18,7 +18,7 @@ export const motionState = {
   chapterProgress: 0
 };
 
-export type ChapterKey = "hero" | "lineup" | "matches" | "method" | "academy" | "final";
+export type ChapterKey = "hero" | "lineup" | "matches" | "method" | "academy" | "penalties" | "final";
 
 export type SceneStatus = "idle" | "loading" | "ready" | "fallback";
 
@@ -31,6 +31,9 @@ type AppState = {
   /** O canvas de efeitos de imagem está ativo (FxImage passa a se registrar). */
   fxEnabled: boolean;
   setFxEnabled: (v: boolean) => void;
+  /** Um jogo de pênalti está na tela: a cena do estádio pausa para liberar a GPU. */
+  gameActive: boolean;
+  setGameActive: (v: boolean) => void;
   setBooted: (v: boolean) => void;
   setBootDone: (v: boolean) => void;
   setSceneStatus: (s: SceneStatus) => void;
@@ -42,6 +45,8 @@ export const useApp = create<AppState>((set) => ({
   sceneStatus: "idle",
   fxEnabled: false,
   setFxEnabled: (fxEnabled) => set({ fxEnabled }),
+  gameActive: false,
+  setGameActive: (gameActive) => set({ gameActive }),
   setBooted: (booted) => set({ booted }),
   setBootDone: (bootDone) => set({ bootDone }),
   setSceneStatus: (sceneStatus) => set({ sceneStatus })
