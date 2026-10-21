@@ -1,3 +1,13 @@
 # Política de cadeia de suprimentos: não instala versões publicadas há menos de 24 h
 # (mesma regra do pnpm local; evita lockfile com pacote recém-publicado).
 minimumReleaseAge: 1440
+
+# Pacotes autorizados a rodar scripts de instalação: sharp (otimização de
+# imagens do next/image) e unrs-resolver (resolvedor do ESLint).
+# allowBuilds é o formato do pnpm 11+; onlyBuiltDependencies, o do pnpm 10.
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
