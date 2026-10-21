@@ -6,6 +6,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/motion/Reveal";
 import { getPortfolio } from "@/lib/get-portfolio";
+import { HeroIntro } from "@/components/home/HeroIntro";
 
 type PageProps = {
   params?: Promise<{ locale?: string }>;
@@ -18,39 +19,47 @@ export default async function HomePage({ params }: PageProps) {
   const featured = portfolio.projects.filter((p) => p.featured).slice(0, 3);
   const wide = featured.find((p) => p.featuredSize === "wide") ?? featured[0];
   const normals = featured.filter((p) => p.slug !== wide.slug);
+  const [first, ...rest] = portfolio.profile.name.split(" ");
+  const last = rest.pop() ?? "";
+  const middle = rest.join(" ");
 
   return (
     <div>
       {/* Hero */}
-      <section className="pt-16 sm:pt-20">
-        <Container>
-          <Reveal>
-            <div className="max-w-3xl">
-              <p className="text-xs font-medium tracking-[0.18em] uppercase text-ink-4 dark:text-paper-1/60">
-                {portfolio.profile.headlineBase}
-              </p>
-              <h1 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-tight">
-                {portfolio.profile.heroHeadline}
-              </h1>
-              <p className="mt-5 text-base sm:text-lg leading-relaxed text-ink-4 dark:text-paper-1/70">
-                {portfolio.profile.heroSubheadline}
-              </p>
+      <section className="relative flex min-h-[100svh] flex-col justify-end pb-[calc(var(--hud-inset)+64px)] pt-32">
+        <HeroIntro className="grid-editorial gap-y-10">
+          <p data-fade className="label col-span-12 max-w-[34ch] text-muted md:col-span-5">
+            {portfolio.profile.headlineBase}
+          </p>
 
-              <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                <Button as="link" href="/projects">
-                  Ver projetos
-                </Button>
-                <Button as="link" href="/contact" variant="secondary">
-                  Falar comigo
-                </Button>
-              </div>
+          <h1 className="col-span-12 font-display text-[clamp(4.5rem,16vw,18rem)]">
+            <span className="sr-only">{portfolio.profile.name}</span>
+            <span aria-hidden="true" className="line-mask block">
+              <span data-line className="block">{first}</span>
+            </span>
+            <span aria-hidden="true" className="line-mask block">
+              <span data-line className="block">
+                {middle} <span className="font-accent text-[0.62em] text-signal-ink">{last}</span>
+              </span>
+            </span>
+          </h1>
 
-              <p className="mt-6 text-sm text-ink-4 dark:text-paper-1/70">
-                {portfolio.credibilityLine}
-              </p>
+          <p data-fade className="col-span-12 max-w-[30ch] text-[clamp(1.25rem,2vw,1.75rem)] leading-snug md:col-span-6">
+            {portfolio.profile.heroHeadline}
+          </p>
+
+          <div data-fade className="col-span-12 flex flex-col gap-6 md:col-span-4 md:col-start-9 md:self-end">
+            <p className="label leading-relaxed text-muted">{portfolio.profile.heroSubheadline}</p>
+            <div className="flex flex-wrap gap-3">
+              <Button as="link" href="/projects">
+                Ver projetos
+              </Button>
+              <Button as="link" href="/contact" variant="secondary">
+                Falar comigo
+              </Button>
             </div>
-          </Reveal>
-        </Container>
+          </div>
+        </HeroIntro>
       </section>
 
       {/* Featured Projects */}

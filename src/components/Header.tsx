@@ -3,75 +3,104 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { Container } from "@/components/Container";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/cn";
 
 const nav = [
-  { href: "/", label: "Home" },
+  { href: "/", label: "Index" },
   { href: "/projects", label: "Projetos" },
   { href: "/about", label: "Sobre" },
   { href: "/contact", label: "Contato" }
 ];
 
-export function Header() {
+const isActive = (pathname: string, href: string) =>
+  href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+export function Header({ handle }: { handle: string }) {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => setOpen(false), [pathname]);
 
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50",
-        "backdrop-blur supports-[backdrop-filter]:bg-paper-1/65 dark:supports-[backdrop-filter]:bg-ink-1/55",
-        scrolled ? "border-b border-borderSubtle" : "border-b border-transparent"
-      )}
-    >
-      <Container className="flex h-16 items-center justify-between">
-        <Link
-          href="/"
-          className="focus-ring text-sm font-semibold tracking-tight"
-          aria-label="Ir para Home"
-        >
-          Gustavo<span className="text-ink-4 dark:text-paper-1/60">.dev</span>
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/* Véu para o conteúdo que rola por baixo não brigar com a navegação. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-28 bg-gradient-to-b from-bg via-bg/70 to-transparent" />
+      <div className="grid-editorial items-center pt-[calc(var(--hud-inset)+14px)]">
+        <Link href="/" className="label col-span-6 text-fg md:col-span-3" aria-label="Ir para o início">
+          <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-signal" />
+          {handle}
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1" aria-label="Navegação principal">
-          {nav.map((item) => {
-            const active = pathname === item.href;
+        <nav className="col-span-6 hidden justify-center gap-8 md:flex" aria-label="Navegação principal">
+          {nav.map((item, i) => {
+            const active = isActive(pathname, item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "focus-ring rounded-full px-3 py-2 text-sm transition",
-                  active
-                    ? "bg-accent-soft text-ink-1 dark:text-paper-1"
-                    : "text-ink-4 dark:text-paper-1/70 hover:bg-paper-2/70 dark:hover:bg-ink-2/70"
-                )}
+                aria-current={active ? "page" : undefined}
+                className={cn("label group relative py-2 transition-colors", active ? "text-fg" : "text-muted hover:text-fg")}
               >
+                <span className="mr-1.5 text-muted/70">0{i + 1}</span>
                 {item.label}
+                <span
+                  className={cn(
+                    "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-signal transition-transform duration-500 ease-cine",
+                    active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  )}
+                />
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Link
-            className="focus-ring hidden sm:inline-flex rounded-full px-3 py-2 text-sm text-ink-4 dark:text-paper-1/70 hover:bg-paper-2/70 dark:hover:bg-ink-2/70 transition"
-            href="/projects"
-          >
-            Ver trabalhos
-          </Link>
+        <div className="col-span-6 flex items-center justify-end gap-5 md:col-span-3">
           <ThemeToggle />
+          <button
+            type="button"
+            className="label py-2 text-fg md:hidden"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? "Fechar" : "Menu"}
+          </button>
         </div>
-      </Container>
+      </div>
+
+      <div
+        id="mobile-menu"
+        className={cn(
+          "fixed inset-0 -z-10 flex flex-col justify-end bg-bg px-[var(--margin)] pb-16 transition-[clip-path] duration-700 ease-cine md:hidden",
+          open ? "[clip-path:inset(0_0_0_0)]" : "pointer-events-none [clip-path:inset(0_0_100%_0)]"
+        )}
+        aria-hidden={!open}
+      >
+        <nav aria-label="Navegação móvel" className="flex flex-col gap-2">
+          {nav.map((item, i) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              tabIndex={open ? 0 : -1}
+              className={cn(
+                "font-display text-[clamp(3.5rem,17vw,7rem)]",
+                isActive(pathname, item.href) ? "text-signal-ink" : "text-fg"
+              )}
+            >
+              <span className="label mr-3 align-top text-muted">0{i + 1}</span>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
     </header>
   );
 }

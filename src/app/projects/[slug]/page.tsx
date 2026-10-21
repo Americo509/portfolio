@@ -139,17 +139,6 @@ export default async function ProjectCasePage({ params }: Props) {
 
             <Reveal>
               <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
-                <h2 className="text-lg font-semibold tracking-tight">Resultados</h2>
-                <ul className="mt-3 space-y-2 text-sm text-ink-4 dark:text-paper-1/70">
-                  {p.caseStudy.results.map((r) => (
-                    <li key={r}>• {r}</li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-
-            <Reveal>
-              <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-7 shadow-soft">
                 <h2 className="text-lg font-semibold tracking-tight">Galeria</h2>
 
                 <ProjectGallery items={p.caseStudy.gallery} />

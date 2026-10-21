@@ -4,7 +4,7 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { Chip } from "@/components/ui/Chip";
 import type { Project } from "../types/portfolio.types";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 
 export function ProjectCard({
   project,

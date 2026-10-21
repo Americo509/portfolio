@@ -1,37 +1,56 @@
 import type { Config } from "tailwindcss";
 
+const token = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 export default {
   darkMode: ["class"],
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"]
+        sans: ["var(--font-archivo)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-instrument)", "ui-serif", "Georgia", "serif"],
+        mono: ["var(--font-jetbrains)", "ui-monospace", "SFMono-Regular", "monospace"]
       },
       colors: {
+        // Tokens do "Sistema vivo" (docs/art-direction.md). Valores por tema em globals.css.
+        bg: token("bg"),
+        surface: token("surface"),
+        fg: token("fg"),
+        muted: token("muted"),
+        line: "var(--line)",
+        signal: token("signal"),
+        "signal-ink": token("signal-ink"),
+        alert: token("alert"),
+
+        // Legado: usados pelas páginas que ainda serão redesenhadas (Fases 3 e 4).
         ink: {
-          1: "hsl(222 20% 8%)",
-          2: "hsl(222 18% 12%)",
-          3: "hsl(222 14% 18%)",
-          4: "hsl(222 10% 35%)"
+          1: "#07080A",
+          2: "#0E1014",
+          3: "#171A1F",
+          4: "#5A5E66"
         },
         paper: {
-          1: "hsl(0 0% 100%)",
-          2: "hsl(210 20% 98%)",
-          3: "hsl(210 18% 95%)"
+          1: "#ECE9E2",
+          2: "#E2DED5",
+          3: "#D8D3C8"
         },
         accent: {
-          DEFAULT: "hsl(217 90% 55%)",
-          soft: "hsl(217 90% 55% / 0.12)"
+          DEFAULT: "#D4FF3A",
+          soft: "rgb(212 255 58 / 0.14)"
         },
-        borderSubtle: "hsl(220 10% 80% / 0.35)"
+        borderSubtle: "var(--line)"
+      },
+      transitionTimingFunction: {
+        cine: "cubic-bezier(.76,0,.24,1)",
+        snap: "cubic-bezier(.2,.8,.2,1)"
       },
       boxShadow: {
-        soft: "0 1px 0 hsl(0 0% 100% / 0.6) inset, 0 12px 30px hsl(222 25% 7% / 0.08)",
-        lift: "0 1px 0 hsl(0 0% 100% / 0.5) inset, 0 18px 48px hsl(222 25% 7% / 0.12)"
+        soft: "0 1px 0 rgb(255 255 255 / 0.04) inset",
+        lift: "0 1px 0 rgb(255 255 255 / 0.06) inset, 0 18px 48px rgb(0 0 0 / 0.25)"
       },
       borderRadius: {
-        xl2: "1.25rem"
+        xl2: "0.5rem"
       }
     }
   },

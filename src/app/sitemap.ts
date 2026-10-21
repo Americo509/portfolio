@@ -1,15 +1,16 @@
+import type { MetadataRoute } from "next";
 import { getPortfolio } from "@/lib/get-portfolio";
+import { SITE_URL } from "@/lib/site";
 
-export default function sitemap(params?: { locale?: string }) {
-  const portfolio = getPortfolio(params?.locale);
-  const base = "https://example.com";
+export default function sitemap(): MetadataRoute.Sitemap {
+  const portfolio = getPortfolio();
   const staticRoutes = ["", "/projects", "/about", "/contact"].map((p) => ({
-    url: `${base}${p}`,
+    url: `${SITE_URL}${p}`,
     lastModified: new Date()
   }));
 
   const projectRoutes = portfolio.projects.map((p) => ({
-    url: `${base}/projects/${p.slug}`,
+    url: `${SITE_URL}/projects/${p.slug}`,
     lastModified: new Date()
   }));
 

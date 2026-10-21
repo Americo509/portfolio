@@ -41,10 +41,6 @@ export default async function ContactPage({ params }: PageProps) {
                 {portfolio.links.email}
               </a>
             </div>
-
-            <p className="mt-6 text-xs text-ink-4 dark:text-paper-1/60">
-              Observação: este formulário é frontend-only. Para enviar de verdade, conecte um endpoint (ex.: Next Route Handler) ou um serviço de forms.
-            </p>
           </aside>
         </div>
       </Container>

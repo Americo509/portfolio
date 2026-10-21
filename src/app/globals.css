@@ -1,65 +1,216 @@
+@import "lenis/dist/lenis.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ---------- Tokens (docs/art-direction.md §2) ---------- */
 :root {
   color-scheme: light;
+  --c-bg: 236 233 226;
+  --c-surface: 226 222 213;
+  --c-fg: 11 12 14;
+  --c-muted: 90 94 102;
+  --c-signal: 212 255 58;
+  /* Accent quando usado como TEXTO: no tema claro vira oliva escuro (contraste AA). */
+  --c-signal-ink: 79 104 0;
+  --c-alert: 224 64 28;
+  --line: rgb(11 12 14 / 0.12);
+
+  --gutter: clamp(16px, 2vw, 28px);
+  --margin: clamp(16px, 4vw, 56px);
+  --hud-inset: clamp(10px, 1.4vw, 20px);
+
+  /* Velocidade do scroll suavizada em [-1, 1], escrita pelo SmoothScroll. */
+  --scroll-v: 0;
 }
 
 .dark {
   color-scheme: dark;
-}
-
-html, body {
-  height: 100%;
-}
-
-::selection {
-  background: hsl(217 90% 55% / 0.18);
+  --c-bg: 7 8 10;
+  --c-surface: 14 16 20;
+  --c-fg: 237 234 227;
+  --c-muted: 139 144 153;
+  --c-signal-ink: 212 255 58;
+  --c-alert: 255 90 54;
+  --line: rgb(237 234 227 / 0.09);
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    @apply bg-paper-1 text-ink-1 dark:bg-ink-1 dark:text-paper-1 antialiased;
+    @apply bg-bg text-fg antialiased;
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100%;
+    overflow-x: clip;
+  }
+
+  @media (max-width: 640px) {
+    body {
+      font-size: 16px;
+    }
+  }
+
+  ::selection {
+    background: rgb(var(--c-signal));
+    color: #07080a;
   }
 }
 
-/* Subtle background gradient + grain overlay (very light) */
-.bg-shell {
-  position: relative;
-  overflow-x: clip;  
-  overflow-y: visible; 
-}
-.bg-shell::before {
-  content: "";
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(1200px 600px at 15% 10%, hsl(217 90% 55% / 0.10), transparent 60%),
-    radial-gradient(900px 500px at 80% 20%, hsl(280 90% 60% / 0.06), transparent 55%),
-    radial-gradient(900px 500px at 50% 90%, hsl(160 80% 45% / 0.06), transparent 55%);
-  filter: blur(10px);
-  pointer-events: none;
-  opacity: .9;
+/* ---------- Tipografia ---------- */
+@layer components {
+  .font-display {
+    font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    font-variation-settings: "wdth" 62;
+    line-height: 0.82;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .font-accent {
+    font-family: var(--font-instrument), ui-serif, Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-variation-settings: normal;
+  }
+
+  .label {
+    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .text-chapter {
+    font-size: clamp(4rem, 12vw, 14rem);
+  }
+
+  .text-section {
+    font-size: clamp(2.25rem, 5.5vw, 5rem);
+  }
+
+  /* Grid editorial de 12 colunas, de borda a borda. */
+  .grid-editorial {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    padding-inline: var(--margin);
+  }
+
+  /* Máscara para revelar linhas de texto de baixo para cima. */
+  .line-mask {
+    overflow: clip;
+    overflow-clip-margin: 0.08em;
+  }
 }
 
-.bg-shell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
+/* ---------- Grain global ---------- */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
   pointer-events: none;
-  opacity: .07;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
-  mix-blend-mode: soft-light;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
 }
 
-.focus-ring:focus-visible {
-  outline: 2px solid hsl(217 90% 55% / 0.70);
+.dark .grain {
+  opacity: 0.09;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grain {
+    animation: grain-shift 0.8s steps(4) infinite;
+  }
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-1%, -2%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---------- Foco e acessibilidade ---------- */
+.focus-ring:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgb(var(--c-signal));
   outline-offset: 3px;
-  border-radius: 12px;
+  border-radius: 2px;
 }
 
-.prose-senior p { @apply leading-relaxed text-ink-4 dark:text-paper-1/70; }
-.prose-senior h3 { @apply text-lg font-semibold tracking-tight; }
-.prose-senior a { @apply underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80; }
+:root:not(.dark) .focus-ring:focus-visible,
+:root:not(.dark) a:focus-visible,
+:root:not(.dark) button:focus-visible,
+:root:not(.dark) input:focus-visible,
+:root:not(.dark) textarea:focus-visible {
+  outline-color: rgb(var(--c-fg));
+}
 
+.skip-link {
+  position: fixed;
+  left: var(--margin);
+  top: 12px;
+  z-index: 100;
+  transform: translateY(-200%);
+  background: rgb(var(--c-signal));
+  color: #07080a;
+  padding: 10px 14px;
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* ---------- Cursor customizado ---------- */
+html.has-cursor,
+html.has-cursor a,
+html.has-cursor button,
+html.has-cursor [role="button"],
+html.has-cursor label {
+  cursor: none;
+}
+
+html.has-cursor input,
+html.has-cursor textarea {
+  cursor: text;
+}
+
+/* ---------- Preloader ----------
+   Só aparece quando o script inline do <head> marca html[data-boot]
+   (primeira visita da sessão e sem reduced motion). Sem JS, nunca aparece. */
+.boot-screen {
+  display: none;
+}
+
+html[data-boot] .boot-screen {
+  display: block;
+  /* Failsafe: se o JS falhar, o preloader some sozinho. */
+  animation: boot-failsafe 0.01s linear 6s forwards;
+}
+
+@keyframes boot-failsafe {
+  to {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* ---------- Conteúdo legado (até as Fases 3 e 4) ---------- */
+.prose-senior p { @apply leading-relaxed text-muted; }
+.prose-senior h3 { @apply text-lg font-semibold tracking-tight; }
+.prose-senior a { @apply underline decoration-line underline-offset-4 hover:decoration-fg; }

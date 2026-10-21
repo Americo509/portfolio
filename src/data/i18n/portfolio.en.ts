@@ -3,6 +3,7 @@ import type { SkillCategory, Project } from "../../types/portfolio.types";
 export const portfolioEN = {
   profile: {
     name: "Gustavo Américo Rosa",
+    handle: "gustavo.dev",
     headlineBase:
       "Pleno Software Engineer focused on scalable architecture and product-driven development",
 

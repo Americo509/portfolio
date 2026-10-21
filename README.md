@@ -25,3 +25,39 @@ Currently improving my expertise in:
 - Artificial Intelligence integration
 
 📫 Let’s build something scalable.
+
+---
+
+## Sobre este repositório
+
+Portfólio em Next.js 15 (App Router) + React 19 + TypeScript + Tailwind. Direção de arte "Sistema vivo": veja [`docs/art-direction.md`](docs/art-direction.md).
+
+### Rodando localmente
+
+```bash
+pnpm install
+cp .env.example .env.local   # opcional: só é necessário para o envio real do formulário
+pnpm dev
+```
+
+### Testes
+
+```bash
+pnpm build
+pnpm test:e2e   # smoke tests com Playwright (desktop e mobile) contra o build de produção
+```
+
+### Arquitetura de animação
+
+- **Lenis** (`lenis`): uma instância global de smooth scroll, dirigida pelo `gsap.ticker` (`src/components/providers/SmoothScroll.tsx`). Publica a velocidade do scroll em `motionState` e na variável CSS `--scroll-v`.
+- **GSAP** (`gsap`, `@gsap/react`): timelines, `ScrollTrigger`, `SplitText` e as curvas `cine` e `snap` (`src/lib/gsap.ts`).
+- **three + React Three Fiber + drei** (`three`, `@react-three/fiber`, `@react-three/drei`): a rede 3D em `src/components/scene`. O canvas é único, fixo, carregado com `next/dynamic` só depois do preloader e em idle, fora do caminho crítico do LCP.
+- **@react-three/postprocessing / postprocessing**: pós-processamento da cena (bloom, aberração cromática) a partir da Fase 2.
+- **Motion** (`motion`): microinterações de UI em componentes React; substituiu o `framer-motion`.
+- **zustand**: estado discreto compartilhado entre o DOM e a cena (preloader concluído, status da cena).
+
+### Fallbacks
+
+- Sem WebGL, com falha da cena ou antes de ela carregar: rede estática em SVG (`StaticNetwork`).
+- `prefers-reduced-motion`: sem Lenis, sem preloader, sem cursor customizado e sem canvas.
+- Touch: sem cursor customizado e sem botões magnéticos.

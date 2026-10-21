@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    optimizePackageImports: ["framer-motion"]
+    optimizePackageImports: ["motion", "@react-three/drei"]
   }
 };
 

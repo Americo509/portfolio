@@ -1,35 +1,44 @@
 import Link from "next/link";
-import { Container } from "@/components/Container";
 import { getPortfolio } from "@/lib/get-portfolio";
 
 export function Footer({ params }: { params?: { locale?: string } }) {
   const portfolio = getPortfolio(params?.locale);
-  return (
-    <footer className="border-t border-borderSubtle">
-      <Container className="py-10">
-        <div className="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-ink-4 dark:text-paper-1/70">
-              © {new Date().getFullYear()} {portfolio.profile.name}
-            </p>
-            <p className="mt-1 text-xs text-ink-4/80 dark:text-paper-1/50">
-              {portfolio.education.title}
-            </p>
-          </div>
+  const links = [
+    { href: portfolio.links.github, label: "GitHub", external: true },
+    { href: portfolio.links.linkedin, label: "LinkedIn", external: true },
+    { href: `mailto:${portfolio.links.email}`, label: "Email", external: true },
+    { href: "/contact", label: "Contato", external: false }
+  ];
 
-          <div className="flex items-center gap-4 text-sm">
-            <Link className="focus-ring underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href={portfolio.links.github}>
-              GitHub
-            </Link>
-            <Link className="focus-ring underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href={portfolio.links.linkedin}>
-              LinkedIn
-            </Link>
-            <Link className="focus-ring underline decoration-borderSubtle underline-offset-4 hover:decoration-ink-4 dark:hover:decoration-paper-1/80" href="/contact">
-              Contato
-            </Link>
-          </div>
+  return (
+    <footer className="relative z-10 border-t border-line pb-[calc(var(--hud-inset)+40px)] pt-16">
+      <div className="grid-editorial gap-y-10">
+        <p className="col-span-12 font-display text-[clamp(3rem,9vw,9rem)] md:col-span-8">
+          Vamos construir <span className="font-accent text-signal-ink">algo</span> que escala.
+        </p>
+
+        <ul className="col-span-12 flex flex-col gap-3 self-end md:col-span-3 md:col-start-10">
+          {links.map((l) => (
+            <li key={l.label}>
+              <Link
+                href={l.href}
+                {...(l.external && !l.href.startsWith("mailto:") ? { target: "_blank", rel: "noreferrer" } : {})}
+                className="label flex items-center justify-between border-b border-line py-2 text-fg transition-colors hover:text-signal-ink"
+              >
+                {l.label}
+                <span aria-hidden="true">↗</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="label col-span-12 flex flex-col justify-between gap-2 text-muted sm:flex-row">
+          <span>
+            © {new Date().getFullYear()} {portfolio.profile.name}
+          </span>
+          <span>{portfolio.education.title}</span>
         </div>
-      </Container>
+      </div>
     </footer>
   );
 }
