@@ -87,7 +87,7 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
 - **PT/EN:** dois layouts raiz (`src/app/(pt)` e `src/app/(en)/en`) sobre as mesmas views (`src/views`). O português fica na raiz e o inglês em `/en`, com `lang`, `hreflang` e sitemap por idioma. O seletor no header leva à mesma página no outro idioma.
 - **Páginas:** Campanha (`/projects`, tabela com busca e filtros), Súmula completa (`/projects/[slug]`, com "próxima partida"), Ficha do jogador (`/about`, histórico de clubes pinado na horizontal) e Pós-jogo (`/contact`, formulário com estados de envio e erro; a API não mudou). O 404 é "Impedimento." / "Offside.".
 - **Modo Resenha:** chave manual no header, salva no navegador. Força a noite e troca o vermelho pelo âmbar (DOM e estádio). O pós-jogo da home abre o "Fora do terminal": contagem para a próxima pelada (fuso de São Paulo), Radar 2027, cromos e uma jukebox de samba-rock gerada com Web Audio.
-- **Fotos da resenha:** coloque `cromo-08.jpg`, `cromo-19.jpg`, `cromo-10.jpg` e `cromo-77.jpg` em `public/images/resenha/` (retrato 3:4). Elas substituem os placeholders sozinhas.
+- **Fotos da resenha:** `public/images/resenha/cromo-08|19|10|77.jpg` (retrato 3:4, 900 × 1200). As fotos originais ficam em `design/resenha/`; sem o arquivo, o cromo mostra o número como placeholder.
 
 ### Terminal, transições e acabamento (Fase 6)
 

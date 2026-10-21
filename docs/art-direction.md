@@ -245,7 +245,7 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 - [x] **Key arts:** geradas e aplicadas (`public/images/<slug>/cover.jpg`, e `cover-clinico.jpg` para a Sol Poretti). Os originais e as variações ficam em `design/key-art/` (fora do `public/`, então não são publicados). A OG image é `src/app/opengraph-image.jpg`.
 - [x] **Key art do YourBest:** aplicada (`public/images/yourbest/cover.jpg`). a capa atual é o logo em fundo branco e destoa do site. Gerar `public/images/yourbest/cover.jpg` (prompt no apêndice, item 6). Até lá, a súmula usa a capa de prancheta.
 - [ ] **Mapas de profundidade (opcional):** `cover-depth.png` para o parallax 2.5D (veja o pedido de mapa de profundidade no apêndice).
-- [ ] **Cromos da resenha:** `cromo-10.jpg` (Resenha, chope no balcão) e `cromo-77.jpg` (Radar 2027) são ilustrações procedurais geradas para o site. Faltam as duas fotos reais: `cromo-08.jpg` (pelada, camisa 8) e `cromo-19.jpg` (arquibancada). Ao subir, recortar em retrato 3:4 centrado no Gustavo; na foto do estádio, o escudo da camisa e as placas de patrocínio ficam fora do quadro ou pequenos (regra "alma, sem marca").
+- [x] **Cromos da resenha:** `cromo-08.jpg` (pelada, camisa 8) e `cromo-19.jpg` (arquibancada) são as fotos do Gustavo, recortadas em 3:4. Na da arquibancada, o telão saiu do quadro, o escudo e o logo do fornecedor da camisa foram cobertos com o próprio tecido e o rosto do torcedor ao lado foi desfocado. Os originais ficam em `design/resenha/` (não publicados). `cromo-10.jpg` (Resenha) e `cromo-77.jpg` (Radar 2027) são ilustrações procedurais.
 - [ ] **Estádio:** variação das key arts inspirada na arquitetura da arena do Corinthians, sem marca e sem nome de patrocinador.
 
 ## Apêndice — prompts para o Nano Banana
