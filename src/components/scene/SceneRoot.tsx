@@ -3,12 +3,13 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { motionState, useApp } from "@/lib/store";
 import { useReducedMotion } from "@/lib/use-media";
 import { guessTier, hasWebGL, type GpuTier } from "@/lib/webgl";
 import { loadScene } from "./load";
-import { StaticNetwork } from "./StaticNetwork";
+import { StaticStadium } from "./StaticStadium";
 
 const Scene = dynamic(loadScene, { ssr: false });
 
@@ -44,10 +45,11 @@ function idle(cb: () => void): () => void {
  */
 export function SceneRoot() {
   const reduce = useReducedMotion();
-  const booted = useApp((s) => s.booted);
+  const booted = useApp((s) => s.bootDone);
   const status = useApp((s) => s.sceneStatus);
   const setStatus = useApp((s) => s.setSceneStatus);
   const { resolvedTheme } = useTheme();
+  const pathname = usePathname();
   const [tier, setTier] = React.useState<GpuTier | null>(null);
 
   React.useEffect(() => {
@@ -75,16 +77,13 @@ export function SceneRoot() {
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-      <StaticNetwork
-        className={cn(
-          "absolute inset-0 h-full w-full transition-opacity duration-1000",
-          status === "ready" ? "opacity-0" : "opacity-100"
-        )}
+      <StaticStadium
+        className={cn("transition-opacity duration-1000", status === "ready" ? "opacity-0" : "opacity-100")}
       />
       {showCanvas ? (
         <div
           className={cn(
-            "absolute inset-0 transition-opacity duration-1000",
+            "absolute inset-0 transition-opacity duration-[1600ms]",
             status === "ready" ? "opacity-100" : "opacity-0"
           )}
         >
@@ -92,6 +91,7 @@ export function SceneRoot() {
             <Scene
               tier={tier}
               theme={resolvedTheme === "light" ? "light" : "dark"}
+              mode={pathname === "/" ? "hero" : "ambient"}
               onReady={() => setStatus("ready")}
             />
           </SceneBoundary>

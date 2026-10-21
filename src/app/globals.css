@@ -220,3 +220,73 @@ html[data-boot] .boot-screen {
 .prose-senior p { @apply leading-relaxed text-muted; }
 .prose-senior h3 { @apply text-lg font-semibold tracking-tight; }
 .prose-senior a { @apply underline decoration-line underline-offset-4 hover:decoration-fg; }
+
+/* ---------- Estádio estático (fallback da cena 3D) ---------- */
+.static-stadium {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 50% 100%, rgb(var(--c-fg) / 0.06), transparent 60%),
+    rgb(var(--c-bg));
+}
+
+.static-stadium__beam {
+  position: absolute;
+  top: -10%;
+  width: 70%;
+  height: 120%;
+  opacity: 0.55;
+  filter: blur(18px);
+}
+
+.static-stadium__beam--l {
+  left: -8%;
+  background: conic-gradient(from 148deg at 18% 0%, transparent 0deg, rgb(var(--c-fg) / 0.16) 10deg, rgb(var(--c-fg) / 0.05) 24deg, transparent 34deg);
+}
+
+.static-stadium__beam--r {
+  right: -8%;
+  background: conic-gradient(from 178deg at 82% 0%, transparent 0deg, rgb(var(--c-fg) / 0.05) 10deg, rgb(var(--c-fg) / 0.16) 24deg, transparent 34deg);
+}
+
+.static-stadium__flare {
+  position: absolute;
+  left: 36%;
+  top: 42%;
+  width: 18vmax;
+  height: 18vmax;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(var(--c-signal) / 0.45), rgb(var(--c-signal) / 0.08) 40%, transparent 70%);
+  filter: blur(8px);
+}
+
+.static-stadium__pitch {
+  position: absolute;
+  inset: 62% -20% -10%;
+  transform: perspective(600px) rotateX(62deg);
+  background-image:
+    linear-gradient(rgb(var(--c-fg) / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--c-fg) / 0.1) 1px, transparent 1px);
+  background-size: 100% 25%, 12.5% 100%;
+  mask-image: linear-gradient(to top, black, transparent 85%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .static-stadium__flare {
+    animation: flare-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes flare-pulse {
+  50% { opacity: 0.7; transform: scale(0.94); }
+}
+
+/* ---------- Física do scroll no DOM ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .skew-on-scroll {
+    transform: skewY(calc(var(--scroll-v) * -4deg));
+    transform-origin: left center;
+    will-change: transform;
+  }
+}

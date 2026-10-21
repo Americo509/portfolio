@@ -21,6 +21,7 @@ export function HeroIntro({ children, className }: { children: React.ReactNode; 
         if (covered.current) {
           gsap.set("[data-line]", { yPercent: 110 });
           gsap.set("[data-fade]", { autoAlpha: 0, y: 16 });
+          gsap.set("[data-band]", { scaleX: 0 });
         }
       }
       if (!booted || !covered.current) return;
@@ -28,7 +29,8 @@ export function HeroIntro({ children, className }: { children: React.ReactNode; 
       gsap
         .timeline({ delay: 0.25 })
         .to("[data-line]", { yPercent: 0, duration: 1.3, ease: "expo.out", stagger: 0.09 })
-        .to("[data-fade]", { autoAlpha: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.06 }, "<0.35");
+        .to("[data-fade]", { autoAlpha: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.06 }, "<0.35")
+        .to("[data-band]", { scaleX: 1, duration: 1.4, ease: "cine", stagger: 0.12 }, "<0.1");
     },
     { scope, dependencies: [booted] }
   );

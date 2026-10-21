@@ -18,16 +18,21 @@ export const motionState = {
 export type SceneStatus = "idle" | "loading" | "ready" | "fallback";
 
 type AppState = {
-  /** O preloader terminou (ou não foi exibido). */
+  /** O obturador do preloader começou a abrir (ou não houve preloader): o hero entra. */
   booted: boolean;
+  /** O preloader saiu de cena por completo: só então a cena 3D compila (evita travar a abertura). */
+  bootDone: boolean;
   sceneStatus: SceneStatus;
   setBooted: (v: boolean) => void;
+  setBootDone: (v: boolean) => void;
   setSceneStatus: (s: SceneStatus) => void;
 };
 
 export const useApp = create<AppState>((set) => ({
   booted: false,
+  bootDone: false,
   sceneStatus: "idle",
   setBooted: (booted) => set({ booted }),
+  setBootDone: (bootDone) => set({ bootDone }),
   setSceneStatus: (sceneStatus) => set({ sceneStatus })
 }));

@@ -121,7 +121,7 @@ test.describe("preloader e fallbacks", () => {
     const page = await ctx.newPage();
     await page.goto("/");
     await expect(page.locator(".boot-screen")).toBeHidden();
-    await expect(page.locator("svg[aria-hidden='true'] radialGradient#sn-glow")).toHaveCount(1);
+    await expect(page.locator(".static-stadium")).toHaveCount(1);
     await expect(page.locator("canvas")).toHaveCount(0);
     await ctx.close();
   });
@@ -152,5 +152,15 @@ test.describe("súmulas", () => {
   test("Sol Poretti aponta para o site público", async ({ page }) => {
     await page.goto("/projects/sol-poretti");
     await expect(page.getByRole("link", { name: "Ver ao vivo →" })).toHaveAttribute("href", "https://solporettinutri.com.br");
+  });
+});
+
+test.describe("sem WebGL", () => {
+  test("usa o estádio estático e não monta canvas", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/");
+    await expect(page.locator(".static-stadium")).toHaveCount(1);
+    await page.waitForTimeout(1500);
+    await expect(page.locator("canvas")).toHaveCount(0);
   });
 });

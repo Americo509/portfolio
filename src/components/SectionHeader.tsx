@@ -18,7 +18,7 @@ export function SectionHeader({
           {eyebrow}
         </p>
       ) : null}
-      <h2 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight">
+      <h2 className="skew-on-scroll mt-3 text-2xl sm:text-3xl font-semibold tracking-tight">
         {title}
       </h2>
       {description ? (

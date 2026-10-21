@@ -56,8 +56,15 @@ pnpm test:e2e   # smoke tests com Playwright (desktop e mobile) contra o build d
 - **Motion** (`motion`): microinterações de UI em componentes React; substituiu o `framer-motion`.
 - **zustand**: estado discreto compartilhado entre o DOM e a cena (preloader concluído, status da cena).
 
+### Cena do estádio (Fase 2B)
+
+- `src/components/scene/stadium/`: neblina em camadas (fBm), cones de luz dos 4 refletores, gramado com as linhas do campo em shader, arquibancadas em silhueta, sinalizador com fumaça, e a câmera que desce do refletor e depois é dirigida pelo scroll e pelo mouse.
+- Tiers de GPU (`low`, `mid`, `high`) controlam as camadas de neblina, as partículas, o DPR e o pós-processamento. Para forçar um tier em QA: `?tier=low|mid|high`. `?debug` expõe `__scene`/`__gl` no `window`.
+- A cena só compila depois que o preloader sai de cena (`bootDone`), para não travar a abertura.
+- Os testes funcionais rodam com `--disable-webgl` (fallback); o projeto `webgl` do Playwright testa a cena.
+
 ### Fallbacks
 
-- Sem WebGL, com falha da cena ou antes de ela carregar: rede estática em SVG (`StaticNetwork`).
+- Sem WebGL, com falha da cena ou antes de ela carregar: estádio estático em CSS (`StaticStadium`).
 - `prefers-reduced-motion`: sem Lenis, sem preloader, sem cursor customizado e sem canvas.
 - Touch: sem cursor customizado e sem botões magnéticos.

@@ -24,6 +24,7 @@ export function Preloader({ handle, copy }: { handle: string; copy: BootCopy }) 
   const root = React.useRef<HTMLDivElement>(null);
   const counter = React.useRef<HTMLSpanElement>(null);
   const setBooted = useApp((s) => s.setBooted);
+  const setBootDone = useApp((s) => s.setBootDone);
   const [visibleLines, setVisibleLines] = React.useState(0);
   const [done, setDone] = React.useState(false);
   const finishRef = React.useRef<(fast?: boolean) => void>(undefined);
@@ -36,6 +37,7 @@ export function Preloader({ handle, copy }: { handle: string; copy: BootCopy }) 
     const html = document.documentElement;
     if (html.dataset.boot !== "1") {
       setBooted(true);
+      setBootDone(true);
       setDone(true);
       return;
     }
@@ -73,6 +75,7 @@ export function Preloader({ handle, copy }: { handle: string; copy: BootCopy }) 
         onComplete: () => {
           delete html.dataset.boot;
           setDone(true);
+          setBootDone(true);
         }
       });
       tl.to(state, { value: 100, duration: fast ? 0.15 : 0.35, ease: "power2.out", onUpdate: render })
@@ -116,7 +119,7 @@ export function Preloader({ handle, copy }: { handle: string; copy: BootCopy }) 
       window.clearTimeout(failsafe);
       window.removeEventListener("keydown", onKey);
     };
-  }, [lines, setBooted]);
+  }, [lines, setBooted, setBootDone]);
 
   if (done) return null;
 

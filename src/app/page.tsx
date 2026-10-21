@@ -27,13 +27,29 @@ export default async function HomePage({ params }: PageProps) {
   return (
     <div>
       {/* Hero */}
-      <section className="relative flex min-h-[100svh] flex-col justify-end pb-[calc(var(--hud-inset)+64px)] pt-32">
+      <section className="relative flex min-h-[100svh] flex-col justify-end overflow-x-clip pb-[calc(var(--hud-inset)+64px)] pt-32">
+        {/* Véu de legibilidade: os textos pequenos do hero nunca brigam com os refletores. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-bg/75 via-bg/25 to-transparent md:from-bg/60 md:via-transparent"
+        />
         <HeroIntro className="grid-editorial gap-y-10">
+          {/* Faixa diagonal alvinegra: no escuro, inverte o nome por onde passa. */}
+          <span
+            aria-hidden="true"
+            data-band
+            className="pointer-events-none absolute left-[-15%] top-[46%] z-20 h-[2px] w-[135%] origin-left -rotate-[11deg] bg-fg dark:h-[clamp(26px,4.6vw,78px)] dark:bg-[#F5F5F0] dark:mix-blend-difference"
+          />
+          <span
+            aria-hidden="true"
+            data-band
+            className="pointer-events-none absolute left-[-15%] top-[calc(46%+clamp(40px,6.4vw,104px))] z-20 h-px w-[135%] origin-left -rotate-[11deg] bg-fg/60"
+          />
           <p data-fade className="label col-span-12 max-w-[34ch] text-muted md:col-span-5">
             {portfolio.profile.headlineBase}
           </p>
 
-          <h1 className="col-span-12 font-display text-[clamp(4.5rem,16vw,18rem)]">
+          <h1 className="skew-on-scroll col-span-12 font-display text-[clamp(4.5rem,16vw,18rem)]">
             <span className="sr-only">{portfolio.profile.name}</span>
             <span aria-hidden="true" className="line-mask block">
               <span data-line className="block">{first}</span>
