@@ -4,7 +4,13 @@ import { z } from "zod";
 
 export const runtime = "nodejs";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Instanciado sob demanda: no build não existe RESEND_API_KEY.
+let resend: Resend | null = null;
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  resend ??= new Resend(process.env.RESEND_API_KEY);
+  return resend;
+}
 
 // --------- validação ---------
 const schema = z.object({
@@ -118,7 +124,15 @@ export async function POST(req: Request) {
     const to = process.env.CONTACT_TO ?? "americorosagustavo@gmail.com";
     const from = process.env.CONTACT_FROM ?? "Portfolio <onboarding@resend.dev>";
 
-    await resend.emails.send({
+    const client = getResend();
+    if (!client) {
+      return NextResponse.json(
+        { ok: false, error: "Envio indisponível no momento. Use o email direto." },
+        { status: 503 }
+      );
+    }
+
+    await client.emails.send({
       from,
       to,
       replyTo: data.email,
