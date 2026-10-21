@@ -61,7 +61,7 @@ export default function Scene({
   onReady
 }: {
   tier: GpuTier;
-  theme: "dark" | "light";
+  theme: "dark" | "light" | "resenha";
   mode: SceneMode;
   onReady: () => void;
 }) {
@@ -77,13 +77,14 @@ export default function Scene({
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
-  const palette = React.useMemo<StadiumPalette>(
-    () =>
-      theme === "dark"
-        ? { fg: new THREE.Color("#F5F5F0"), bg: new THREE.Color("#080808"), signal: new THREE.Color("#E61919"), additive: true }
-        : { fg: new THREE.Color("#080808"), bg: new THREE.Color("#F5F5F0"), signal: new THREE.Color("#C21414"), additive: false },
-    [theme]
-  );
+  const palette = React.useMemo<StadiumPalette>(() => {
+    if (theme === "resenha")
+      // Pós-jogo: refletores esquentam (âmbar de balcão de bar) e a neblina fica dourada.
+      return { fg: new THREE.Color("#F7D9A8"), bg: new THREE.Color("#0A0806"), signal: new THREE.Color("#F59E0B"), additive: true };
+    return theme === "dark"
+      ? { fg: new THREE.Color("#F5F5F0"), bg: new THREE.Color("#080808"), signal: new THREE.Color("#E61919"), additive: true }
+      : { fg: new THREE.Color("#080808"), bg: new THREE.Color("#F5F5F0"), signal: new THREE.Color("#C21414"), additive: false };
+  }, [theme]);
 
   return (
     <Canvas
@@ -105,7 +106,7 @@ export default function Scene({
         }}
       />
       <Stadium tier={tier} palette={palette} mode={mode} />
-      {post !== "none" && theme === "dark" ? <Effects level={post} /> : null}
+      {post !== "none" && theme !== "light" ? <Effects level={post} /> : null}
       <ReadySignal onReady={onReady} />
     </Canvas>
   );

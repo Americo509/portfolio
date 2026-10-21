@@ -6,19 +6,29 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/cn";
+import type { Portfolio } from "@/types/portfolio.types";
 
-const schema = z.object({
-  name: z.string().min(2, "Informe seu nome."),
-  email: z.string().email("Email inválido."),
-  message: z.string().min(10, "Escreva uma mensagem com pelo menos 10 caracteres.")
-});
+type Copy = Portfolio["copy"]["contactForm"];
 
-type FormValues = z.infer<typeof schema>;
+const fieldClass =
+  "mt-2 w-full border-b border-fg/30 bg-transparent py-3 text-[17px] placeholder:text-muted/60 transition-colors focus:border-signal focus:outline-none aria-[invalid=true]:border-alert";
 
-export function ContactForm() {
+export function ContactForm({ copy }: { copy: Copy }) {
   const reduce = useReducedMotion();
-  const [sent, setSent] = React.useState(false);
+  const [status, setStatus] = React.useState<"idle" | "sent" | "error">("idle");
   const startedAtRef = React.useRef<number>(Date.now());
+
+  const schema = React.useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, copy.errors.name),
+        email: z.string().email(copy.errors.email),
+        message: z.string().min(10, copy.errors.message)
+      }),
+    [copy]
+  );
+  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
@@ -31,111 +41,102 @@ export function ContactForm() {
   });
 
   async function onSubmit(values: FormValues) {
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...values,
-        company: "",
-        startedAt: startedAtRef.current
-      }),
-    });
-
-    const json = await res.json().catch(() => ({}));
-
-    if (!res.ok || json?.ok === false) {
-      throw new Error(json?.error ?? "Falha ao enviar. Tente novamente em instantes.");
+    setStatus("idle");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, company: "", startedAt: startedAtRef.current })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json?.ok === false) throw new Error(json?.error);
+      setStatus("sent");
+      reset();
+      startedAtRef.current = Date.now();
+    } catch {
+      setStatus("error");
     }
-
-    setSent(true);
-    reset();
-    startedAtRef.current = Date.now();
-    setTimeout(() => setSent(false), 3500);
   }
 
+  const fieldError = (id: string, message?: string) =>
+    message ? (
+      <p id={id} className="label mt-2 text-alert">
+        {message}
+      </p>
+    ) : null;
+
   return (
-    <div className="rounded-xl2 border border-borderSubtle bg-paper-2/50 dark:bg-ink-2/40 p-6 sm:p-7 shadow-soft">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label="Formulário de contato">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label className="block">
-            <span className="text-xs text-ink-4 dark:text-paper-1/70">Nome</span>
-            <input
-              {...register("name")}
-              className="focus-ring mt-2 w-full rounded-xl2 border border-borderSubtle bg-paper-1/70 dark:bg-ink-1/40 px-4 py-3 text-sm"
-              placeholder="Seu nome"
-              aria-invalid={!!errors.name}
-              aria-describedby={errors.name ? "name-error" : undefined}
-            />
-            {errors.name ? (
-              <p id="name-error" className="mt-1 text-xs text-ink-4 dark:text-paper-1/70">
-                {errors.name.message}
-              </p>
-            ) : null}
-          </label>
-
-          <label className="block">
-            <span className="text-xs text-ink-4 dark:text-paper-1/70">Email</span>
-            <input
-              {...register("email")}
-              className="focus-ring mt-2 w-full rounded-xl2 border border-borderSubtle bg-paper-1/70 dark:bg-ink-1/40 px-4 py-3 text-sm"
-              placeholder="voce@exemplo.com"
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? "email-error" : undefined}
-            />
-            {errors.email ? (
-              <p id="email-error" className="mt-1 text-xs text-ink-4 dark:text-paper-1/70">
-                {errors.email.message}
-              </p>
-            ) : null}
-          </label>
-        </div>
-
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8" aria-label={copy.submit} noValidate>
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         <label className="block">
-          <span className="text-xs text-ink-4 dark:text-paper-1/70">Mensagem</span>
-          <textarea
-            {...register("message")}
-            rows={6}
-            className="focus-ring mt-2 w-full rounded-xl2 border border-borderSubtle bg-paper-1/70 dark:bg-ink-1/40 px-4 py-3 text-sm"
-            placeholder="Me conte sobre o projeto e o que você precisa."
-            aria-invalid={!!errors.message}
-            aria-describedby={errors.message ? "message-error" : undefined}
+          <span className="label text-muted">{copy.name}</span>
+          <input
+            {...register("name")}
+            className={fieldClass}
+            placeholder={copy.namePlaceholder}
+            autoComplete="name"
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? "name-error" : undefined}
           />
-          {errors.message ? (
-            <p id="message-error" className="mt-1 text-xs text-ink-4 dark:text-paper-1/70">
-              {errors.message.message}
-            </p>
-          ) : null}
+          {fieldError("name-error", errors.name?.message)}
         </label>
+        <label className="block">
+          <span className="label text-muted">{copy.email}</span>
+          <input
+            {...register("email")}
+            type="email"
+            className={fieldClass}
+            placeholder={copy.emailPlaceholder}
+            autoComplete="email"
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
+          />
+          {fieldError("email-error", errors.email?.message)}
+        </label>
+      </div>
 
-        <div className="hidden" aria-hidden="true">
-          <label>
-            Company
-            <input tabIndex={-1} autoComplete="off" {...register("company" as any)} />
-          </label>
-        </div>
+      <label className="block">
+        <span className="label text-muted">{copy.message}</span>
+        <textarea
+          {...register("message")}
+          rows={6}
+          className={cn(fieldClass, "resize-y")}
+          placeholder={copy.messagePlaceholder}
+          aria-invalid={!!errors.message}
+          aria-describedby={errors.message ? "message-error" : undefined}
+        />
+        {fieldError("message-error", errors.message?.message)}
+      </label>
 
-        <div className="flex items-center gap-3">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Enviando…" : "Enviar mensagem"}
-          </Button>
+      {/* Honeypot: invisível para pessoas, preenchido por bots. */}
+      <div className="hidden" aria-hidden="true">
+        <label>
+          Company
+          <input tabIndex={-1} autoComplete="off" name="company" />
+        </label>
+      </div>
 
-          <AnimatePresence>
-            {sent ? (
-              <motion.p
-                initial={reduce ? false : { opacity: 0, y: 6 }}
-                animate={reduce ? {} : { opacity: 1, y: 0 }}
-                exit={reduce ? {} : { opacity: 0, y: -6 }}
-                transition={{ duration: 0.28 }}
-                className="text-sm text-ink-4 dark:text-paper-1/70"
-                role="status"
-                aria-live="polite"
-              >
-                Mensagem enviada ✓
-              </motion.p>
-            ) : null}
-          </AnimatePresence>
-        </div>
-      </form>
-    </div>
+      <div className="flex flex-wrap items-center gap-6">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? copy.sending : copy.submit}
+        </Button>
+        <AnimatePresence mode="wait">
+          {status !== "idle" ? (
+            <motion.p
+              key={status}
+              initial={reduce ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduce ? undefined : { opacity: 0, y: -6 }}
+              transition={{ duration: 0.28 }}
+              className={cn("label", status === "sent" ? "text-signal-ink" : "text-alert")}
+              role="status"
+              aria-live="polite"
+            >
+              {status === "sent" ? copy.sent : copy.error}
+            </motion.p>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    </form>
   );
 }

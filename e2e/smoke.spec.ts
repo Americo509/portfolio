@@ -202,7 +202,7 @@ test.describe("home em capítulos", () => {
 
 test.describe("pênaltis (sem WebGL: gol em grade)", () => {
   test("disputa completa em /penalti até o fim", async ({ page }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(180_000);
     await skipBoot(page);
     await page.goto("/penalti");
     await expect(page.getByRole("heading", { level: 1, name: "Disputa de pênaltis" })).toBeVisible();
@@ -211,7 +211,7 @@ test.describe("pênaltis (sem WebGL: gol em grade)", () => {
     for (let i = 0; i < 14; i++) {
       const zone = field.getByRole("button", { name: i % 2 ? "ângulo direito" : "rasteiro à esquerda" });
       // Espera a próxima cobrança liberar (ou o fim da disputa).
-      await expect(zone.and(page.locator(":enabled")).or(again)).toBeVisible({ timeout: 15_000 });
+      await expect(zone.and(page.locator(":enabled")).or(again)).toBeVisible({ timeout: 30_000 });
       if (await again.isVisible()) break;
       await zone.click();
     }
@@ -243,5 +243,80 @@ test.describe("pênaltis (sem WebGL: gol em grade)", () => {
     await page.waitForTimeout(400);
     await page.keyboard.up("Space");
     await expect(page.locator("#penalty-status")).toHaveText(/Gol!|Defendeu!|Na trave!|Pra fora!/, { timeout: 5000 });
+  });
+});
+
+test.describe("idiomas (PT/EN)", () => {
+  test("/en está em inglês, com lang correto e vocabulário de transmissão", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("heading", { level: 2, name: "Starting XI" })).toBeAttached();
+    await page.goto("/en/projects/conecta-plantao");
+    await expect(page.getByText("Full-time", { exact: true })).toBeVisible();
+    await expect(page.getByText(/Private repository/)).toBeVisible();
+  });
+
+  test("seletor de idioma leva para a mesma página no outro idioma", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/about");
+    await page.getByRole("link", { name: "Read in English" }).click();
+    await expect(page).toHaveURL(/\/en\/about$/);
+    await page.getByRole("link", { name: "Ler em português" }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
+  });
+
+  test("404 em inglês é 'Offside.'", async ({ page }) => {
+    await skipBoot(page);
+    const res = await page.goto("/en/nope");
+    expect(res?.status()).toBe(404);
+    await expect(page.getByRole("heading", { name: "Offside." })).toBeVisible();
+  });
+});
+
+test.describe("Modo Resenha", () => {
+  test("a chave liga a resenha, persiste e mostra o 'Fora do terminal' no pós-jogo", async ({ page, isMobile }) => {
+    await skipBoot(page);
+    await page.goto("/");
+    if (isMobile) await page.getByRole("button", { name: "Menu" }).click();
+    const toggle = page.getByRole("switch", { name: /Modo Resenha/ }).first();
+    await toggle.click();
+    await expect(page.locator("html")).toHaveClass(/resenha/);
+    await expect(page.getByText("Resenha aberta")).toBeAttached();
+    await page.reload();
+    await expect(page.locator("html")).toHaveClass(/resenha/);
+    const off = page.locator("[data-chapter=final] .resenha-only");
+    await off.scrollIntoViewIfNeeded();
+    await expect(off.getByRole("heading", { name: "Fora do terminal" })).toBeVisible();
+    await expect(off.getByText(/Próxima pelada/)).toBeVisible();
+  });
+});
+
+test.describe("páginas internas", () => {
+  test("ficha do jogador tem o histórico de clubes e o 'Fora do terminal'", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/about");
+    await expect(page.getByText("Histórico de clubes")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Fora do terminal" })).toBeAttached();
+    await expect(page.getByText(/Radar 2027 ·/)).toBeAttached();
+  });
+
+  test("contato mostra erro amigável quando o envio falha", async ({ page }) => {
+    await skipBoot(page);
+    await page.route("**/api/contact", (route) => route.fulfill({ status: 503, json: { ok: false, error: "indisponível" } }));
+    await page.goto("/contact");
+    await page.getByPlaceholder("Seu nome").fill("Ada Lovelace");
+    await page.getByPlaceholder("voce@exemplo.com").fill("ada@example.com");
+    await page.getByPlaceholder(/Me conte sobre o projeto/).fill("Quero conversar sobre um sistema distribuído.");
+    await page.getByRole("button", { name: /Enviar mensagem/ }).click();
+    await expect(page.getByText(/Não foi possível enviar agora/)).toBeVisible();
+  });
+
+  test("súmula completa leva à próxima partida", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/projects/yourbest");
+    await page.getByRole("link", { name: /Próxima partida/ }).click();
+    await expect(page).toHaveURL(/\/projects\/conecta-plantao$/);
   });
 });

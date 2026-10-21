@@ -42,6 +42,25 @@
   --line: rgb(245 245 240 / 0.09);
 }
 
+/* Modo Resenha: sempre noite, luz âmbar de balcão de bar no lugar do sinalizador. */
+html.resenha {
+  color-scheme: dark;
+  --c-bg: 10 8 6;
+  --c-surface: 20 16 12;
+  --c-fg: 245 236 220;
+  --c-muted: 150 138 120;
+  --c-signal: 245 158 11;
+  --c-signal-ink: 251 176 59;
+  --c-alert: 255 46 46;
+  --line: rgb(245 236 220 / 0.1);
+}
+
+/* Conteúdo que só existe num dos modos (renderizado no servidor, alternado por CSS). */
+html:not(.resenha) .resenha-only,
+html.resenha .expediente-only {
+  display: none !important;
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;

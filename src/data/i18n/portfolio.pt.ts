@@ -676,6 +676,7 @@ export const portfolioPT: Portfolio = {
       var: "VAR",
       fullTime: "Placar final",
       coverage: "Cobertura fotográfica",
+      next: "Próxima partida →",
       back: "← Voltar para a campanha",
       talk: "Vamos conversar",
       code: "Código →",
@@ -715,6 +716,68 @@ export const portfolioPT: Portfolio = {
       academy: { number: "05", title: "Categorias de base", kicker: "Onde tudo começou" },
       penalties: { number: "06", title: "Disputa de pênaltis", kicker: "Você contra a minha defesa" },
       final: { number: "07", title: "Apito final", kicker: "Fim de jogo" }
+    },
+    lang: { label: "Idioma", switchTo: "EN", switchToLabel: "Read in English" },
+    resenha: {
+      work: "Expediente",
+      pub: "Resenha",
+      toggleLabel: "Alternar entre Modo Expediente e Modo Resenha",
+      live: "Resenha aberta",
+      invite: "Abrir a resenha",
+      nextMatch: "Próxima pelada",
+      left: "faltam",
+      now: "Bola rolando agora",
+      weekdays: ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"],
+      jukebox: "Jukebox",
+      play: "Tocar samba-rock",
+      stop: "Parar",
+      photoSoon: "Foto em breve",
+      versus: "ou"
+    },
+    projectsPage: {
+      title: "Campanha",
+      kicker: "Todas as partidas",
+      description: "Súmulas e categorias de base. Busque por título, stack ou tag, ou filtre por setor.",
+      search: "Buscar por título, stack ou tag…",
+      searchLabel: "Buscar projetos",
+      all: "Todos",
+      empty: "Nenhum projeto encontrado. Tente remover filtros ou ajustar a busca.",
+      columns: { match: "Partida", competition: "Competição", status: "Status", lineup: "Escalação" },
+      tiers: { sumula: "Súmula", base: "Base" }
+    },
+    aboutPage: {
+      title: "Ficha do jogador",
+      kicker: "Quem entra em campo",
+      who: "Quem eu sou",
+      values: "O que eu valorizo",
+      career: "Histórico de clubes",
+      education: "Formação",
+      ctaContact: "Falar comigo",
+      ctaProjects: "Ver a campanha"
+    },
+    contactPage: {
+      title: "Pós-jogo",
+      kicker: "Contato",
+      heading: "Vamos conversar.",
+      description: "Me conte sobre o produto, o problema e o prazo. Eu respondo com clareza e próximos passos.",
+      links: "Links"
+    },
+    contactForm: {
+      name: "Nome",
+      namePlaceholder: "Seu nome",
+      email: "Email",
+      emailPlaceholder: "voce@exemplo.com",
+      message: "Mensagem",
+      messagePlaceholder: "Me conte sobre o projeto e o que você precisa.",
+      submit: "Enviar mensagem",
+      sending: "Enviando…",
+      sent: "Mensagem enviada ✓ — respondo em breve.",
+      error: "Não foi possível enviar agora. Tente de novo ou mande um email direto.",
+      errors: {
+        name: "Informe seu nome.",
+        email: "Email inválido.",
+        message: "Escreva uma mensagem com pelo menos 10 caracteres."
+      }
     },
     penalty: {
       title: "Disputa de pênaltis",

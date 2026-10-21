@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
 import { useFinePointer, useReducedMotion } from "@/lib/use-media";
+import { localeHref, type Locale } from "@/lib/i18n";
 import type { Project } from "@/types/portfolio.types";
 
 /** Categorias de base: índice compacto dos projetos de estudo, com a capa seguindo o cursor. */
-export function Academy({ projects, openLabel }: { projects: Project[]; openLabel: string }) {
+export function Academy({ projects, openLabel, locale }: { projects: Project[]; openLabel: string; locale: Locale }) {
   const fine = useFinePointer();
   const reduce = useReducedMotion();
   const preview = React.useRef<HTMLDivElement>(null);
@@ -34,7 +35,7 @@ export function Academy({ projects, openLabel }: { projects: Project[]; openLabe
         {projects.map((p, i) => (
           <li key={p.slug} className="border-b border-line">
             <Link
-              href={`/projects/${p.slug}`}
+              href={localeHref(locale, `/projects/${p.slug}`)}
               data-cursor={openLabel}
               onPointerEnter={() => setActive(p)}
               onFocus={() => setActive(p)}

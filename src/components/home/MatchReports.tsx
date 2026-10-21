@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { FxImage } from "@/components/fx/FxImage";
-import { StatusBadge } from "@/components/ProjectCard";
 import { BlueprintCover } from "@/components/projects/BlueprintCover";
+import { StatusBadge } from "@/components/projects/StatusBadge";
+import { localeHref, type Locale } from "@/lib/i18n";
 import type { Portfolio, Project } from "@/types/portfolio.types";
 
 /** Minutos decorativos dos lances: distribuídos pela partida a partir da ordem (não são dados). */
 const minute = (i: number, n: number) => `${String(Math.round(((i + 1) * 90) / (n + 1))).padStart(2, "0")}'`;
 
-function MatchCard({ project, index, copy }: { project: Project; index: number; copy: Portfolio["copy"] }) {
+function MatchCard({ project, index, copy, locale }: { project: Project; index: number; copy: Portfolio["copy"]; locale: Locale }) {
   const moments = project.caseStudy.technicalDecisions.slice(0, 3);
   const even = index % 2 === 0;
   return (
@@ -18,7 +19,7 @@ function MatchCard({ project, index, copy }: { project: Project; index: number; 
         even ? "md:col-start-1" : "md:col-start-5"
       )}
     >
-      <Link href={`/projects/${project.slug}`} className="group block" data-cursor={copy.matchCard.open} aria-label={`${copy.matchCard.open}: ${project.title}`}>
+      <Link href={localeHref(locale, `/projects/${project.slug}`)} className="group block" data-cursor={copy.matchCard.open} aria-label={`${copy.matchCard.open}: ${project.title}`}>
         <div className="label flex items-center justify-between gap-4 text-muted">
           <span>
             <span className="text-fg">#{String(index + 1).padStart(2, "0")}</span> · {copy.matchReport.title}
@@ -63,11 +64,11 @@ function MatchCard({ project, index, copy }: { project: Project; index: number; 
   );
 }
 
-export function MatchReports({ projects, copy }: { projects: Project[]; copy: Portfolio["copy"] }) {
+export function MatchReports({ projects, copy, locale }: { projects: Project[]; copy: Portfolio["copy"]; locale: Locale }) {
   return (
     <div className="grid-editorial gap-y-24 md:gap-y-36">
       {projects.map((p, i) => (
-        <MatchCard key={p.slug} project={p} index={i} copy={copy} />
+        <MatchCard key={p.slug} project={p} index={i} copy={copy} locale={locale} />
       ))}
     </div>
   );

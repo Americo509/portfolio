@@ -50,6 +50,7 @@ export function SceneRoot() {
   const setStatus = useApp((s) => s.setSceneStatus);
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
+  const resenha = useApp((s) => s.resenha);
   const [tier, setTier] = React.useState<GpuTier | null>(null);
 
   React.useEffect(() => {
@@ -90,8 +91,8 @@ export function SceneRoot() {
           <SceneBoundary onError={() => setStatus("fallback")}>
             <Scene
               tier={tier}
-              theme={resolvedTheme === "light" ? "light" : "dark"}
-              mode={pathname === "/" ? "hero" : "ambient"}
+              theme={resenha ? "resenha" : resolvedTheme === "light" ? "light" : "dark"}
+              mode={pathname === "/" || pathname === "/en" ? "hero" : "ambient"}
               onReady={() => setStatus("ready")}
             />
           </SceneBoundary>

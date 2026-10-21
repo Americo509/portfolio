@@ -4,21 +4,37 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ResenhaToggle } from "@/components/resenha/ResenhaToggle";
 import { cn } from "@/lib/cn";
+import { alternateHref, localeHref, type Locale } from "@/lib/i18n";
+import type { Portfolio } from "@/types/portfolio.types";
 
-type NavCopy = { index: string; projects: string; about: string; contact: string; menu: string; close: string };
+type NavCopy = Portfolio["copy"]["nav"];
 
 const isActive = (pathname: string, href: string) =>
-  href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+  href === "/" || href === "/en" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
-export function Header({ handle, copy }: { handle: string; copy: NavCopy }) {
+export function Header({
+  locale,
+  handle,
+  copy,
+  lang,
+  resenha
+}: {
+  locale: Locale;
+  handle: string;
+  copy: NavCopy;
+  lang: Portfolio["copy"]["lang"];
+  resenha: Portfolio["copy"]["resenha"];
+}) {
   const pathname = usePathname();
   const nav = [
-    { href: "/", label: copy.index },
-    { href: "/projects", label: copy.projects },
-    { href: "/about", label: copy.about },
-    { href: "/contact", label: copy.contact }
+    { href: localeHref(locale, "/"), label: copy.index },
+    { href: localeHref(locale, "/projects"), label: copy.projects },
+    { href: localeHref(locale, "/about"), label: copy.about },
+    { href: localeHref(locale, "/contact"), label: copy.contact }
   ];
+  const home = localeHref(locale, "/");
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => setOpen(false), [pathname]);
@@ -35,12 +51,12 @@ export function Header({ handle, copy }: { handle: string; copy: NavCopy }) {
       {/* Véu para o conteúdo que rola por baixo não brigar com a navegação. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-bg from-40% to-transparent" />
       <div className="grid-editorial relative items-center pt-[calc(var(--hud-inset)+14px)]">
-        <Link href="/" className="label col-span-6 text-fg md:col-span-3" aria-label="Ir para o início">
+        <Link href={home} className="label col-span-6 text-fg md:col-span-3" aria-label={copy.index}>
           <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-signal" />
           {handle}
         </Link>
 
-        <nav className="col-span-6 hidden justify-center gap-8 md:flex" aria-label="Navegação principal">
+        <nav className="col-span-6 hidden justify-center gap-8 md:flex" aria-label={locale === "en" ? "Main navigation" : "Navegação principal"}>
           {nav.map((item, i) => {
             const active = isActive(pathname, item.href);
             return (
@@ -63,7 +79,18 @@ export function Header({ handle, copy }: { handle: string; copy: NavCopy }) {
           })}
         </nav>
 
-        <div className="col-span-6 flex items-center justify-end gap-5 md:col-span-3">
+        <div className="col-span-6 flex items-center justify-end gap-4 md:col-span-3">
+          <ResenhaToggle work={resenha.work} pub={resenha.pub} label={resenha.toggleLabel} className="hidden lg:inline-flex" />
+          {/* Troca de idioma: layouts raiz diferentes, então é navegação completa (sem cortina). */}
+          <a
+            href={alternateHref(pathname)}
+            hrefLang={locale === "en" ? "pt-BR" : "en"}
+            data-no-transition
+            aria-label={lang.switchToLabel}
+            className="label py-2 text-muted transition-colors hover:text-fg"
+          >
+            {lang.switchTo}
+          </a>
           <ThemeToggle />
           <button
             type="button"
@@ -85,7 +112,8 @@ export function Header({ handle, copy }: { handle: string; copy: NavCopy }) {
         )}
         aria-hidden={!open}
       >
-        <nav aria-label="Navegação móvel" className="flex flex-col gap-2">
+        <ResenhaToggle work={resenha.work} pub={resenha.pub} label={resenha.toggleLabel} className="mb-8 lg:hidden" />
+        <nav aria-label={locale === "en" ? "Mobile navigation" : "Navegação móvel"} className="flex flex-col gap-2">
           {nav.map((item, i) => (
             <Link
               key={item.href}

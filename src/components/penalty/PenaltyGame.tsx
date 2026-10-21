@@ -24,6 +24,7 @@ import {
 } from "@/lib/penalty/engine";
 import { createPenaltyAudio } from "./audio";
 import type { PenaltySceneHandle } from "./PenaltyScene";
+import { localeHref, type Locale } from "@/lib/i18n";
 import type { Portfolio } from "@/types/portfolio.types";
 
 const PenaltyScene = dynamic(() => import("./PenaltyScene"), { ssr: false });
@@ -65,10 +66,21 @@ function Dots({ results, label }: { results: boolean[]; label: string }) {
  * mode="full": 5 cobranças + morte súbita, com a vez do "Gustavo" simulada.
  * Sem WebGL, o gol vira uma grade 3 × 3 de botões (mesma lógica).
  */
-export function PenaltyGame({ copy, mode = "full", className }: { copy: Copy; mode?: "single" | "full"; className?: string }) {
+export function PenaltyGame({
+  copy,
+  mode = "full",
+  locale = "pt",
+  className
+}: {
+  copy: Copy;
+  mode?: "single" | "full";
+  locale?: Locale;
+  className?: string;
+}) {
   const reduce = useReducedMotion();
   const { resolvedTheme } = useTheme();
   const setGameActive = useApp((s) => s.setGameActive);
+  const resenha = useApp((s) => s.resenha);
   const root = React.useRef<HTMLDivElement>(null);
   const scene = React.useRef<PenaltySceneHandle | null>(null);
   const aim = React.useRef({ x: 0, y: 1.2, visible: true });
@@ -323,7 +335,7 @@ export function PenaltyGame({ copy, mode = "full", className }: { copy: Copy; mo
             }}
             muralha={muralha}
             reduce={reduce}
-            dark={resolvedTheme !== "light"}
+            dark={resenha || resolvedTheme !== "light"}
           />
         ) : webgl === false ? (
           // Sem WebGL: o gol vira uma grade de 9 cantos clicáveis.
@@ -374,14 +386,14 @@ export function PenaltyGame({ copy, mode = "full", className }: { copy: Copy; mo
               <p className="font-display text-[clamp(2.5rem,6vw,5rem)] leading-none">{message}</p>
             )}
             <div className="flex flex-wrap gap-3">
-              <Link href="/contact" className="label inline-flex h-12 items-center bg-fg px-6 text-bg">
+              <Link href={localeHref(locale, "/contact")} className="label inline-flex h-12 items-center bg-fg px-6 text-bg">
                 {copy.cta}
               </Link>
               <button type="button" onClick={restart} className="label inline-flex h-12 items-center border border-fg/30 px-6 text-fg hover:bg-fg hover:text-bg">
                 {copy.again}
               </button>
               {mode === "single" ? (
-                <Link href="/penalti" className="label inline-flex h-12 items-center px-2 text-fg underline underline-offset-4">
+                <Link href={localeHref(locale, "/penalti")} className="label inline-flex h-12 items-center px-2 text-fg underline underline-offset-4">
                   {copy.fullGame}
                 </Link>
               ) : null}

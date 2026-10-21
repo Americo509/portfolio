@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { getPortfolio } from "@/lib/get-portfolio";
+import { localeHref, type Locale } from "@/lib/i18n";
 
-export function Footer({ params }: { params?: { locale?: string } }) {
-  const portfolio = getPortfolio(params?.locale);
+export function Footer({ locale }: { locale: Locale }) {
+  const portfolio = getPortfolio(locale);
   const links = [
     { href: portfolio.links.github, label: "GitHub", external: true },
     { href: portfolio.links.linkedin, label: "LinkedIn", external: true },
     { href: `mailto:${portfolio.links.email}`, label: "Email", external: true },
-    { href: "/contact", label: portfolio.copy.nav.contact, external: false }
+    { href: localeHref(locale, "/contact"), label: portfolio.copy.nav.contact, external: false }
   ];
 
   return (

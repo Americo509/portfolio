@@ -6,15 +6,10 @@ import { useApp } from "@/lib/store";
 import { hasWebGL } from "@/lib/webgl";
 import { loadScene } from "@/components/scene/load";
 
-const SESSION_KEY = "gd:booted";
+import { BOOT_SESSION_KEY as SESSION_KEY } from "@/lib/inline-scripts";
 const MIN_MS = 1300;
 const MAX_MS = 2600;
 
-/**
- * Script inline do <head>: decide antes do primeiro paint se o preloader
- * aparece (primeira visita da sessão, sem reduced motion). Sem JS, não aparece.
- */
-export const bootScript = `try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!sessionStorage.getItem('${SESSION_KEY}')){document.documentElement.dataset.boot='1'}}catch(e){}`;
 
 const pad = (n: number) => String(Math.round(n)).padStart(3, "0");
 

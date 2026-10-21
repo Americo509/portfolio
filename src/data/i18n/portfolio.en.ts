@@ -662,6 +662,7 @@ export const portfolioEN: Portfolio = {
       var: "VAR review",
       fullTime: "Full-time",
       coverage: "Match photos",
+      next: "Next match →",
       back: "← Back to the season",
       talk: "Let's talk",
       code: "Code →",
@@ -701,6 +702,68 @@ export const portfolioEN: Portfolio = {
       academy: { number: "05", title: "Academy", kicker: "Where it all started" },
       penalties: { number: "06", title: "Penalty shootout", kicker: "You against my defence" },
       final: { number: "07", title: "Final whistle", kicker: "Full-time" }
+    },
+    lang: { label: "Language", switchTo: "PT", switchToLabel: "Ler em português" },
+    resenha: {
+      work: "On the clock",
+      pub: "After-match",
+      toggleLabel: "Switch between On-the-clock and After-match mode",
+      live: "Pub's open",
+      invite: "Head to the after-match",
+      nextMatch: "Next kickabout",
+      left: "in",
+      now: "Kick-off right now",
+      weekdays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      jukebox: "Jukebox",
+      play: "Play samba-rock",
+      stop: "Stop",
+      photoSoon: "Photo coming soon",
+      versus: "or"
+    },
+    projectsPage: {
+      title: "The season",
+      kicker: "Every match",
+      description: "Match reports and academy projects. Search by title, stack or tag, or filter by line.",
+      search: "Search by title, stack or tag…",
+      searchLabel: "Search projects",
+      all: "All",
+      empty: "No projects found. Try removing filters or changing the search.",
+      columns: { match: "Match", competition: "Competition", status: "Status", lineup: "Starting XI" },
+      tiers: { sumula: "Match report", base: "Academy" }
+    },
+    aboutPage: {
+      title: "Player profile",
+      kicker: "Who takes the pitch",
+      who: "Who I am",
+      values: "What I value",
+      career: "Career history",
+      education: "Education",
+      ctaContact: "Get in touch",
+      ctaProjects: "See the season"
+    },
+    contactPage: {
+      title: "After-match",
+      kicker: "Contact",
+      heading: "Let's talk.",
+      description: "Tell me about the product, the problem and the deadline. I'll reply with clarity and next steps.",
+      links: "Links"
+    },
+    contactForm: {
+      name: "Name",
+      namePlaceholder: "Your name",
+      email: "Email",
+      emailPlaceholder: "you@example.com",
+      message: "Message",
+      messagePlaceholder: "Tell me about the project and what you need.",
+      submit: "Send message",
+      sending: "Sending…",
+      sent: "Message sent ✓ — I'll get back to you soon.",
+      error: "Couldn't send right now. Please try again or email me directly.",
+      errors: {
+        name: "Please enter your name.",
+        email: "Invalid email.",
+        message: "Write a message with at least 10 characters."
+      }
     },
     penalty: {
       title: "Penalty shootout",

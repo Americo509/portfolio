@@ -133,6 +133,7 @@ export type Portfolio = {
       var: string;
       fullTime: string;
       coverage: string;
+      next: string;
       back: string;
       talk: string;
       code: string;
@@ -151,6 +152,58 @@ export type Portfolio = {
       "lineup" | "matches" | "method" | "academy" | "penalties" | "final",
       { number: string; title: string; kicker: string }
     >;
+    lang: { label: string; switchTo: string; switchToLabel: string };
+    resenha: {
+      work: string;
+      pub: string;
+      toggleLabel: string;
+      live: string;
+      invite: string;
+      nextMatch: string;
+      left: string;
+      now: string;
+      weekdays: string[];
+      jukebox: string;
+      play: string;
+      stop: string;
+      photoSoon: string;
+      versus: string;
+    };
+    projectsPage: {
+      title: string;
+      kicker: string;
+      description: string;
+      search: string;
+      searchLabel: string;
+      all: string;
+      empty: string;
+      columns: { match: string; competition: string; status: string; lineup: string };
+      tiers: Record<ProjectTier, string>;
+    };
+    aboutPage: {
+      title: string;
+      kicker: string;
+      who: string;
+      values: string;
+      career: string;
+      education: string;
+      ctaContact: string;
+      ctaProjects: string;
+    };
+    contactPage: { title: string; kicker: string; heading: string; description: string; links: string };
+    contactForm: {
+      name: string;
+      namePlaceholder: string;
+      email: string;
+      emailPlaceholder: string;
+      message: string;
+      messagePlaceholder: string;
+      submit: string;
+      sending: string;
+      sent: string;
+      error: string;
+      errors: { name: string; email: string; message: string };
+    };
     penalty: {
       title: string;
       intro: string;

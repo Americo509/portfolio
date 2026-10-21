@@ -3,7 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "@/lib/gsap";
-import { motionState } from "@/lib/store";
+import { motionState, useApp } from "@/lib/store";
 
 type HudCopy = {
   build: string;
@@ -32,8 +32,9 @@ const Corner = ({ className }: { className: string }) => (
 );
 
 /** Moldura de HUD fixa (docs/art-direction.md §4). Puramente decorativa. */
-export function HudFrame({ hud }: { hud: HudCopy }) {
+export function HudFrame({ hud, liveResenha }: { hud: HudCopy; liveResenha: string }) {
   const pathname = usePathname();
+  const resenha = useApp((s) => s.resenha);
   const clock = React.useRef<HTMLSpanElement>(null);
   const match = React.useRef<HTMLSpanElement>(null);
 
@@ -80,7 +81,7 @@ export function HudFrame({ hud }: { hud: HudCopy }) {
         </span>
         <span className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-signal" />
-          {hud.live}
+          {resenha ? liveResenha : hud.live}
         </span>
       </div>
     </div>
