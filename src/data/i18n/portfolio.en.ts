@@ -388,7 +388,7 @@ export const portfolioEN: Portfolio = {
       featured: true,
       featuredSize: "wide",
       privateRepo: true,
-      cover: { src: "/images/sol-poretti/cover-clinico.jpg", alt: "Sol Poretti - clinical system key art" },
+      cover: { src: "/images/sol-poretti-clinico/cover.jpg", alt: "Sol Poretti clinical system - consultation mode showing the drop in symptom score" },
       tags: ["Fullstack", "Architecture", "AppSec", "AI", "Product", "Frontend"],
       stack: [
         "React 19",
@@ -407,9 +407,9 @@ export const portfolioEN: Portfolio = {
       links: {},
       caseStudy: {
         context:
-          "The practice ran on loose forms, spreadsheets and hand-made PDFs. The system brings the whole care cycle into one place: pre-consultation questionnaire, diary, consultation notes, body assessment, meal plans in the nutritionist's own visual identity, finances and a patient portal. Because it is health data, LGPD (Brazil's data protection law) was part of the design from day one, not a fix at the end.",
+          "The practice ran on loose forms, spreadsheets and hand-made PDFs. The system brings the whole care cycle into one place: pre-consultation questionnaire, diary, consultation notes, body assessment, meal plans in the nutritionist's own visual identity, finances and a patient portal. Because it is health data, LGPD (Brazil's data protection law) was part of the design from day one, not a fix at the end. The gallery screens use fictional patients, in a local environment with the same database and rules as the real system.",
         role:
-          "End-to-end product: discovery with the client, specification, database modelling, security policies, front end, Edge Functions, testing and deployment. I also built the practice's landing page.",
+          "End-to-end product: discovery with the client, specification, database modelling, security policies, front end, Edge Functions, testing and deployment. I also created the brand identity and built the practice's landing page.",
         technicalDecisions: [
           "Static SPA (React 19 + Vite) on Supabase with no server of its own: Postgres with Row Level Security and RPC functions as the only gateway to sensitive rules",
           "Patient links use a random single-use token, one per appointment; clinical files (photos, lab results, ebooks) are served only through short-lived signed URLs",
@@ -431,7 +431,17 @@ export const portfolioEN: Portfolio = {
           "Database evolved through 60+ versioned migrations; around 560 Vitest tests, SQL security tests and Playwright end-to-end tests",
           "AI cost projected at R$ 0 on the free tier and under US$ 1 a month on the paid fallback"
         ],
-        gallery: []
+        gallery: [
+          { src: "/images/sol-poretti-clinico/visao-geral.jpg", alt: "Sol Poretti (fictional data) - Overview: today's appointments, birthdays and what changed since the last visit" },
+          { src: "/images/sol-poretti-clinico/agenda.jpg", alt: "Sol Poretti (fictional data) - Weekly diary with pending confirmations, appointment types and personal events" },
+          { src: "/images/sol-poretti-clinico/evolucao.jpg", alt: "Sol Poretti (fictional data) - Patient record: symptom score trend across consultations" },
+          { src: "/images/sol-poretti-clinico/prontuario-ia.jpg", alt: "Sol Poretti (fictional data) - Consultation notes with the AI draft: every sentence has a source, and the ones that don't match ask for confirmation" },
+          { src: "/images/sol-poretti-clinico/antropometria-isak.jpg", alt: "Sol Poretti (fictional data) - ISAK body assessment: body fat percentage and 4-component composition (De Rose)" },
+          { src: "/images/sol-poretti-clinico/plano-alimentar.jpg", alt: "Sol Poretti (fictional data) - Meal plan editor with options per food group and a calorie and macro summary" },
+          { src: "/images/sol-poretti-clinico/plano-pdf.jpg", alt: "Sol Poretti (fictional data) - Meal plan PDF in the nutritionist's own visual identity" },
+          { src: "/images/sol-poretti-clinico/financeiro.jpg", alt: "Sol Poretti (fictional data) - Finances: received, receivable, overdue charges and programme instalments" },
+          { src: "/images/sol-poretti-clinico/paciente-celular.jpg", alt: "Sol Poretti (fictional data) - Patient side on mobile: self-booking, questionnaire and follow-up portal" }
+        ]
       }
     },
     {
@@ -451,8 +461,9 @@ export const portfolioEN: Portfolio = {
       caseStudy: {
         context:
           "The practice's front door: it introduces the nutritionist and her method and takes visitors to booking, which happens in the clinical system.",
-        role: "Interface design on top of the brand, development and launch.",
+        role: "Brand identity (logo, palette, typography and brand book), interface design, development and launch.",
         technicalDecisions: [
+          "Brand identity built from scratch (symbol, earthy palette, typography and brand book), used across the website, the system and the meal plan PDFs",
           "Astro with static HTML and JavaScript only where there is interaction",
           "GSAP animation without hurting Core Web Vitals",
           "Hooked into the clinical system's self-booking"

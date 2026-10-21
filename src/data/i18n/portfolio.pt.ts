@@ -394,7 +394,7 @@ export const portfolioPT: Portfolio = {
       featured: true,
       featuredSize: "wide",
       privateRepo: true,
-      cover: { src: "/images/sol-poretti/cover-clinico.jpg", alt: "Sol Poretti - key art do sistema clínico" },
+      cover: { src: "/images/sol-poretti-clinico/cover.jpg", alt: "Sistema clínico Sol Poretti - modo consulta mostrando a queda da pontuação de sintomas" },
       tags: ["Fullstack", "Arquitetura", "AppSec", "IA", "Produto", "Frontend"],
       stack: [
         "React 19",
@@ -413,9 +413,9 @@ export const portfolioPT: Portfolio = {
       links: {},
       caseStudy: {
         context:
-          "O consultório funcionava com formulários soltos, planilhas e PDFs montados à mão. O sistema reúne o ciclo inteiro do atendimento num lugar só: questionário pré-consulta, agenda, anotação da consulta, avaliação corporal, plano alimentar com a identidade visual da nutricionista, financeiro e um portal para o paciente. Como é dado de saúde, a LGPD entrou no desenho desde o começo, não como ajuste no fim.",
+          "O consultório funcionava com formulários soltos, planilhas e PDFs montados à mão. O sistema reúne o ciclo inteiro do atendimento num lugar só: questionário pré-consulta, agenda, anotação da consulta, avaliação corporal, plano alimentar com a identidade visual da nutricionista, financeiro e um portal para o paciente. Como é dado de saúde, a LGPD entrou no desenho desde o começo, não como ajuste no fim. As telas da galeria usam pacientes fictícios, num ambiente local com o mesmo banco e as mesmas regras do sistema.",
         role:
-          "Produto de ponta a ponta: levantamento com a cliente, especificação, modelagem do banco, políticas de segurança, front-end, Edge Functions, testes e deploy. Também fiz a landing page do consultório.",
+          "Produto de ponta a ponta: levantamento com a cliente, especificação, modelagem do banco, políticas de segurança, front-end, Edge Functions, testes e deploy. Também criei a identidade visual da marca e a landing page do consultório.",
         technicalDecisions: [
           "SPA estática (React 19 + Vite) sobre Supabase, sem servidor próprio: Postgres com Row Level Security e funções RPC como única porta para as regras sensíveis",
           "Link do paciente por token aleatório de uso único, um por consulta; arquivos clínicos (fotos, exames, ebooks) servidos só por URL assinada temporária",
@@ -437,7 +437,17 @@ export const portfolioPT: Portfolio = {
           "Banco evoluído por mais de 60 migrations versionadas; cerca de 560 testes com Vitest, testes de segurança em SQL e e2e com Playwright",
           "Custo de IA projetado em R$ 0 na cota gratuita e abaixo de US$ 1 por mês na reserva paga"
         ],
-        gallery: []
+        gallery: [
+          { src: "/images/sol-poretti-clinico/visao-geral.jpg", alt: "Sol Poretti (dados fictícios) - Visão geral: consultas do dia, aniversariantes e o que mudou desde a última visita" },
+          { src: "/images/sol-poretti-clinico/agenda.jpg", alt: "Sol Poretti (dados fictícios) - Agenda semanal com confirmações pendentes, tipos de atendimento e eventos pessoais" },
+          { src: "/images/sol-poretti-clinico/evolucao.jpg", alt: "Sol Poretti (dados fictícios) - Ficha da paciente: evolução da pontuação de sintomas entre consultas" },
+          { src: "/images/sol-poretti-clinico/prontuario-ia.jpg", alt: "Sol Poretti (dados fictícios) - Anotação da consulta com o rascunho da IA: cada frase tem fonte, e a que não confere pede confirmação" },
+          { src: "/images/sol-poretti-clinico/antropometria-isak.jpg", alt: "Sol Poretti (dados fictícios) - Avaliação corporal ISAK: percentual de gordura e composição em 4 componentes (De Rose)" },
+          { src: "/images/sol-poretti-clinico/plano-alimentar.jpg", alt: "Sol Poretti (dados fictícios) - Editor do plano alimentar com opções por grupo e resumo de calorias e macros" },
+          { src: "/images/sol-poretti-clinico/plano-pdf.jpg", alt: "Sol Poretti (dados fictícios) - PDF do plano alimentar com a identidade visual da nutricionista" },
+          { src: "/images/sol-poretti-clinico/financeiro.jpg", alt: "Sol Poretti (dados fictícios) - Financeiro: recebidos, a receber, cobranças em atraso e parcelas dos programas" },
+          { src: "/images/sol-poretti-clinico/paciente-celular.jpg", alt: "Sol Poretti (dados fictícios) - Lado do paciente no celular: autoagendamento, questionário e portal de acompanhamento" }
+        ]
       }
     },
     {
@@ -458,8 +468,9 @@ export const portfolioPT: Portfolio = {
       caseStudy: {
         context:
           "Porta de entrada do consultório: apresenta a nutricionista e o método e leva a visita até o agendamento, que acontece no sistema clínico.",
-        role: "Design de interface em cima da marca, desenvolvimento e publicação.",
+        role: "Identidade visual da marca (logo, paleta, tipografia e brand book), design de interface, desenvolvimento e publicação.",
         technicalDecisions: [
+          "Identidade visual criada do zero (símbolo, paleta terrosa, tipografia e brand book), usada no site, no sistema e nos PDFs do plano alimentar",
           "Astro com HTML estático e JavaScript só onde há interação",
           "Animações com GSAP sem prejudicar os Core Web Vitals",
           "Integração com o autoagendamento do sistema clínico"
