@@ -268,10 +268,10 @@ export const portfolioEN: Portfolio = {
       options: ["Skiing in Chile", "A classic Europe tour"]
     },
     cards: [
-      { number: "#08", caption: "Weekly kickabout", src: "/images/resenha/cromo-08.jpg", alt: "Gustavo at the weekly kickabout" },
-      { number: "#19", caption: "In the stands", src: "/images/resenha/cromo-19.jpg", alt: "Gustavo at the stadium" },
-      { number: "#10", caption: "After-match", src: "/images/resenha/cromo-10.jpg", alt: "Hanging out with friends" },
-      { number: "#77", caption: "Radar 2027", src: "/images/resenha/cromo-77.jpg", alt: "Trip with the lads" }
+      { number: "#08", caption: "Weekly kickabout", src: "/images/resenha/cromo-08.jpg", alt: "Gustavo, number 8, shooting at the weekly kickabout" },
+      { number: "#19", caption: "In the stands", src: "/images/resenha/cromo-19.jpg", alt: "Gustavo in the stands on match day" },
+      { number: "#10", caption: "After-match", src: "/images/resenha/cromo-10.jpg", alt: "Illustration: two cold pints on a bar counter" },
+      { number: "#77", caption: "Radar 2027", src: "/images/resenha/cromo-77.jpg", alt: "Illustration: tactical radar locked on target 2027" }
     ]
   },
   projectTags: ["Backend", "Frontend", "Mobile", "Fullstack", "Architecture", "AppSec", "AI", "DevOps", "Product"],
@@ -704,6 +704,48 @@ export const portfolioEN: Portfolio = {
       final: { number: "07", title: "Final whistle", kicker: "Full-time" }
     },
     lang: { label: "Language", switchTo: "PT", switchToLabel: "Ler em português" },
+    terminal: {
+      title: "terminal — gustavo.dev",
+      open: "Open the terminal",
+      hint: "~ terminal",
+      placeholder: "type help",
+      inputLabel: "Terminal command",
+      close: "Close [esc]",
+      welcome: ["gustavo.dev v19.10 — node-2012 :08", "Type help to see the commands. Esc closes."],
+      notFound: "command not found: {cmd}. Try help.",
+      help: [
+        "help ............ this list",
+        "projects ........ match reports (projects <n> opens one)",
+        "about ........... player profile",
+        "contact ......... get in touch",
+        "penalti ......... penalty shootout",
+        "resenha ......... toggles After-match mode",
+        "theme ........... toggles light/dark",
+        "clear ........... clears the screen",
+        "exit ............ closes the terminal",
+        "(there's more hidden in here…)"
+      ],
+      about: ["{name}", "Software Architect · Full Stack · AppSec", "Paraná, Brazil · number 8 in midfield"],
+      contact: ["email: {email}", "Opening the after-match…"],
+      projectsIntro: "Match reports (projects <n> to open):",
+      opening: "Opening…",
+      e1910: [
+        "1 September 1910 — Bom Retiro, São Paulo.",
+        "A club founded by workers, against all odds.",
+        "Good architecture starts the same way: hands-on."
+      ],
+      socrates: [
+        "\"Win or lose, but always with democracy.\"",
+        "Democracy, clean architecture and black-and-white blood:",
+        "decisions discussed, recorded and owned by the team."
+      ],
+      cerveja: ["Pouring a cold one… 🍺", "Cheers! The after-match is on."],
+      cervejaOff: ["The bar only opens after hours.", "Turn on After-match mode (command resenha) and ask again."],
+      hireMe: ["[sudo] password for recruiter: ********", "Access granted.", "Buy a round and let's talk. Opening the after-match…"],
+      resenhaOn: "After-match mode on. Let's go.",
+      resenhaOff: "Back on the clock.",
+      theme: "Theme toggled."
+    },
     resenha: {
       work: "On the clock",
       pub: "After-match",

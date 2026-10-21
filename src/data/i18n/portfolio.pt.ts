@@ -269,10 +269,10 @@ export const portfolioPT: Portfolio = {
       options: ["Esquiar no Chile", "Rodar a Europa clássica"]
     },
     cards: [
-      { number: "#08", caption: "Pelada da semana", src: "/images/resenha/cromo-08.jpg", alt: "Gustavo na pelada da semana" },
-      { number: "#19", caption: "Arquibancada", src: "/images/resenha/cromo-19.jpg", alt: "Gustavo no estádio" },
-      { number: "#10", caption: "Resenha", src: "/images/resenha/cromo-10.jpg", alt: "Resenha com os amigos" },
-      { number: "#77", caption: "Radar 2027", src: "/images/resenha/cromo-77.jpg", alt: "Viagem com a rapaziada" }
+      { number: "#08", caption: "Pelada da semana", src: "/images/resenha/cromo-08.jpg", alt: "Gustavo, camisa 8, finalizando na pelada da semana" },
+      { number: "#19", caption: "Arquibancada", src: "/images/resenha/cromo-19.jpg", alt: "Gustavo na arquibancada do estádio, em dia de jogo" },
+      { number: "#10", caption: "Resenha", src: "/images/resenha/cromo-10.jpg", alt: "Ilustração: dois copos de chope gelado num balcão de bar" },
+      { number: "#77", caption: "Radar 2027", src: "/images/resenha/cromo-77.jpg", alt: "Ilustração: radar tático com o alvo 2027 travado" }
     ]
   },
   projectTags: ["Backend", "Frontend", "Mobile", "Fullstack", "Arquitetura", "AppSec", "IA", "DevOps", "Produto"],
@@ -718,6 +718,48 @@ export const portfolioPT: Portfolio = {
       final: { number: "07", title: "Apito final", kicker: "Fim de jogo" }
     },
     lang: { label: "Idioma", switchTo: "EN", switchToLabel: "Read in English" },
+    terminal: {
+      title: "terminal — gustavo.dev",
+      open: "Abrir o terminal",
+      hint: "~ terminal",
+      placeholder: "digite help",
+      inputLabel: "Comando do terminal",
+      close: "Fechar [esc]",
+      welcome: ["gustavo.dev v19.10 — node-2012 :08", "Digite help para ver os comandos. Esc fecha."],
+      notFound: "comando não encontrado: {cmd}. Tente help.",
+      help: [
+        "help ............ esta lista",
+        "projects ........ as súmulas (projects <n> abre uma)",
+        "about ........... ficha do jogador",
+        "contact ......... falar comigo",
+        "penalti ......... disputa de pênaltis",
+        "resenha ......... liga/desliga o Modo Resenha",
+        "theme ........... alterna claro/escuro",
+        "clear ........... limpa a tela",
+        "exit ............ fecha o terminal",
+        "(tem mais coisa escondida…)"
+      ],
+      about: ["{name}", "Arquiteto de Software · Full Stack · AppSec", "Paraná, Brasil · camisa 8 do meio-campo"],
+      contact: ["email: {email}", "Abrindo o pós-jogo…"],
+      projectsIntro: "Súmulas (projects <n> para abrir):",
+      opening: "Abrindo…",
+      e1910: [
+        "01/09/1910 — Bom Retiro, São Paulo.",
+        "Um time feito por operários, contra tudo e contra todos.",
+        "Arquitetura também nasce assim: de quem põe a mão na massa."
+      ],
+      socrates: [
+        "\"Ganhar ou perder, mas sempre com democracia.\"",
+        "Democracia, arquitetura limpa e sangue preto e branco:",
+        "decisões discutidas, registradas e assumidas pelo time."
+      ],
+      cerveja: ["Servindo um chope gelado… 🍺", "Saúde! A resenha está aberta."],
+      cervejaOff: ["O bar só abre depois do expediente.", "Ligue o Modo Resenha (comando resenha) e peça de novo."],
+      hireMe: ["[sudo] senha para recrutador: ********", "Acesso concedido.", "Paga uma rodada que a gente conversa. Abrindo o pós-jogo…"],
+      resenhaOn: "Modo Resenha ligado. Bora.",
+      resenhaOff: "De volta ao expediente.",
+      theme: "Tema alternado."
+    },
     resenha: {
       work: "Expediente",
       pub: "Resenha",

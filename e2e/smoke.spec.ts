@@ -47,13 +47,13 @@ test.describe("projetos", () => {
     const search = page.getByPlaceholder(/Buscar/);
     await search.fill("pagina");
     await expect(page.getByRole("link", { name: "Página de Vendas — Apple Watch" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "YourBest", exact: true })).toHaveCount(0);
+    await expect(page.locator('main ol a[href="/projects/yourbest"]')).toHaveCount(0);
   });
 
   test("filtro por tag", async ({ page }) => {
     await page.getByRole("button", { name: "Mobile", exact: true }).click();
-    await expect(page.getByRole("link", { name: "YourBest", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "CookShow", exact: true })).toHaveCount(0);
+    await expect(page.locator('main ol a[href="/projects/yourbest"]')).toBeVisible();
+    await expect(page.locator('main ol a[href="/projects/cookshow"]')).toHaveCount(0);
   });
 
   test("estado vazio", async ({ page }) => {
@@ -190,7 +190,7 @@ test.describe("home em capítulos", () => {
   });
 
   test("súmula da home leva ao case", async ({ page }) => {
-    await page.getByRole("link", { name: "Abrir súmula: CONECTA Plantão" }).click();
+    await page.locator('[data-chapter=matches] a[href="/projects/conecta-plantao"]').click();
     await expect(page).toHaveURL(/\/projects\/conecta-plantao$/);
   });
 
@@ -318,5 +318,93 @@ test.describe("páginas internas", () => {
     await page.goto("/projects/yourbest");
     await page.getByRole("link", { name: /Próxima partida/ }).click();
     await expect(page).toHaveURL(/\/projects\/conecta-plantao$/);
+  });
+});
+
+/** O atalho só funciona depois da hidratação: tenta até o diálogo aparecer. */
+async function openTerminal(page: Page) {
+  await expect(async () => {
+    await page.keyboard.press("Backquote");
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 10_000 });
+}
+
+test.describe("terminal", () => {
+  test("abre com ~, responde comandos e fecha com Esc devolvendo o foco", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/");
+    await openTerminal(page);
+    const dialog = page.getByRole("dialog", { name: /terminal/ });
+    const input = dialog.getByRole("textbox", { name: "Comando do terminal" });
+    await expect(input).toBeFocused();
+
+    await input.fill("help");
+    await input.press("Enter");
+    await expect(dialog.getByRole("log")).toContainText("esta lista");
+
+    await input.fill("1910");
+    await input.press("Enter");
+    await expect(dialog.getByRole("log")).toContainText("Bom Retiro");
+
+    await input.fill("cerveja");
+    await input.press("Enter");
+    await expect(dialog.getByRole("log")).toContainText("depois do expediente");
+
+    await input.fill("xyz");
+    await input.press("Enter");
+    await expect(dialog.getByRole("log")).toContainText("comando não encontrado: xyz");
+
+    // Histórico
+    await input.press("ArrowUp");
+    await expect(input).toHaveValue("xyz");
+    await input.fill("");
+
+    await input.fill("clear");
+    await input.press("Enter");
+    await expect(dialog.getByRole("log")).not.toContainText("Bom Retiro");
+
+    await input.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
+
+  test("resenha liga o modo e a cerveja é servida", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/");
+    await openTerminal(page);
+    const input = page.getByRole("textbox", { name: "Comando do terminal" });
+    await input.fill("resenha");
+    await input.press("Enter");
+    await expect(page.locator("html")).toHaveClass(/resenha/);
+    await input.fill("cerveja");
+    await input.press("Enter");
+    await expect(page.getByRole("log")).toContainText("Saúde!");
+  });
+
+  test("botão do rodapé abre; projects <n> e sudo hire-me navegam", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/projects");
+    await page.getByRole("button", { name: "Abrir o terminal" }).click();
+    const input = page.getByRole("textbox", { name: "Comando do terminal" });
+    await input.fill("projects");
+    await input.press("Enter");
+    await expect(page.getByRole("log")).toContainText("01");
+    await input.fill("projects 1");
+    await input.press("Enter");
+    await expect(page).toHaveURL(/\/projects\/yourbest$/, { timeout: 10_000 });
+    await expect(page.getByRole("dialog")).toBeHidden();
+
+    await openTerminal(page);
+    await page.getByRole("textbox", { name: "Comando do terminal" }).fill("sudo hire-me");
+    await page.getByRole("textbox", { name: "Comando do terminal" }).press("Enter");
+    await expect(page.getByRole("log")).toContainText("Acesso concedido");
+    await expect(page).toHaveURL(/\/contact$/, { timeout: 10_000 });
+  });
+
+  test("EN: terminal em inglês", async ({ page }) => {
+    await skipBoot(page);
+    await page.goto("/en");
+    await openTerminal(page);
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("log")).toContainText("help");
   });
 });

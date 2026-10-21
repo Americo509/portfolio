@@ -37,6 +37,9 @@ type AppState = {
   /** Modo Resenha (pós-expediente): luz âmbar e o lado de fora do terminal. */
   resenha: boolean;
   setResenha: (v: boolean) => void;
+  /** Terminal secreto (tecla ~ ou botão no rodapé). */
+  terminalOpen: boolean;
+  setTerminalOpen: (v: boolean) => void;
   setBooted: (v: boolean) => void;
   setBootDone: (v: boolean) => void;
   setSceneStatus: (s: SceneStatus) => void;
@@ -52,6 +55,8 @@ export const useApp = create<AppState>((set) => ({
   setGameActive: (gameActive) => set({ gameActive }),
   resenha: false,
   setResenha: (resenha) => set({ resenha }),
+  terminalOpen: false,
+  setTerminalOpen: (terminalOpen) => set({ terminalOpen }),
   setBooted: (booted) => set({ booted }),
   setBootDone: (bootDone) => set({ bootDone }),
   setSceneStatus: (sceneStatus) => set({ sceneStatus })

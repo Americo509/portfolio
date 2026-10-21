@@ -12,6 +12,7 @@ import { HudFrame } from "@/components/hud/HudFrame";
 import { Cursor } from "@/components/cursor/Cursor";
 import { Preloader } from "@/components/preloader/Preloader";
 import { ResenhaRoot } from "@/components/resenha/ResenhaRoot";
+import { Terminal } from "@/components/terminal/Terminal";
 import { bootScript, resenhaScript } from "@/lib/inline-scripts";
 import { getPortfolio } from "@/lib/get-portfolio";
 import { htmlLang, type Locale } from "@/lib/i18n";
@@ -43,6 +44,13 @@ export function RootShell({ locale, children }: { locale: Locale; children: Reac
               <FxRoot />
               <div className="grain" aria-hidden="true" />
               <Cursor />
+              <Terminal
+                locale={locale}
+                copy={copy.terminal}
+                name={portfolio.profile.name}
+                email={portfolio.links.email}
+                projects={portfolio.projects.filter((p) => p.tier === "sumula").map((p) => ({ slug: p.slug, title: p.title }))}
+              />
               <Preloader handle={portfolio.profile.handle} copy={copy.boot} />
             </SmoothScroll>
           </MotionRoot>

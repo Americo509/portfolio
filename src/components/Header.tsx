@@ -51,7 +51,7 @@ export function Header({
       {/* Véu para o conteúdo que rola por baixo não brigar com a navegação. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-bg from-40% to-transparent" />
       <div className="grid-editorial relative items-center pt-[calc(var(--hud-inset)+14px)]">
-        <Link href={home} className="label col-span-6 text-fg md:col-span-3" aria-label={copy.index}>
+        <Link href={home} className="label col-span-6 text-fg md:col-span-3" aria-label={`${handle} — ${copy.index}`}>
           <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-signal" />
           {handle}
         </Link>
@@ -86,7 +86,7 @@ export function Header({
             href={alternateHref(pathname)}
             hrefLang={locale === "en" ? "pt-BR" : "en"}
             data-no-transition
-            aria-label={lang.switchToLabel}
+            aria-label={`${lang.switchTo} — ${lang.switchToLabel}`}
             className="label py-2 text-muted transition-colors hover:text-fg"
           >
             {lang.switchTo}
@@ -110,7 +110,7 @@ export function Header({
           "fixed inset-0 -z-10 flex flex-col justify-end bg-bg px-[var(--margin)] pb-16 transition-[clip-path] duration-700 ease-cine md:hidden",
           open ? "[clip-path:inset(0_0_0_0)]" : "pointer-events-none [clip-path:inset(0_0_100%_0)]"
         )}
-        aria-hidden={!open}
+        inert={!open}
       >
         <ResenhaToggle work={resenha.work} pub={resenha.pub} label={resenha.toggleLabel} className="mb-8 lg:hidden" />
         <nav aria-label={locale === "en" ? "Mobile navigation" : "Navegação móvel"} className="flex flex-col gap-2">
@@ -118,7 +118,6 @@ export function Header({
             <Link
               key={item.href}
               href={item.href}
-              tabIndex={open ? 0 : -1}
               className={cn(
                 "font-display text-[clamp(3.5rem,17vw,7rem)]",
                 isActive(pathname, item.href) ? "text-signal-ink" : "text-fg"

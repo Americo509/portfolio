@@ -76,9 +76,11 @@ function Cromo({ card, copy }: { card: Resenha["cards"][number]; copy: Copy }) {
       {card.src ? (
         <Image src={card.src} alt={card.alt} fill sizes="(max-width: 768px) 50vw, 20vw" className="object-cover grayscale contrast-125" />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
-          <span className="font-display text-[clamp(3rem,7vw,6rem)] text-fg/10">{card.number}</span>
-        </div>
+        <div
+          aria-hidden="true"
+          data-n={card.number}
+          className="absolute inset-0 flex items-center justify-center font-display text-[clamp(3rem,7vw,6rem)] text-fg/10 before:content-[attr(data-n)]"
+        />
       )}
       {/* Cantos a giz, como figurinha técnica. */}
       <span aria-hidden="true" className="absolute left-2 top-2 h-4 w-4 border-l border-t border-fg/60" />

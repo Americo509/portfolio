@@ -19,7 +19,7 @@ function MatchCard({ project, index, copy, locale }: { project: Project; index: 
         even ? "md:col-start-1" : "md:col-start-5"
       )}
     >
-      <Link href={localeHref(locale, `/projects/${project.slug}`)} className="group block" data-cursor={copy.matchCard.open} aria-label={`${copy.matchCard.open}: ${project.title}`}>
+      <Link href={localeHref(locale, `/projects/${project.slug}`)} className="group block" data-cursor={copy.matchCard.open}>
         <div className="label flex items-center justify-between gap-4 text-muted">
           <span>
             <span className="text-fg">#{String(index + 1).padStart(2, "0")}</span> · {copy.matchReport.title}

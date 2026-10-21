@@ -153,6 +153,30 @@ export type Portfolio = {
       { number: string; title: string; kicker: string }
     >;
     lang: { label: string; switchTo: string; switchToLabel: string };
+    /** Terminal secreto (tecla ~). Respostas em linhas; {name} e {email} são preenchidos. */
+    terminal: {
+      title: string;
+      open: string;
+      hint: string;
+      placeholder: string;
+      inputLabel: string;
+      close: string;
+      welcome: string[];
+      notFound: string;
+      help: string[];
+      about: string[];
+      contact: string[];
+      projectsIntro: string;
+      opening: string;
+      e1910: string[];
+      socrates: string[];
+      cerveja: string[];
+      cervejaOff: string[];
+      hireMe: string[];
+      resenhaOn: string;
+      resenhaOff: string;
+      theme: string;
+    };
     resenha: {
       work: string;
       pub: string;

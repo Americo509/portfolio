@@ -23,12 +23,13 @@ export function TeamTalk({ method, principles }: { method: Portfolio["method"]; 
       });
       gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step) => {
         const body = step.querySelector("[data-body]") as HTMLElement;
-        const split = SplitText.create(body, { type: "words" });
+        const split = SplitText.create(body, { type: "words", aria: "none" });
         gsap
           .timeline({ scrollTrigger: { trigger: step, start: "top 78%" } })
           .from(step.querySelector("[data-num]"), { yPercent: 100, autoAlpha: 0, duration: 0.9, ease: "expo.out" })
           .from(step.querySelector("[data-dot]"), { scale: 0, duration: 0.5, ease: "back.out(3)" }, "<")
-          .from(split.words, { autoAlpha: 0.08, duration: 0.6, stagger: 0.025, ease: "none" }, "<0.15");
+          // Giz sendo escrito: desfoque e deslocamento, sem opacidade (o contraste nunca cai).
+          .from(split.words, { filter: "blur(6px)", yPercent: 35, duration: 0.6, stagger: 0.02, ease: "power2.out", clearProps: "filter" }, "<0.15");
       });
     },
     { scope, dependencies: [reduce] }

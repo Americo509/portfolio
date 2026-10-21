@@ -30,7 +30,7 @@ Currently improving my expertise in:
 
 ## Sobre este repositório
 
-Portfólio em Next.js 15 (App Router) + React 19 + TypeScript + Tailwind. Direção de arte "Sistema vivo": veja [`docs/art-direction.md`](docs/art-direction.md).
+Portfólio em Next.js 15 (App Router) + React 19 + TypeScript + Tailwind. Direção de arte "Noite de Jogo / Prancheta Tática": veja [`docs/art-direction.md`](docs/art-direction.md).
 
 ### Rodando localmente
 
@@ -44,8 +44,13 @@ pnpm dev
 
 ```bash
 pnpm build
-pnpm test:e2e   # smoke tests com Playwright (desktop e mobile) contra o build de produção
+pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pênalti, cena 3D e auditoria axe
 ```
+
+- `e2e/smoke.spec.ts`: rotas, navegação, formulário, capítulos, pênaltis, idiomas, Modo Resenha e terminal (desktop e mobile, sem WebGL).
+- `e2e/a11y.spec.ts`: axe-core (WCAG 2.1 A/AA) nas páginas principais, no tema claro, no Modo Resenha e com o terminal aberto.
+- `e2e/scene.spec.ts`: projeto `webgl`, com a cena e o pênalti 3D de verdade.
+- `e2e/penalty-logic.spec.ts`: testes unitários do motor do pênalti.
 
 ### Arquitetura de animação
 
@@ -83,6 +88,26 @@ pnpm test:e2e   # smoke tests com Playwright (desktop e mobile) contra o build d
 - **Páginas:** Campanha (`/projects`, tabela com busca e filtros), Súmula completa (`/projects/[slug]`, com "próxima partida"), Ficha do jogador (`/about`, histórico de clubes pinado na horizontal) e Pós-jogo (`/contact`, formulário com estados de envio e erro; a API não mudou). O 404 é "Impedimento." / "Offside.".
 - **Modo Resenha:** chave manual no header, salva no navegador. Força a noite e troca o vermelho pelo âmbar (DOM e estádio). O pós-jogo da home abre o "Fora do terminal": contagem para a próxima pelada (fuso de São Paulo), Radar 2027, cromos e uma jukebox de samba-rock gerada com Web Audio.
 - **Fotos da resenha:** coloque `cromo-08.jpg`, `cromo-19.jpg`, `cromo-10.jpg` e `cromo-77.jpg` em `public/images/resenha/` (retrato 3:4). Elas substituem os placeholders sozinhas.
+
+### Terminal, transições e acabamento (Fase 6)
+
+- **Terminal secreto:** `~` (ou `` ` ``) em qualquer página, ou o botão "~ terminal" no rodapé. Comandos: `help`, `projects [n]`, `about`, `contact`, `penalti`, `resenha`, `theme`, `clear` e `exit`, além de alguns escondidos. Diálogo modal com foco preso, histórico (↑/↓), Tab completa e Esc fecha devolvendo o foco. Textos em `copy.terminal` (PT/EN).
+- **Transição de rota:** uma faixa vermelha diagonal entra na frente da cortina, a rota troca e as duas saem pela direita (`clip-path: polygon()` interpolado pelo GSAP). O terminal navega pelo mesmo caminho (`src/lib/navigate.ts`).
+- **Acessibilidade:** auditoria axe automatizada. Nomes acessíveis contêm o texto visível (WCAG 2.5.3), o menu móvel fechado fica `inert`, e as revelações por scroll usam desfoque e deslocamento em vez de opacidade, para o contraste nunca cair.
+
+#### Lighthouse (medido neste ambiente)
+
+Build de produção servido localmente e Lighthouse 12 no Chromium headless de um container **sem GPU** (a cena 3D roda em software). No mobile o Lighthouse simula CPU 4× mais lenta e rede 4G, e mede a **primeira visita**, com o preloader.
+
+| Página | Mobile (perf · a11y · BP · SEO) | Desktop (perf · a11y · BP · SEO) |
+| --- | --- | --- |
+| `/` | 63 · 100 · 100 · 100 (LCP 3,6 s, TBT 1,7 s, CLS 0) | 97 · 100 · 100 · 100 (LCP 0,7 s) |
+| `/about` | 84 · 100 · 100 · 100 | 100 · 100 · 100 · 100 |
+| `/contact` | 86 · 100 · 96 · 100 | 100 · 100 · 100 · 100 |
+| `/projects` | 85 · 100 · 96 · 100 | 100 · 100 · 100 · 100 |
+| `/projects/yourbest` | 90 · 100 · 100 · 100 | 100 · 100 · 100 · 100 |
+
+O ponto fraco é o TBT da home no mobile: compilar a cena e montar as animações dos capítulos numa CPU limitada e sem GPU. Num aparelho real com GPU ele cai bastante, mas não foi medido aqui. O que já foi feito: cena só depois do preloader e em idle, tiers de GPU, o parágrafo do hero (elemento de LCP) nunca fica transparente (LCP mobile de 7,3 s para 3,6 s), e favicon e ícone próprios.
 
 ### Fallbacks
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getPortfolio } from "@/lib/get-portfolio";
 import { localeHref, type Locale } from "@/lib/i18n";
+import { TerminalButton } from "@/components/terminal/Terminal";
 
 export function Footer({ locale }: { locale: Locale }) {
   const portfolio = getPortfolio(locale);
@@ -39,6 +40,7 @@ export function Footer({ locale }: { locale: Locale }) {
           <span>
             © {new Date().getFullYear()} {portfolio.profile.name}
           </span>
+          <TerminalButton label={portfolio.copy.terminal.open} hint={portfolio.copy.terminal.hint} className="w-fit" />
           <span>{portfolio.education.title}</span>
         </div>
       </div>

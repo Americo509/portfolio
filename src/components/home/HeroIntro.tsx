@@ -5,9 +5,9 @@ import { gsap, useGSAP } from "@/lib/gsap";
 import { useApp } from "@/lib/store";
 
 /**
- * Entrada do hero sincronizada com a abertura do preloader. Só esconde o texto
+ * Entrada do hero sincronizada com a abertura do preloader. Só prepara o texto
  * se o preloader estiver cobrindo a tela; caso contrário o hero já chega
- * pronto no HTML (é o elemento de LCP).
+ * pronto no HTML. O parágrafo (elemento de LCP) nunca fica transparente.
  */
 export function HeroIntro({ children, className }: { children: React.ReactNode; className?: string }) {
   const scope = React.useRef<HTMLDivElement>(null);
@@ -20,7 +20,8 @@ export function HeroIntro({ children, className }: { children: React.ReactNode; 
         covered.current = document.documentElement.dataset.boot === "1";
         if (covered.current) {
           gsap.set("[data-line]", { yPercent: 110 });
-          gsap.set("[data-fade]", { autoAlpha: 0, y: 16 });
+          // Só desloca (sem opacidade): o texto é pintado sob o obturador e já conta como LCP.
+          gsap.set("[data-fade]", { y: 24 });
           gsap.set("[data-band]", { scaleX: 0 });
         }
       }
@@ -29,7 +30,7 @@ export function HeroIntro({ children, className }: { children: React.ReactNode; 
       gsap
         .timeline({ delay: 0.25 })
         .to("[data-line]", { yPercent: 0, duration: 1.3, ease: "expo.out", stagger: 0.09 })
-        .to("[data-fade]", { autoAlpha: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.06 }, "<0.35")
+        .to("[data-fade]", { y: 0, duration: 0.9, ease: "expo.out", stagger: 0.06 }, "<0.35")
         .to("[data-band]", { scaleX: 1, duration: 1.4, ease: "cine", stagger: 0.12 }, "<0.1");
     },
     { scope, dependencies: [booted] }

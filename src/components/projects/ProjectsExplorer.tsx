@@ -105,7 +105,6 @@ export function ProjectsExplorer({
             <li key={p.slug} className="border-b border-line">
               <Link
                 href={localeHref(locale, `/projects/${p.slug}`)}
-                aria-label={p.title}
                 data-cursor={copy.matchCard.open}
                 onPointerEnter={() => setHovered(p)}
                 onFocus={() => setHovered(p)}
