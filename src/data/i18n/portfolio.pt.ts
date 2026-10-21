@@ -382,6 +382,7 @@ export const portfolioPT: Portfolio = {
       }
     },
     {
+      // LEMBRETE: os prints são da landing page; o foco deve ser o site clínico (docs/art-direction.md §13).
       slug: "sol-poretti",
       title: "Sol Poretti — Nutrição Clínica",
       summary:

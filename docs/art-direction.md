@@ -237,6 +237,13 @@ Ao fim de cada fase: lint, build, testes Playwright, prints reais em desktop e m
 5. **Pelada:** terça, quarta e sábado, configuráveis em `resenha.nextMatchDays`.
 6. **Regra de conteúdo:** nunca expor dados sensíveis. Só arquitetura, preocupações técnicas, tecnologias e o domínio de cada sistema.
 
+## 13. Lembretes (ajustar depois)
+
+- [ ] **Sol Poretti:** os prints atuais são da **landing page** pública (`solporettinutri.com.br`). O trabalho principal foi o **site/sistema clínico** desenvolvido para ela. Ajustar a súmula (contexto, papel, decisões e imagens) para destacar o sistema clínico, e tratar a landing page como parte secundária.
+- [ ] **Horários da pelada:** a quarta às 20h foi confirmada. Terça (20h) e sábado (9h) foram assumidos; confirmar em `resenha.nextMatchDays`.
+- [ ] **YourBest:** confirmar o status (hoje "Em desenvolvimento") e se o repositório é privado.
+- [ ] **Key arts:** subir `public/images/{conecta-plantao,sentinela,gustavo-os}/cover.jpg`, geradas a partir dos prompts do apêndice.
+
 ## Apêndice — prompts para o Nano Banana
 
 **Estilo comum** (cole no início de cada prompt):
