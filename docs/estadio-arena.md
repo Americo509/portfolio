@@ -66,7 +66,7 @@ O que as referências mostram e muda o plano:
 
 ## 5. Fases sugeridas
 
-1. **Referência:** ✅ fotos e duas concept arts em `design/reference/arena/`, analisadas no §3. Próximo passo: eu devolvo um esboço de proporções (planta e corte) para você aprovar antes de mexer na cena.
+1. **Referência:** ✅ fotos e duas concept arts em `design/reference/arena/`, analisadas no §3. Esboço de proporções entregue no §7, aguardando sua aprovação antes de mexer na cena.
 2. **Estrutura:** arquibancadas assimétricas, cobertura e luz da borda, substituindo as torres. Preloader e apito final passam a falar em setores.
 3. **Telão:** conteúdo dinâmico (capítulo, placar dos pênaltis, Modo Resenha).
 4. **2D:** key arts e OG image novas (se quiser), fallback estático e estádio do pênalti.
@@ -86,3 +86,33 @@ Use o **estilo comum** do apêndice de `docs/art-direction.md` no início de cad
 > …set inside the same arena: the steel-truss roof silhouette and its line of edge lights visible in the background through the fog.
 
 Ao mandar as imagens, coloque os originais em `design/key-art/<slug>/` (como já é feito). Eu escolho, ajusto grão, contraste e corte e publico em `public/images/<slug>/cover.jpg`.
+
+## 7. Esboço de proporções (aguardando aprovação)
+
+![Esboço da arena: planta, corte transversal e corte longitudinal](estadio-arena-esboco.svg)
+
+Medidas estimadas a partir das referências e ajustadas para a câmera da cena; não é levantamento arquitetônico. O sistema é o mesmo de `stadium/config.ts`: metros, campo de 68 × 105 centrado na origem, **norte = −z** (o fundo que a câmera do hero vê) e **oeste = −x** (o lado do prédio).
+
+| Elemento | Proposta | Hoje na cena |
+|---|---|---|
+| Recuo do campo | 6 m nas laterais, 8 m nos fundos | — |
+| Lateral oeste | 2 anéis: inferior de 0,8 a 12 m (x −40 a −62), superior de 16 a 38 m (x −64 a −84); prédio maciço de 48 m atrás (x −84 a −96) | caixa inclinada em x = −48 |
+| Lateral leste | 2 anéis: inferior de 0,8 a 12 m (x 40 a 62), superior de 15 a 30 m (x 63 a 78); parede de 34 m | caixa inclinada em x = 48 |
+| Fundos (norte e sul) | anel único de 0,8 a 14 m, de z ±60,5 a ±84,5, largura 72 m; cantos abertos | duas caixas no norte (z −63 e −70), nada no sul |
+| Coberturas laterais | treliça de ~4 m de altura; borda interna em x = ±44, a 40 m (oeste) e 36 m (leste) | — |
+| Coberturas dos fundos | finas, a 24 m, de z ±60 a ±88, penduradas no arco | — |
+| Arcos dos fundos | em z = ±72, de x −60 a 60, nascem a 30 m e chegam a 46 m no topo; tirantes a cada 8 m | — |
+| Telão | atrás da arquibancada norte, centralizado: 24 × 8 m, de 14 a 22 m de altura | — |
+| Luz | linha de LED em toda a borda interna das coberturas; 4 grupos grandes (oeste, leste, norte, sul) e grupos pequenos a cada ~12 m | 4 torres de 38 m nos cantos |
+| Sinalizador | arquibancada norte, (−14, 6, −68) | (−20, 12,5, −61) |
+
+**O que muda nas câmeras:**
+- **Hero:** a câmera continua no sul, perto do gramado. O enquadramento passa a pegar a arquibancada baixa do norte, o telão e o arco, que é a vista mais reconhecível da arena (como na referência `interior-cobertura-telao.png`).
+- **Abertura:** a câmera hoje "desce do refletor" em (40, 46, 66). Sem torres, ela passa a descer da borda da cobertura do sul. O ponto de partida fica igual, acima da cobertura do fundo sul e na frente do arco.
+- **Vista tática:** a câmera fica a 66 m, acima da abertura da cobertura, que tem 88 × 120 m. Ela não bate em nada e a cobertura vira a moldura da prancheta.
+
+**Para aprovar:**
+1. Proporções gerais: o oeste bem mais alto, com o prédio, e fundos baixos com anel único.
+2. O norte, o fundo que a câmera do hero vê, com o telão e o sinalizador.
+3. Os 4 grupos grandes de luz representando os 4 setores, que substituem as 4 torres no preloader e no apito final.
+

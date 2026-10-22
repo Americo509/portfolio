@@ -1,0 +1,216 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 840" width="1260" height="840" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <!--
+    Esboço de proporções da arena (docs/estadio-arena.md §7).
+    Mesmo sistema da cena 3D: metros, campo 68 × 105 centrado na origem, norte = −z, oeste = −x.
+    Planta: X = 328 + 3x, Y = 360 + 3z.  Corte transversal: X = 948 + 3x, Y = 380 − 3y.  Corte longitudinal: X = 930 + 3z, Y = 720 − 3y.
+  -->
+  <defs>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F5F5F0" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#F5F5F0" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="stand" width="6" height="6" patternUnits="userSpaceOnUse">
+      <path d="M0 6 L6 0" stroke="#F5F5F0" stroke-opacity="0.35" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1260" height="840" fill="#080808"/>
+
+  <g fill="none" stroke="#F5F5F0" stroke-width="1.4" stroke-linejoin="round">
+
+    <!-- ===================== PLANTA ===================== -->
+    <g>
+      <text x="40" y="44" fill="#F5F5F0" stroke="none" font-size="15" letter-spacing="2">PLANTA · vista de cima</text>
+      <text x="40" y="64" fill="#8a8a85" stroke="none" font-size="11">1 quadradinho da grade = 10 m · norte para cima</text>
+
+      <!-- grade de 10 m -->
+      <g stroke="#F5F5F0" stroke-opacity="0.06" stroke-width="1">
+        <path d="M40 90 V630 M70 90 V630 M100 90 V630 M130 90 V630 M160 90 V630 M190 90 V630 M220 90 V630 M250 90 V630 M280 90 V630 M310 90 V630 M340 90 V630 M370 90 V630 M400 90 V630 M430 90 V630 M460 90 V630 M490 90 V630 M520 90 V630 M550 90 V630 M580 90 V630"/>
+        <path d="M40 90 H598 M40 120 H598 M40 150 H598 M40 180 H598 M40 210 H598 M40 240 H598 M40 270 H598 M40 300 H598 M40 330 H598 M40 360 H598 M40 390 H598 M40 420 H598 M40 450 H598 M40 480 H598 M40 510 H598 M40 540 H598 M40 570 H598 M40 600 H598 M40 630 H598"/>
+      </g>
+
+      <!-- coberturas laterais (tracejado) -->
+      <rect x="76" y="180" width="120" height="360" stroke-dasharray="6 4" stroke-opacity="0.55"/>
+      <rect x="460" y="180" width="102" height="360" stroke-dasharray="6 4" stroke-opacity="0.55"/>
+
+      <!-- prédio oeste -->
+      <rect x="40" y="90" width="36" height="540" fill="#F5F5F0" fill-opacity="0.1"/>
+      <!-- arquibancadas oeste: anel inferior e superior -->
+      <rect x="142" y="192" width="66" height="336" fill="url(#stand)"/>
+      <rect x="76" y="192" width="60" height="336" fill="url(#stand)"/>
+      <!-- arquibancadas leste -->
+      <rect x="448" y="192" width="66" height="336" fill="url(#stand)"/>
+      <rect x="517" y="192" width="45" height="336" fill="url(#stand)"/>
+      <rect x="562" y="180" width="6" height="360" fill="#F5F5F0" fill-opacity="0.25"/>
+      <!-- fundos: anel único, baixo -->
+      <rect x="220" y="106.5" width="216" height="72" fill="url(#stand)"/>
+      <rect x="220" y="541.5" width="216" height="72" fill="url(#stand)"/>
+
+      <!-- arcos dos fundos -->
+      <path d="M148 144 H508 M148 576 H508" stroke-width="3"/>
+      <path d="M172 144 v-4 M196 144 v-4 M220 144 v-4 M244 144 v-4 M268 144 v-4 M292 144 v-4 M316 144 v-4 M340 144 v-4 M364 144 v-4 M388 144 v-4 M412 144 v-4 M436 144 v-4 M460 144 v-4 M484 144 v-4" stroke-opacity="0.7"/>
+      <path d="M172 576 v4 M196 576 v4 M220 576 v4 M244 576 v4 M268 576 v4 M292 576 v4 M316 576 v4 M340 576 v4 M364 576 v4 M388 576 v4 M412 576 v4 M436 576 v4 M460 576 v4 M484 576 v4" stroke-opacity="0.7"/>
+
+      <!-- telão -->
+      <rect x="292" y="99" width="72" height="5" fill="#F5F5F0"/>
+
+      <!-- campo -->
+      <rect x="226" y="202.5" width="204" height="315" stroke-width="1.6"/>
+      <path d="M226 360 H430"/>
+      <circle cx="328" cy="360" r="27.5"/>
+      <rect x="267" y="202.5" width="122" height="49.5"/>
+      <rect x="267" y="468" width="122" height="49.5"/>
+
+      <!-- linha de LED na borda interna das coberturas e dos arcos -->
+      <path d="M196 180 V540 M460 180 V540 M220 180 H436 M220 540 H436" stroke-width="2.4" stroke-opacity="0.9"/>
+
+      <!-- cena atual (sai): torres e caixas -->
+      <g stroke="#6b6b6b" stroke-dasharray="3 3">
+        <path d="M184 162 l8 8 m0 -8 l-8 8 M460 162 l8 8 m0 -8 l-8 8 M184 550 l8 8 m0 -8 l-8 8 M460 550 l8 8 m0 -8 l-8 8"/>
+        <rect x="103" y="162" width="450" height="18"/>
+        <rect x="73" y="141" width="510" height="18"/>
+      </g>
+
+      <!-- câmera do hero -->
+      <path d="M298 528 L382 270" stroke-dasharray="2 4" stroke-opacity="0.7"/>
+      <path d="M292 538 L304 538 L298 524 Z" fill="#F5F5F0"/>
+    </g>
+
+    <!-- grupos de luz na planta: 4 grandes (um por setor) + pequenos -->
+    <g stroke="none">
+      <circle cx="196" cy="360" r="16" fill="url(#glow)"/>
+      <circle cx="460" cy="360" r="16" fill="url(#glow)"/>
+      <circle cx="328" cy="180" r="16" fill="url(#glow)"/>
+      <circle cx="328" cy="540" r="16" fill="url(#glow)"/>
+      <g fill="#F5F5F0" fill-opacity="0.85">
+        <circle cx="196" cy="216" r="2.5"/><circle cx="196" cy="252" r="2.5"/><circle cx="196" cy="288" r="2.5"/><circle cx="196" cy="324" r="2.5"/><circle cx="196" cy="396" r="2.5"/><circle cx="196" cy="432" r="2.5"/><circle cx="196" cy="468" r="2.5"/><circle cx="196" cy="504" r="2.5"/>
+        <circle cx="460" cy="216" r="2.5"/><circle cx="460" cy="252" r="2.5"/><circle cx="460" cy="288" r="2.5"/><circle cx="460" cy="324" r="2.5"/><circle cx="460" cy="396" r="2.5"/><circle cx="460" cy="432" r="2.5"/><circle cx="460" cy="468" r="2.5"/><circle cx="460" cy="504" r="2.5"/>
+        <circle cx="232" cy="180" r="2.5"/><circle cx="268" cy="180" r="2.5"/><circle cx="388" cy="180" r="2.5"/><circle cx="424" cy="180" r="2.5"/>
+        <circle cx="232" cy="540" r="2.5"/><circle cx="268" cy="540" r="2.5"/><circle cx="388" cy="540" r="2.5"/><circle cx="424" cy="540" r="2.5"/>
+      </g>
+      <!-- sinalizador -->
+      <circle cx="286" cy="156" r="9" fill="#E61919" fill-opacity="0.35"/>
+      <circle cx="286" cy="156" r="3.5" fill="#E61919"/>
+    </g>
+
+    <!-- rótulos da planta -->
+    <g stroke="none" fill="#F5F5F0" font-size="11">
+      <text x="44" y="380" transform="rotate(-90 52 360)" text-anchor="middle">PRÉDIO OESTE · 48 m</text>
+      <text x="328" y="84" text-anchor="middle">NORTE · telão · torcida · sinalizador</text>
+      <text x="328" y="650" text-anchor="middle">SUL · câmera do hero</text>
+      <text x="586" y="360" transform="rotate(90 586 360)" text-anchor="middle">LESTE · 34 m</text>
+      <text x="514" y="138" fill="#8a8a85">arco + tirantes</text>
+      <text x="370" y="96" fill="#8a8a85">telão</text>
+      <text x="298" y="132" fill="#E61919" stroke="#080808" stroke-width="4" paint-order="stroke">sinalizador</text>
+      <text x="234" y="432" fill="#8a8a85">campo 68 × 105</text>
+      <text x="240" y="512" fill="#8a8a85">câmera</text>
+      <text x="96" y="672" fill="#8a8a85">cantos abertos entre laterais e fundos · coberturas laterais em tracejado</text>
+    </g>
+
+    <!-- ============ CORTE TRANSVERSAL (z = 0, olhando para o norte) ============ -->
+    <g>
+      <text x="660" y="164" fill="#F5F5F0" stroke="none" font-size="15" letter-spacing="2">CORTE TRANSVERSAL · olhando para o norte</text>
+      <!-- arco norte e telão ao fundo -->
+      <path d="M768 290 Q948 166 1128 290" stroke-dasharray="6 4" stroke-opacity="0.5" stroke-width="2"/>
+      <path d="M840 248 V314 M876 228 V314 M912 220 V314 M948 218 V314 M984 220 V314 M1020 228 V314 M1056 248 V314" stroke-opacity="0.2"/>
+      <rect x="912" y="314" width="72" height="24" stroke-dasharray="4 3" stroke-opacity="0.6"/>
+      <!-- feixes -->
+      <path d="M816 269 L980 380 L900 380 Z" fill="url(#beam)" stroke="none"/>
+      <path d="M1080 281 L916 380 L1000 380 Z" fill="url(#beam)" stroke="none"/>
+      <!-- chão e campo -->
+      <path d="M660 380 H1218" stroke-opacity="0.5"/>
+      <path d="M846 380 H1050" stroke-width="3"/>
+      <!-- oeste -->
+      <rect x="660" y="236" width="36" height="144" fill="#F5F5F0" fill-opacity="0.1"/>
+      <path d="M828 377.6 L762 344 L762 380 Z" fill="url(#stand)"/>
+      <path d="M756 332 L696 266 L696 338 L756 338 Z" fill="url(#stand)"/>
+      <path d="M660 230 L816 260 L816 269 L660 242 Z" fill="#F5F5F0" fill-opacity="0.2"/>
+      <!-- leste -->
+      <path d="M1068 377.6 L1134 344 L1134 380 Z" fill="url(#stand)"/>
+      <path d="M1137 335 L1182 290 L1182 341 L1137 341 Z" fill="url(#stand)"/>
+      <rect x="1182" y="278" width="6" height="102" fill="#F5F5F0" fill-opacity="0.25"/>
+      <path d="M1188 266 L1080 272 L1080 281 L1188 275 Z" fill="#F5F5F0" fill-opacity="0.2"/>
+      <!-- torre atual -->
+      <path d="M810 380 V266 M1086 380 V266" stroke="#6b6b6b" stroke-dasharray="3 3"/>
+    </g>
+    <g stroke="none">
+      <circle cx="816" cy="269" r="10" fill="url(#glow)"/>
+      <circle cx="1080" cy="281" r="10" fill="url(#glow)"/>
+    </g>
+    <g stroke="none" fill="#8a8a85" font-size="11">
+      <text x="662" y="226">48 m</text>
+      <text x="822" y="256">40 m</text>
+      <text x="1150" y="258">38 m</text>
+      <text x="1190" y="296">34 m</text>
+      <text x="764" y="397">oeste: 2 anéis</text>
+      <text x="1054" y="397">leste: 2 anéis</text>
+      <text x="900" y="397">campo</text>
+      <text x="868" y="306">telão (ao fundo)</text>
+      <text x="1000" y="200">arco norte (ao fundo)</text>
+      <text x="756" y="214" fill="#6b6b6b">torre atual 38 m (sai)</text>
+    </g>
+
+    <!-- ============ CORTE LONGITUDINAL (x = 0, olhando para o oeste) ============ -->
+    <g>
+      <text x="660" y="476" fill="#F5F5F0" stroke="none" font-size="15" letter-spacing="2">CORTE LONGITUDINAL · olhando para o oeste</text>
+      <!-- cobertura oeste ao fundo -->
+      <path d="M750 600 H1110" stroke-dasharray="6 4" stroke-opacity="0.45"/>
+      <!-- chão e campo -->
+      <path d="M660 720 H1218" stroke-opacity="0.5"/>
+      <path d="M772.5 720 H1087.5" stroke-width="3"/>
+      <!-- fundos -->
+      <path d="M748.5 717.6 L676.5 678 L676.5 720 Z" fill="url(#stand)"/>
+      <path d="M1111.5 717.6 L1183.5 678 L1183.5 720 Z" fill="url(#stand)"/>
+      <!-- coberturas finas dos fundos -->
+      <path d="M750 648 H666 M1110 648 H1194" stroke-width="2"/>
+      <!-- arcos cortados no topo + tirantes -->
+      <path d="M714 582 V648 M1146 582 V648" stroke-opacity="0.6"/>
+      <circle cx="714" cy="582" r="4" fill="#F5F5F0"/>
+      <circle cx="1146" cy="582" r="4" fill="#F5F5F0"/>
+      <!-- telão -->
+      <rect x="670" y="654" width="5" height="24" fill="#F5F5F0"/>
+      <!-- linha de visão da câmera do hero -->
+      <path d="M1098 709.8 L840 696" stroke-dasharray="2 4" stroke-opacity="0.7"/>
+      <path d="M1094 704 L1106 704 L1100 716 Z" fill="#F5F5F0"/>
+    </g>
+    <g stroke="none">
+      <circle cx="750" cy="648" r="8" fill="url(#glow)"/>
+      <circle cx="1110" cy="648" r="8" fill="url(#glow)"/>
+      <circle cx="726" cy="702" r="8" fill="#E61919" fill-opacity="0.35"/>
+      <circle cx="726" cy="702" r="3" fill="#E61919"/>
+    </g>
+    <g stroke="none" fill="#8a8a85" font-size="11">
+      <text x="664" y="574">arco 46 m</text>
+      <text x="1116" y="574">arco 46 m</text>
+      <text x="756" y="642">cobertura do fundo 24 m</text>
+      <text x="664" y="740">NORTE: anel único, 14 m</text>
+      <text x="1060" y="740">SUL: anel único</text>
+      <text x="880" y="740">campo 105 m</text>
+      <text x="760" y="594">cobertura oeste ao fundo (40 m)</text>
+      <text x="972" y="690">câmera do hero (z 56, 3,4 m)</text>
+      <text x="734" y="696" fill="#E61919">sinalizador</text>
+      <text x="636" y="668" transform="rotate(-90 652 666)" fill="#F5F5F0">telão</text>
+    </g>
+  </g>
+
+  <!-- legenda -->
+  <g font-size="11" fill="#F5F5F0">
+    <line x1="40" y1="790" x2="70" y2="790" stroke="#F5F5F0" stroke-width="1.4"/>
+    <text x="78" y="794">proposta</text>
+    <line x1="160" y1="790" x2="190" y2="790" stroke="#6b6b6b" stroke-dasharray="3 3" stroke-width="1.4"/>
+    <text x="198" y="794" fill="#8a8a85">cena atual (sai)</text>
+    <rect x="320" y="783" width="22" height="14" fill="url(#stand)" stroke="#F5F5F0" stroke-width="1"/>
+    <text x="350" y="794">arquibancada</text>
+    <circle cx="460" cy="790" r="9" fill="url(#glow)"/>
+    <text x="476" y="794">grupo de luz (4 grandes, um por setor)</text>
+    <line x1="742" y1="790" x2="772" y2="790" stroke="#F5F5F0" stroke-width="2.4"/>
+    <text x="780" y="794">linha de LED na borda da cobertura</text>
+    <circle cx="1030" cy="790" r="3.5" fill="#E61919"/>
+    <text x="1042" y="794" fill="#E61919">sinalizador</text>
+    <text x="40" y="820" fill="#8a8a85">Medidas estimadas a partir das referências (design/reference/arena/), ajustadas para a câmera da cena. Não é levantamento arquitetônico.</text>
+  </g>
+</svg>
