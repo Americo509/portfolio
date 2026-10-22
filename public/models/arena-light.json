@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "hash": "f048504506689f4787c47d741c225031ee52908816c0dba6123ed1990cbe5d09",
+  "channels": [
+    "south",
+    "east",
+    "west",
+    "north"
+  ],
+  "encoding": "sqrt",
+  "scale": [
+    10.89027214050293,
+    6.313432693481445,
+    6.184139728546143,
+    12.946606636047363
+  ],
+  "reserveUv": [
+    0.0244140625,
+    0.5068359375
+  ],
+  "glb": "/models/arena.glb",
+  "lightmap": {
+    "low": "/models/arena-light-512.ktx2",
+    "mid": "/models/arena-light-1024.ktx2",
+    "high": "/models/arena-light-2048.ktx2"
+  },
+  "bake": {
+    "res": 2048,
+    "iterations": 512,
+    "shadow": 2048,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "stats": {
+    "cameras": 4682,
+    "faces": 2276,
+    "facesOutside": 275,
+    "areaOutside": 0.184,
+    "atlasOccupancy": 0.5932,
+    "texelsPerUnit": 4.839,
+    "bytes": {
+      "glb": 23224,
+      "low": 206986,
+      "mid": 773936,
+      "high": 2936548
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Luz assada no navegador (plano B do bake)
 
-**Status (22/10):** desenho aprovado na revisão de c51c6fd, com os acréscimos 5 a 11 daquela revisão incorporados abaixo (marcados com o número). O caminho pelo Blender (`docs/arena-blender.md`) é alternativo.
+**Status (22/10):** desenho aprovado na revisão de c51c6fd, com os acréscimos 5 a 11 daquela revisão incorporados abaixo (marcados com o número). Implementado; resultados no §9. O caminho pelo Blender (`docs/arena-blender.md`) é alternativo.
 
 ## Resumo
 
@@ -157,6 +157,29 @@ Na GPU, todos viram 1 byte por texel (2048² com mips dá ~5,3 MB).
 - **Vazamento de luz em geometria fina** (a laje da cobertura dos fundos tem 0,8 m): ajuste de bias e normal offset da sombra. Se não bastar, uma espessura mínima só na geometria do bake.
 - **Pacote do xatlas pouco mantido** (`xatlasjs` 0.2.0): a troca para o `xatlas-three` é direta.
 - **Tempo do bake sem GPU:** se passar de uma hora aqui, o primeiro bake sai em 1024 para validar o desenho, e o de 2048 roda depois.
+
+## 9. Implementação (22/10)
+
+Feito como desenhado, com estes pontos que só apareceram rodando:
+
+- **Quem faz o quê.** O xatlas roda no Node (o pacote tem build para Node); a página no Chromium só renderiza: visibilidade e bake. A geometria sai de `stadium/geometry.ts`, o mesmo módulo que o site usa.
+- **Lado oeste apagado.** As arquibancadas do oeste são o leste espelhado (`scale(-1, 1, 1)`), o que inverte o sentido dos triângulos: a normal do bake apontava para dentro do sólido. O espelho agora desfaz o sentido (`flipWinding`); o site não muda, porque o shader não usa normal.
+- **Ilhas pretas.** O xatlas espelha algumas ilhas, que ficam no sentido horário no espaço da UV, e o material do `ProgressiveLightMap` é de um lado só. A passada da UV agora desenha os dois lados, sem inverter a normal no verso.
+- **Margem da visibilidade.** Entram também as faces finas (menor altura abaixo de 1,5 m) vizinhas de uma face vista, e as cordas entre pontos da trilha (a câmera amortecida corta caminho num scroll rápido). A primeira versão da margem, por qualquer vizinho, trazia de volta o lado de cima das coberturas e foi trocada.
+- **Comparação na mesma página.** A semente da fumaça dos sinalizadores muda a cada carregamento, então a verificação troca o KTX2 pela referência float na mesma página (`window.__bake`, só no `?debug`), com o relógio congelado e sem grão.
+- **Densidade real:** ~4,8 texels/m no 2048 (~21 cm por texel), mais grosso que os ~11 cm estimados no §5: há mais superfície visível do que eu tinha contado.
+
+**Bake final (22/10):** 2048, 512 iterações por setor, sombras de 2048, no Chromium sem GPU: 41 min. 4.682 câmeras; 275 de 2.276 faces (18,4% da área) fora do atlas; ocupação do atlas 59%. Arquivos: `arena.glb` 23 KB; `arena-light-512.ktx2` 202 KB, `-1024` 756 KB, `-2048` 2,87 MB. O 2048 passou da estimativa de ~1,3 MB porque o RDO ficou desligado (§5); ele só entra se a verificação continuar passando, num teste à parte.
+
+**Verificação (`pnpm bake:verify`, tier alto, mesma página, relógio congelado, sem grão):**
+
+| Quadro | Diferença média nas sombras (níveis de 8 bits) | Máxima | Degraus (> 1 nível onde a referência é lisa) |
+|---|---|---|---|
+| Hero, tudo aceso | 0,050 | 1 | 0 em 816.758 pares |
+| Fim do apito final, só o norte | 0,059 | 7 (80 pixels numa faixa da borda esquerda do quadro, efeito do pós; nenhum no meio) | 0 em 1.566.181 pares |
+
+- Faces fora do atlas: 0 pixel magenta em 84 quadros (13 da abertura e 29 da trilha, em desktop e celular).
+- Grade por setor e tema claro: conferidos nas imagens (`scripts/bake-arena/out/verify/`, fora do Git).
 
 ## Depois do bake
 

@@ -4,7 +4,13 @@ import * as React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { ARENA, ARENA_MODEL, archHeight, endStandHeight } from "./config";
+import { ARENA, ARENA_MODEL, endStandHeight } from "./config";
+import { ARENA_PARTS, PART_LOOK, box, buildArenaLines, buildArenaPart, type ArenaPart } from "./geometry";
+import { loadBakedArena, loadReference, type BakedArena } from "./baked";
+import { sceneState } from "./scene-state";
+import { bakeDebug } from "../debug";
+import { useApp } from "@/lib/store";
+import type { GpuTier } from "@/lib/webgl";
 import {
   crowdFragment,
   crowdVertex,
@@ -36,91 +42,61 @@ function rng(seed: number) {
   };
 }
 
-const merge = (geos: THREE.BufferGeometry[]) => {
-  const flat = geos.map((g) => {
-    const n = g.index ? g.toNonIndexed() : g;
-    n.deleteAttribute("uv");
-    n.deleteAttribute("normal");
-    return n;
-  });
-  const merged = mergeGeometries(flat)!;
-  geos.forEach((g) => g.dispose());
-  flat.forEach((g) => g.dispose());
-  return merged;
-};
-
-/** Prisma a partir de um perfil (distância do centro, altura), extrudado ao longo de 2 × half. */
-function profile(points: [number, number][], half: number) {
-  const shape = new THREE.Shape(points.map(([u, v]) => new THREE.Vector2(u, v)));
-  const g = new THREE.ExtrudeGeometry(shape, { depth: half * 2, bevelEnabled: false });
-  g.translate(0, 0, -half);
-  return g;
-}
-
-/** Arquibancada lateral (sign −1 oeste, +1 leste): perfil no plano XY, ao longo de z. */
-function sideTier(sign: number, from: number, to: number, h: readonly [number, number], hanging: boolean) {
-  const base = hanging ? h[0] - 2.2 : 0;
-  const g = profile(
-    [
-      [from, h[0]],
-      [to, h[1]],
-      [to, base],
-      [from, base]
-    ],
-    ARENA.side.halfLength
-  );
-  if (sign < 0) g.scale(-1, 1, 1);
-  return g;
-}
-
-/** Arquibancada do fundo (sign −1 norte, +1 sul): perfil girado para o eixo z. */
-function endTier(sign: number) {
-  const { from, to, h, halfWidth } = ARENA.end;
-  const g = profile(
-    [
-      [from, h[0]],
-      [to, h[1]],
-      [to, 0],
-      [from, 0]
-    ],
-    halfWidth
-  );
-  g.rotateY(sign < 0 ? Math.PI / 2 : -Math.PI / 2);
-  return g;
-}
-
-function box(w: number, h: number, d: number, x: number, y: number, z: number, rotZ = 0) {
-  const g = new THREE.BoxGeometry(w, h, d);
-  if (rotZ) g.rotateZ(rotZ);
-  g.translate(x, y, z);
-  return g;
-}
-
-function useStandMaterial(shared: Shared, base: number, rows: number) {
-  return React.useMemo(
+function useStandMaterial(shared: Shared, base: number, rows: number, baked = false) {
+  const mat = React.useMemo(
     () =>
       new THREE.ShaderMaterial({
         vertexShader: worldVertex,
         fragmentShader: standFragment,
         uniforms: { ...shared, uBase: { value: base }, uRows: { value: rows } },
+        defines: bakedDefines(baked),
         side: THREE.DoubleSide
       }),
-    [shared, base, rows]
+    [shared, base, rows, baked]
   );
+  React.useEffect(() => () => mat.dispose(), [mat]);
+  return mat;
 }
 
-export function ArenaStructure({ shared, additive, truss }: { shared: Shared; additive: boolean; truss: boolean }) {
-  // Com o modelo do Blender, a estrutura vem dele; o LED e o telão continuam no código.
-  // Se o carregamento falhar, volta para a estrutura procedural.
-  const [modelFailed, setModelFailed] = React.useState(false);
-  const useModel = ARENA_MODEL !== null && !modelFailed;
+/** USE_BAKED liga a luz assada no shader da arquibancada; ?debug&bakeCheck pinta as faces fora do atlas. */
+function bakedDefines(baked: boolean): Record<string, string> {
+  if (!baked) return {};
+  const check = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("bakeCheck");
+  return check ? { USE_BAKED: "", BAKE_CHECK: "" } : { USE_BAKED: "" };
+}
+
+/** Um material por parte da estrutura, com o albedo de PART_LOOK. */
+function useStandMaterials(shared: Shared, additive: boolean, baked: boolean) {
+  const mats = React.useMemo(
+    () =>
+      Object.fromEntries(
+        ARENA_PARTS.map((part) => {
+          const look = PART_LOOK[part];
+          return [
+            part,
+            new THREE.ShaderMaterial({
+              vertexShader: worldVertex,
+              fragmentShader: standFragment,
+              uniforms: { ...shared, uBase: { value: look.base[additive ? 0 : 1] }, uRows: { value: look.rows } },
+              defines: bakedDefines(baked),
+              side: THREE.DoubleSide
+            })
+          ];
+        })
+      ) as Record<ArenaPart, THREE.ShaderMaterial>,
+    [shared, additive, baked]
+  );
+  React.useEffect(() => () => Object.values(mats).forEach((m) => m.dispose()), [mats]);
+  return mats;
+}
+
+export function ArenaStructure({ shared, additive, truss, tier }: { shared: Shared; additive: boolean; truss: boolean; tier: GpuTier }) {
+  const materials = useStandMaterials(shared, additive, false);
+  const bakedMaterials = useStandMaterials(shared, additive, true);
+  const baked = useBakedArena(shared, tier, bakedMaterials);
   return (
     <group>
-      {useModel ? (
-        <ArenaModel url={ARENA_MODEL!} shared={shared} onError={() => setModelFailed(true)} />
-      ) : (
-        <ProceduralStructure shared={shared} additive={additive} truss={truss} />
-      )}
+      <ProceduralStructure shared={shared} additive={additive} truss={truss} baked={baked} materials={baked ? bakedMaterials : materials} />
       <LedStrips shared={shared} />
       <Screen shared={shared} />
     </group>
@@ -128,168 +104,108 @@ export function ArenaStructure({ shared, additive, truss }: { shared: Shared; ad
 }
 
 /**
- * A arena do Blender (glTF com meshopt e KTX2). A luz já vem assada na textura, então
- * o material é sem iluminação; a cor escurece com os setores apagados e com o dim
- * dos capítulos de leitura.
+ * Luz assada (docs/bake-luz.md): carrega depois que a cena fica pronta (fora do
+ * TBT), compila o shader novo e troca a geometria com uBaked em 0, o que deixa a troca
+ * invisível (a malha é a mesma e a luz ainda é a analítica). Depois, o crossfade: se
+ * chegou durante a abertura, 0,5 s, dentro dela; se depois, 2 s.
  */
-function ArenaModel({ url, shared, onError }: { url: string; shared: Shared; onError: () => void }) {
-  const gl = useThree((s) => s.gl);
-  const [root, setRoot] = React.useState<THREE.Group | null>(null);
-  const materials = React.useRef<THREE.MeshBasicMaterial[]>([]);
-  const onErrorRef = React.useRef(onError);
-  onErrorRef.current = onError;
-
+function useBakedArena(shared: Shared, tier: GpuTier, materials: Record<ArenaPart, THREE.ShaderMaterial>) {
+  const ready = useApp((s) => s.sceneStatus === "ready");
+  const { gl, camera, scene } = useThree();
+  const [baked, setBaked] = React.useState<BakedArena | null>(null);
+  const refTexture = React.useRef<(() => THREE.Texture | null) | null>(null);
   React.useEffect(() => {
+    // Uma vez só: trocar de tema recria os materiais, mas a luz assada já está na cena.
+    if (!ready || !ARENA_MODEL || baked) return;
     let alive = true;
-    let ktx2: { dispose: () => void } | null = null;
-    let loaded: THREE.Group | null = null;
-    (async () => {
-      const [{ GLTFLoader }, { KTX2Loader }, { MeshoptDecoder }] = await Promise.all([
-        import("three/examples/jsm/loaders/GLTFLoader.js"),
-        import("three/examples/jsm/loaders/KTX2Loader.js"),
-        import("three/examples/jsm/libs/meshopt_decoder.module.js")
-      ]);
-      const loader = new GLTFLoader();
-      const k = new KTX2Loader().setTranscoderPath("/basis/").detectSupport(gl);
-      ktx2 = k;
-      loader.setKTX2Loader(k);
-      loader.setMeshoptDecoder(MeshoptDecoder);
-      const gltf = await loader.loadAsync(url);
-      loaded = gltf.scene;
-      const mats: THREE.MeshBasicMaterial[] = [];
-      gltf.scene.traverse((o) => {
-        const mesh = o as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        const old = mesh.material as THREE.MeshStandardMaterial;
-        const baked = new THREE.MeshBasicMaterial({ map: old.map ?? null, side: THREE.DoubleSide, toneMapped: false });
-        old.dispose();
-        mesh.material = baked;
-        mesh.renderOrder = 1;
-        mats.push(baked);
-      });
-      materials.current = mats;
-      if (alive) setRoot(gltf.scene);
-    })().catch(() => {
-      if (alive) onErrorRef.current();
-    });
+    const start = async () => {
+      try {
+        const b = await loadBakedArena(gl, tier);
+        applyBaked(shared, b);
+        shared.uBaked.value = 0;
+        if (gl.extensions.has("KHR_parallel_shader_compile")) {
+          const group = new THREE.Group();
+          for (const part of ARENA_PARTS) if (b.meshes[part]) group.add(new THREE.Mesh(b.meshes[part]!.geometry, materials[part]));
+          await gl.compileAsync(group, camera, scene).catch(() => undefined);
+        }
+        if (alive) {
+          setBaked(b);
+          bakeDebug.loaded = true;
+          if (new URLSearchParams(window.location.search).has("debug")) {
+            let ref: THREE.Texture | null = null;
+            bakeDebug.loadRef = async (url) => {
+              ref = await loadReference(url);
+            };
+            refTexture.current = () => ref;
+          }
+        }
+      } catch {
+        // Sem a luz assada, fica a analítica.
+      }
+    };
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    const id = w.requestIdleCallback ? w.requestIdleCallback(start, { timeout: 2000 }) : window.setTimeout(start, 300);
     return () => {
       alive = false;
-      ktx2?.dispose();
-      loaded?.traverse((o) => {
-        const mesh = o as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        mesh.geometry.dispose();
-        const m = mesh.material as THREE.MeshBasicMaterial;
-        m.map?.dispose();
-        m.dispose();
-      });
+      if (w.cancelIdleCallback) w.cancelIdleCallback(id);
+      else window.clearTimeout(id);
     };
-  }, [url, gl]);
+  }, [ready, gl, camera, scene, tier, shared, materials, baked]);
 
-  useFrame(() => {
-    const on = shared.uLightOn.value.reduce((a, b) => a + b, 0) / 4;
-    const k = (0.22 + 0.78 * on) * (1 - shared.uDim.value * 0.6);
-    for (const m of materials.current) m.color.setScalar(k);
+  const fade = React.useRef(0);
+  useFrame((_, delta) => {
+    if (!baked) return;
+    // ?debug: a referência float da verificação no lugar do KTX2.
+    const ref = bakeDebug.useRef ? refTexture.current?.() : null;
+    shared.uLightmap.value = ref ?? baked.lightmap;
+    if (!fade.current) fade.current = sceneState.intro < 0.87 ? 0.5 : 2;
+    shared.uBaked.value = bakeDebug.baked ?? Math.min(1, shared.uBaked.value + delta / fade.current);
   });
-
-  return root ? <primitive object={root} /> : null;
+  return baked;
 }
 
-function ProceduralStructure({ shared, additive, truss }: { shared: Shared; additive: boolean; truss: boolean }) {
-  const { roof } = ARENA.side;
+function applyBaked(shared: Shared, b: BakedArena) {
+  shared.uLightmap.value = b.lightmap;
+  shared.uLightScale.value.set(...b.meta.scale);
+  shared.uReserveUv.value.set(...b.meta.reserveUv);
+}
 
-  const seats = React.useMemo(() => {
-    const { lower, upper } = ARENA.side;
-    return merge([
-      ...[-1, 1].flatMap((s) => [sideTier(s, lower.from, lower.to, lower.h, false), sideTier(s, upper.from, upper.to, upper.h, true)]),
-      endTier(-1),
-      endTier(1)
-    ]);
-  }, []);
+function ProceduralStructure({
+  shared,
+  additive,
+  truss,
+  baked,
+  materials
+}: {
+  shared: Shared;
+  additive: boolean;
+  truss: boolean;
+  /** Com a luz assada, as malhas vêm do glTF (os mesmos vértices, mais a UV do lightmap). */
+  baked: BakedArena | null;
+  materials: Record<ArenaPart, THREE.ShaderMaterial>;
+}) {
+  const parts = React.useMemo(() => ARENA_PARTS.map((part) => ({ part, geo: buildArenaPart(part) })), []);
+  const lines = React.useMemo(() => buildArenaLines(truss), [truss]);
 
-  const solid = React.useMemo(() => {
-    const { building } = ARENA.side;
-    const run = roof.outer - roof.inner;
-    const angle = Math.atan2(roof.h[1] - roof.h[0], run);
-    const len = Math.hypot(run, roof.h[1] - roof.h[0]);
-    const mid = (roof.inner + roof.outer) / 2;
-    const midH = (roof.h[0] + roof.h[1]) / 2 + 0.6;
-    const er = ARENA.end.roof;
-    const { z, halfSpan, spring } = ARENA.arch;
-    const sw = ARENA.screen;
-    const parts: THREE.BufferGeometry[] = [];
-    for (const s of [-1, 1]) {
-      const bw = building.to - building.from;
-      parts.push(box(bw, building.h, building.halfLength * 2, s * (building.from + bw / 2), building.h / 2, 0));
-      parts.push(box(len, 1.2, roof.halfLength * 2, s * mid, midH, 0, s * angle));
-      parts.push(box(er.halfWidth * 2, 0.8, er.to - er.from, 0, er.h, s * (er.from + er.to) / 2));
-      // Pilares dos arcos, nos cantos abertos.
-      parts.push(box(2.4, spring, 2.4, -halfSpan, spring / 2, s * z));
-      parts.push(box(2.4, spring, 2.4, halfSpan, spring / 2, s * z));
-    }
-    // Estrutura do telão.
-    parts.push(box(sw.width + 2, sw.h[1] - sw.h[0] + 2, 1.2, 0, (sw.h[0] + sw.h[1]) / 2, sw.z - 0.8));
-    parts.push(box(1.2, sw.h[0], 1.2, -sw.width / 3, sw.h[0] / 2, sw.z - 0.8));
-    parts.push(box(1.2, sw.h[0], 1.2, sw.width / 3, sw.h[0] / 2, sw.z - 0.8));
-    return merge(parts);
-  }, [roof]);
-
-  const arches = React.useMemo(() => {
-    const { z, halfSpan } = ARENA.arch;
-    return merge(
-      [-1, 1].map((s) => {
-        const pts = Array.from({ length: 25 }, (_, i) => {
-          const x = -halfSpan + (i / 24) * halfSpan * 2;
-          return new THREE.Vector3(x, archHeight(x), s * z);
-        });
-        return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 64, 0.9, 8, false);
-      })
-    );
-  }, []);
-
-  // Tirantes dos arcos e, nos tiers médio e alto, a treliça da borda das coberturas laterais.
-  const lines = React.useMemo(() => {
-    const v: number[] = [];
-    const { z, hangerStep } = ARENA.arch;
-    const er = ARENA.end.roof;
-    for (const s of [-1, 1])
-      for (let x = -er.halfWidth; x <= er.halfWidth; x += hangerStep) v.push(x, archHeight(x), s * z, x, er.h, s * z);
-    if (truss) {
-      const top = roof.h[0];
-      const bottom = top - roof.depth;
-      for (const s of [-1, 1]) {
-        const x = s * roof.inner;
-        v.push(x, top, -roof.halfLength, x, top, roof.halfLength, x, bottom, -roof.halfLength, x, bottom, roof.halfLength);
-        for (let zz = -roof.halfLength, k = 0; zz < roof.halfLength; zz += 6, k++)
-          v.push(x, k % 2 ? top : bottom, zz, x, k % 2 ? bottom : top, zz + 6);
-      }
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
-    return g;
-  }, [truss, roof]);
-
-  const seatMat = useStandMaterial(shared, additive ? 0.03 : 0.12, 1);
-  const solidMat = useStandMaterial(shared, additive ? 0.02 : 0.1, 0);
-  const archMat = useStandMaterial(shared, additive ? 0.32 : 0.45, 0);
   const lineMat = React.useMemo(() => new THREE.LineBasicMaterial({ transparent: true, opacity: additive ? 0.28 : 0.35 }), [additive]);
   useFrame(() => {
     lineMat.color.copy(shared.uFg.value);
   });
 
-  React.useEffect(
-    () => () => {
-      [seats, solid, arches, lines].forEach((g) => g.dispose());
-    },
-    [seats, solid, arches, lines]
-  );
-  React.useEffect(() => () => [seatMat, solidMat, archMat, lineMat].forEach((m) => m.dispose()), [seatMat, solidMat, archMat, lineMat]);
+  React.useEffect(() => () => parts.forEach(({ geo }) => geo.dispose()), [parts]);
+  React.useEffect(() => () => lines.dispose(), [lines]);
+  React.useEffect(() => () => lineMat.dispose(), [lineMat]);
 
   return (
     <group>
-      <mesh geometry={seats} material={seatMat} renderOrder={1} />
-      <mesh geometry={solid} material={solidMat} renderOrder={1} />
-      <mesh geometry={arches} material={archMat} renderOrder={1} />
+      {parts.map(({ part, geo }) => {
+        const m = baked?.meshes[part];
+        return m ? (
+          <mesh key={part} geometry={m.geometry} material={materials[part]} matrixAutoUpdate={false} matrix={m.matrixWorld} renderOrder={1} />
+        ) : (
+          <mesh key={part} geometry={geo} material={materials[part]} renderOrder={1} />
+        );
+      })}
       <lineSegments geometry={lines} material={lineMat} renderOrder={1} />
     </group>
   );
@@ -383,11 +299,41 @@ export function NorthCrowd({
   );
 }
 
+/**
+ * A arquibancada norte no pênalti: a mesma parte da arena, com a mesma luz assada
+ * quando ela existe (a câmera do pênalti entrou na amostragem do atlas).
+ */
 function NorthStand({ shared, additive }: { shared: Shared; additive: boolean }) {
-  const geo = React.useMemo(() => merge([endTier(-1)]), []);
-  const mat = useStandMaterial(shared, additive ? 0.03 : 0.12, 1);
-  React.useEffect(() => () => (geo.dispose(), mat.dispose()), [geo, mat]);
-  return <mesh geometry={geo} material={mat} renderOrder={1} />;
+  const geo = React.useMemo(() => buildArenaPart("seatEndNorth"), []);
+  const look = PART_LOOK.seatEndNorth;
+  const mat = useStandMaterial(shared, look.base[additive ? 0 : 1], look.rows);
+  const bakedMat = useStandMaterial(shared, look.base[additive ? 0 : 1], look.rows, true);
+  const gl = useThree((s) => s.gl);
+  const [mesh, setMesh] = React.useState<THREE.Mesh | null>(null);
+  React.useEffect(() => {
+    if (!ARENA_MODEL) return;
+    let alive = true;
+    loadBakedArena(gl, "mid")
+      .then((b) => {
+        if (!alive || !b.meshes.seatEndNorth) return;
+        applyBaked(shared, b);
+        shared.uBaked.value = 0;
+        setMesh(b.meshes.seatEndNorth);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [gl, shared]);
+  useFrame((_, delta) => {
+    if (mesh) shared.uBaked.value = bakeDebug.baked ?? Math.min(1, shared.uBaked.value + delta);
+  });
+  React.useEffect(() => () => geo.dispose(), [geo]);
+  return mesh ? (
+    <mesh geometry={mesh.geometry} material={bakedMat} matrixAutoUpdate={false} matrix={mesh.matrixWorld} renderOrder={1} />
+  ) : (
+    <mesh geometry={geo} material={mat} renderOrder={1} />
+  );
 }
 
 function FlareSmoke({ shared, count, blending }: { shared: Shared; count: number; blending: THREE.Blending }) {

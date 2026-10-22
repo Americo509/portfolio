@@ -127,6 +127,8 @@ function Effects({ level, resenha }: { level: "bloom" | "full"; resenha: boolean
   });
 
   const lut = React.useMemo(() => getLut(resenha ? "resenha" : "night"), [resenha]);
+  // ?debug&nograin: sem grão (aleatório a cada quadro), para a verificação do bake comparar dois quadros.
+  const [grain] = React.useState(() => !(new URLSearchParams(window.location.search).has("debug") && new URLSearchParams(window.location.search).has("nograin")));
 
   if (level === "bloom") {
     return (
@@ -134,7 +136,7 @@ function Effects({ level, resenha }: { level: "bloom" | "full"; resenha: boolean
         <Bloom mipmapBlur intensity={0.9} luminanceThreshold={0.55} luminanceSmoothing={0.2} />
         <ToneMapping mode={ToneMappingMode.AGX} />
         <LUT lut={lut} />
-        <Noise premultiply blendFunction={BlendFunction.SOFT_LIGHT} opacity={0.2} />
+        {grain ? <Noise premultiply blendFunction={BlendFunction.SOFT_LIGHT} opacity={0.2} /> : null}
         <Vignette offset={0.25} darkness={0.75} />
       </EffectComposer>
     );
@@ -147,7 +149,7 @@ function Effects({ level, resenha }: { level: "bloom" | "full"; resenha: boolean
       <primitive object={lensEffect} dispose={null} />
       <ToneMapping mode={ToneMappingMode.AGX} />
       <LUT lut={lut} tetrahedralInterpolation />
-      <Noise premultiply blendFunction={BlendFunction.SOFT_LIGHT} opacity={0.2} />
+      {grain ? <Noise premultiply blendFunction={BlendFunction.SOFT_LIGHT} opacity={0.2} /> : null}
       <Vignette offset={0.25} darkness={0.75} />
     </EffectComposer>
   );

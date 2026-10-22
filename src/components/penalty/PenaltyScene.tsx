@@ -9,6 +9,7 @@ import { GOAL, zoneCenter, type Outcome } from "@/lib/penalty/engine";
 import { NorthCrowd } from "@/components/scene/stadium/Arena";
 import { PITCH, endStandHeight } from "@/components/scene/stadium/config";
 import { createShared } from "@/components/scene/stadium/shared";
+import { NORTH_OFFSET, PENALTY_CAMERA, penaltyFov } from "./camera";
 
 export type KickPlan = {
   target: { x: number; y: number };
@@ -301,7 +302,6 @@ function Backdrop({ dark }: { dark: boolean }) {
  * A torcida norte da arena atrás do gol, com bandeirões e sinalizadores. O gol
  * do pênalti fica em z = 0, que é a linha de fundo norte da arena deslocada.
  */
-const NORTH_OFFSET = PITCH.length / 2;
 
 function NorthEnd({ dark, reduce }: { dark: boolean; reduce: boolean }) {
   const shared = React.useMemo(() => createShared(NORTH_OFFSET), []);
@@ -373,12 +373,10 @@ function SceneContent({ control, aim, onAim, muralha, reduce, dark }: Props) {
   const { size } = useThree();
   React.useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera;
-    cam.position.set(0, 1.35, 14.4);
-    cam.lookAt(0, 1.05, 0);
+    cam.position.set(...PENALTY_CAMERA.pos);
+    cam.lookAt(...PENALTY_CAMERA.look);
     // Campo de visão vertical mínimo para caber o gol (± 4,4 m) na largura em qualquer proporção.
-    const hHalf = Math.atan(4.6 / 14.4);
-    const vfov = (2 * Math.atan(Math.tan(hHalf) / (size.width / size.height)) * 180) / Math.PI;
-    cam.fov = Math.max(27, vfov);
+    cam.fov = penaltyFov(size.width / size.height);
     cam.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 
@@ -481,8 +479,9 @@ function SceneContent({ control, aim, onAim, muralha, reduce, dark }: Props) {
     if (shake.current > 0) {
       shake.current = Math.max(0, shake.current - delta);
       const s = shake.current * 0.25;
-      state.camera.position.set((Math.random() - 0.5) * s, 1.35 + (Math.random() - 0.5) * s, 14.4);
-      state.camera.lookAt(0, 1.05, 0);
+      const [px, py, pz] = PENALTY_CAMERA.pos;
+      state.camera.position.set(px + (Math.random() - 0.5) * s, py + (Math.random() - 0.5) * s, pz);
+      state.camera.lookAt(...PENALTY_CAMERA.look);
     }
   });
 
@@ -524,7 +523,7 @@ export default function PenaltyScene(props: Props) {
   return (
     <Canvas
       dpr={[1, 1.75]}
-      camera={{ position: [0, 1.35, 14.4], fov: 27, near: 0.1, far: 120 }}
+      camera={{ position: [...PENALTY_CAMERA.pos], fov: PENALTY_CAMERA.minFov, near: 0.1, far: 120 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       style={{ position: "absolute", inset: 0, touchAction: "none" }}
       aria-hidden="true"

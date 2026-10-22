@@ -77,7 +77,12 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
   - grão no pós-processamento (o grão em CSS some quando ele está ativo) e flare anamórfico nos 12 grupos de refletores;
   - letterbox 2.39:1 no túnel, na saída dele e no apito final (`Letterbox.tsx` e o preloader, que também tem a câmera na mão);
   - no tier alto, rack focus (profundidade de campo, o estádio desfoca nos capítulos de leitura) e motion blur só nos movimentos rápidos.
-- **Luz assada:** o código aceita o modelo com luz assada (`ARENA_MODEL` em `stadium/config.ts`, glTF com meshopt e KTX2; o transcodificador fica em `public/basis/`). Enquanto ele não existe, a estrutura continua procedural. O caminho escolhido é o bake no navegador, um por setor em RGBA ([`docs/bake-luz.md`](docs/bake-luz.md), em desenho); o Blender ficou como alternativa ([`docs/arena-blender.md`](docs/arena-blender.md)).
+- **Luz assada ([`docs/bake-luz.md`](docs/bake-luz.md)):** `pnpm bake:arena` assa a luz da estrutura no Chromium, com o `ProgressiveLightMap` do three: um bake por setor da cobertura, empacotado em RGBA (R sul, G leste, B oeste, A norte), somado no shader com o peso de cada setor, então o apito final e a meia-luz das páginas internas continuam apagando por setor, agora com sombras.
+  - A geometria é a mesma da procedural (`stadium/geometry.ts`); a UV do lightmap sai do xatlas, com as faces que nenhuma câmera real vê (trilhas, abertura, páginas internas, pênalti) fora do atlas.
+  - Saída em `public/models/`: `arena.glb` (meshopt), um KTX2 UASTC por tier (512, 1024, 2048; raiz quadrada com dither contra degraus nos pretos, mipmaps em espaço linear) e `arena-light.json` (escalas e o hash do bake).
+  - O site carrega depois que a cena fica pronta e faz o crossfade (0,5 s dentro da abertura, 2 s depois). Sem os arquivos, fica a luz analítica.
+  - `pnpm bake:arena --headed` roda com o navegador visível e a GPU da máquina; `pnpm bake:verify <url>` gera a verificação (setores, float × KTX2, degraus, tema claro, faces fora do atlas). O teste `e2e/bake.spec.ts` falha com "Bake vencido" se a arena ou as luzes mudarem sem um bake novo.
+  - O Blender ficou como caminho alternativo ([`docs/arena-blender.md`](docs/arena-blender.md)).
 - **Desempenho:**
   - Os shaders compilam em paralelo (`compileAsync`) quando o navegador tem `KHR_parallel_shader_compile`.
   - Arquibancadas, torcida e bandeiras usam uma luz barata por setor (4 barras em vez de 12 cones), mais rápida de compilar.

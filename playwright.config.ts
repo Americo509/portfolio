@@ -18,14 +18,16 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      testIgnore: /scene\.spec/,
+      testIgnore: /scene\.spec|bake\.spec/,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 }, launchOptions: { args: ["--disable-webgl"] } }
     },
     {
       name: "mobile",
-      testIgnore: /scene\.spec/,
+      testIgnore: /scene\.spec|bake\.spec/,
       use: { ...devices["Pixel 7"], launchOptions: { args: ["--disable-webgl"] } }
     },
+    // Sem navegador: confere se a luz assada não está vencida (scripts/bake-arena).
+    { name: "node", testMatch: /bake\.spec/ },
     {
       name: "webgl",
       testMatch: /scene\.spec/,

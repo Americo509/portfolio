@@ -32,11 +32,11 @@ export const ARENA = {
 };
 
 /**
- * Modelo da arena feito no Blender, com a luz assada (docs/arena-blender.md). Com
- * null, a estrutura continua procedural. Ao subir public/models/arena.glb, troque
- * por "/models/arena.glb".
+ * Luz assada da arena (docs/bake-luz.md): os metadados do bake, que apontam para o
+ * .glb e para os lightmaps por tier. Gerado por `pnpm bake:arena`. Com null, ou se o
+ * carregamento falhar, a estrutura fica com a luz analítica de sempre.
  */
-export const ARENA_MODEL: string | null = null;
+export const ARENA_MODEL: string | null = "/models/arena-light.json";
 
 /** Altura da arquibancada do fundo numa distância |z| do meio-campo. */
 export const endStandHeight = (absZ: number) => {

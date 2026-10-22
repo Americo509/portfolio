@@ -8,9 +8,10 @@ import type { GpuTier } from "@/lib/webgl";
 import { ARENA, CONE_TAN, LIGHTS, TIER_SETTINGS } from "./config";
 import { AMBIENT, AMBIENT_DIM_NO_BLUR, CHAPTER_ORDER, INTRO, TRACKS, sampleTrack, type Shot } from "./camera-track";
 import { lens } from "./lens-state";
-import { cameraLive, useCameraDebug } from "../debug";
+import { bakeDebug, cameraLive, useCameraDebug } from "../debug";
 import { ArenaStructure, NorthCrowd } from "./Arena";
 import { createShared, signalLight, type Shared } from "./shared";
+import { sceneState } from "./scene-state";
 import {
   beamFragment,
   beamVertex,
@@ -286,7 +287,8 @@ function CameraRig({ shared, mode, blur }: { shared: Shared; mode: SceneMode; bl
     for (let i = 0; i < 4; i++) {
       const on = final ? 1 - THREE.MathUtils.smoothstep(motionState.chapterProgress, 0.12 + i * 0.14, 0.24 + i * 0.14) : mode === "hero" ? 1 : 0.4;
       st.lights[i] += (on - st.lights[i]) * k * 2;
-      shared.uLightOn.value[i] = st.lights[i];
+      // ?debug (verificação do bake): setores forçados por window.__bake.
+      shared.uLightOn.value[i] = bakeDebug.sectors ? bakeDebug.sectors[i] : st.lights[i];
     }
 
     // Saída do túnel: dolly zoom (a torcida norte fica do mesmo tamanho enquanto a câmera
@@ -309,6 +311,7 @@ function CameraRig({ shared, mode, blur }: { shared: Shared; mode: SceneMode; bl
       fov = THREE.MathUtils.lerp(vertigo(mid.pos), L.fov, u);
     }
     const settled = intro.current.t;
+    sceneState.intro = settled;
     pos.x += st.x * 2.4 * settled;
     pos.y += st.y * 1.0 * settled;
 
@@ -399,7 +402,7 @@ export function Stadium({
   const settings = TIER_SETTINGS[tier];
   const { scene, gl } = useThree();
   React.useEffect(() => {
-    if (new URLSearchParams(window.location.search).has("debug")) Object.assign(window, { __scene: scene, __gl: gl });
+    if (new URLSearchParams(window.location.search).has("debug")) Object.assign(window, { __scene: scene, __gl: gl, __bake: bakeDebug, __cameraDebug: useCameraDebug });
   }, [scene, gl]);
   const blending = palette.additive ? THREE.AdditiveBlending : THREE.NormalBlending;
 
@@ -416,7 +419,7 @@ export function Stadium({
   // trocar de página.
   const hype = React.useRef(mode === "hero" ? 1 : 0);
   useFrame((_, delta) => {
-    shared.uTime.value += delta;
+    shared.uTime.value = bakeDebug.freeze ?? shared.uTime.value + delta;
     const t = shared.uTime.value;
     hype.current += ((mode === "hero" ? 1 : 0) - hype.current) * (1 - Math.exp(-delta * 1.5));
     shared.uFlare.value = (0.85 + 0.15 * Math.sin(t * 13) * Math.sin(t * 3.7)) * hype.current;
@@ -427,7 +430,7 @@ export function Stadium({
     <>
       <CameraRig shared={shared} mode={mode} blur={blur} />
       <Pitch shared={shared} />
-      <ArenaStructure shared={shared} additive={palette.additive} truss={settings.truss} />
+      <ArenaStructure shared={shared} additive={palette.additive} truss={settings.truss} tier={tier} />
       {stage >= 1 ? (
         <>
           <Fog shared={shared} layers={settings.fogLayers} blending={blending} />

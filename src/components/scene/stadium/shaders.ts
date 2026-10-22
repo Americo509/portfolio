@@ -459,11 +459,30 @@ export const standFragment = /* glsl */ `
   uniform float uBase;
   uniform float uRows;
   varying vec3 vWorld;
+  #ifdef USE_BAKED
+    // Luz assada: um canal por setor (R sul, G leste, B oeste, A norte), guardado como
+    // raiz quadrada; a luz é a soma dos 4, pesados pela intensidade de cada setor.
+    uniform sampler2D uLightmap;
+    uniform vec4 uLightScale;
+    uniform float uBaked;
+    uniform vec2 uReserveUv;
+    varying vec2 vUv;
+  #endif
   ${sectorLight}
   ${flares}
   void main() {
     vec3 p = vWorld;
     float lit = sectorSpill(p);
+    #ifdef USE_BAKED
+      vec4 L = texture2D(uLightmap, vUv);
+      L *= L;
+      float baked = dot(L * uLightScale, vec4(uLightOn[0], uLightOn[1], uLightOn[2], uLightOn[3]));
+      lit = mix(lit, baked, uBaked);
+      #ifdef BAKE_CHECK
+        // ?bakeCheck: faces fora do atlas em magenta (nenhuma deve aparecer nas trilhas).
+        if (distance(vUv, uReserveUv) < 1e-3) { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); return; }
+      #endif
+    #endif
     float rows = uRows * step(0.58, fract(p.y * 1.35));
     vec3 color = mix(uBg, uFg, uBase) + uFg * lit * (0.06 + rows * 0.32);
     color += uSignal * flareGlow(p, 0.27) * 0.9;

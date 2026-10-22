@@ -36,6 +36,14 @@ Regra: tudo em `public/` (e as imagens em `src/app/`) é publicado no deploy. Na
 | Capas das Categorias de base (`src/components/projects/BaseCover.tsx`) | SVG procedural com o número do projeto; substituiu os prints dos projetos de estudo, que incluíam marca da Apple e do Spotify (removidos em 2026-10-22) | Próprio | 2026-10-22 | Gustavo (com Claude) |
 | `public/images/resenha/cromo-10.jpg`, `cromo-77.jpg` | Ilustrações procedurais | Próprio | 2026-10-21 | Gustavo (com Claude) |
 
+## Modelos e luz assada
+
+| Arquivo | Origem | Licença | Data | Quem fez |
+|---|---|---|---|---|
+| `public/models/arena.glb` | Geometria procedural do projeto (`stadium/geometry.ts`) com a UV do lightmap, gerada por `pnpm bake:arena` (xatlas, glTF Transform, meshopt) | Próprio | 2026-10-22 | Gustavo (com Claude) |
+| `public/models/arena-light-*.ktx2` | Luz assada da arena, um setor por canal, gerada por `pnpm bake:arena` (`ProgressiveLightMap` do three, basis_universal) | Próprio | 2026-10-22 | Gustavo (com Claude) |
+| `public/models/arena-light.json` | Metadados do bake (escalas, hash, arquivos) | Próprio | 2026-10-22 | Gustavo (com Claude) |
+
 ## Som
 
 Ainda não há arquivos de som: tudo é gerado no navegador (Web Audio). A gravação da torcida entra na etapa 5 do plano, e cada arquivo ganha uma linha aqui.

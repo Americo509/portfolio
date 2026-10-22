@@ -32,7 +32,13 @@ export function createShared(offsetZ = 0) {
     uSectorA: { value: [0, 1, 2, 3].map((s) => LIGHTS[s * LIGHTS_PER_SECTOR].pos.clone().add(shift)) },
     uSectorB: { value: [0, 1, 2, 3].map((s) => LIGHTS[s * LIGHTS_PER_SECTOR + LIGHTS_PER_SECTOR - 1].pos.clone().add(shift)) },
     uScale: { value: 1 },
-    uCamPos: { value: new THREE.Vector3() }
+    uCamPos: { value: new THREE.Vector3() },
+    // Luz assada (docs/bake-luz.md): lightmap RGBA por setor, escala de cada canal, a
+    // mistura com a luz analítica e a UV da ilha-reserva (faces fora do atlas).
+    uLightmap: { value: null as THREE.Texture | null },
+    uLightScale: { value: new THREE.Vector4(1, 1, 1, 1) },
+    uBaked: { value: 0 },
+    uReserveUv: { value: new THREE.Vector2() }
   };
 }
 

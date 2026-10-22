@@ -88,3 +88,22 @@ export function resetPerf() {
   perfLive.index = 0;
   perfLive.count = 0;
 }
+
+// ---------------------------------------------------------------------------
+// Verificação do bake de luz (scripts/bake-arena/verify): sobrescritas do ?debug,
+// controladas por window.__bake.
+
+export const bakeDebug = {
+  /** Intensidade de cada setor no lugar da do CameraRig (null segue a cena). */
+  sectors: null as number[] | null,
+  /** Força a mistura analítica/assada (0 ou 1); null segue o crossfade. */
+  baked: null as number | null,
+  /** Congela o relógio dos shaders (segundos): dois quadros comparáveis. */
+  freeze: null as number | null,
+  /** A luz assada já está na cena (o crossfade pode estar no meio). */
+  loaded: false,
+  /** Usa a referência float no lugar do KTX2, na mesma página (mesma fumaça, mesmo quadro). */
+  useRef: false,
+  /** Carrega a referência float (definida pela cena quando a luz assada chega). */
+  loadRef: null as ((url: string) => Promise<void>) | null
+};
