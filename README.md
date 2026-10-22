@@ -19,6 +19,7 @@ I build real-world systems:
 - On-demand marketplace mobile apps
 
 Currently improving my expertise in:
+- Application Security & Blue Team (postgraduate degree at FIAP)
 - Distributed transactions
 - System design & scalability
 - Cloud architecture

@@ -13,14 +13,16 @@ export const portfolioEN: Portfolio = {
     heroHeadline: "I design and build scalable systems with solid architecture and frictionless experience.",
     heroSubheadline:
       "Backend (Node/NestJS) • Frontend (React/Next) • Mobile (React Native/Expo) — product-driven engineering, with a tight defence from the very first commit.",
-    location: "Paraná, Brazil",
+    location: "Maringá, Brazil (Remote / Open to Relocation)",
     bioShort: "Software engineer focused on clear architecture, evolvable systems and security — from backend to mobile.",
     bioLong: `
       I'm a Software Engineer (Unicesumar) working as an Architect and Full Stack Engineer across backend, frontend and mobile.
 
       My work goes beyond shipping features. I design systems with clear domain modelling, explicit contracts and architectural decisions built for long-term evolution — and I treat security (AppSec) as a design requirement, not a final step.
 
-      Today I'm the architect, full stack developer and technical PO of a multi-tenant medical rostering SaaS in production, while also leading YourBest and building my own AI-powered products.
+      Today I'm a Full Stack Developer (independent contractor) at Grupo G6, the end-to-end technical owner, from architecture to delivery, of the medical shift-scheduling web system and mobile app used by hospitals. Before that I was co-CEO of YourBest and development lead at Nevra Software.
+
+      On the side, I build my own AI-powered products and I'm pursuing a postgraduate degree in Blue Team (Cybersecurity) at FIAP, going deeper into AppSec and security operations.
     `.trim()
   },
   links: {
@@ -30,9 +32,10 @@ export const portfolioEN: Portfolio = {
   },
   education: {
     title: "Bachelor's Degree in Software Engineering",
-    detail: "Strong foundation in software architecture, system design, data structures and engineering best practices."
+    detail:
+      "Bachelor's in Software Engineering from Unicesumar (2020–2024). Postgraduate degree in Blue Team (Cybersecurity) at FIAP (Jul 2026 – May 2027, in progress): information security fundamentals, Linux, networking and shell scripting, cyber intelligence, OSINT and digital forensics."
   },
-  credibilityLine: "Software Engineer • Architecture, AppSec and full stack development",
+  credibilityLine: "Software Engineer • Architecture, AppSec and full stack development • Blue Team postgrad (FIAP)",
   skills: [
     {
       label: "Backend Engineering",
@@ -46,6 +49,7 @@ export const portfolioEN: Portfolio = {
         "Supabase",
         "Redis (Cache & Queues)",
         "BullMQ",
+        "WebSockets (Socket.io)",
         "Kafka / RabbitMQ",
         "Testing (Jest - Unit & Integration)"
       ]
@@ -60,7 +64,7 @@ export const portfolioEN: Portfolio = {
         "Tailwind CSS",
         "GSAP",
         "State Management (Zustand)",
-        "Data Fetching (React Query)",
+        "Data Fetching (TanStack Query)",
         "Accessibility & Performance"
       ]
     },
@@ -70,6 +74,7 @@ export const portfolioEN: Portfolio = {
         "React Native",
         "Expo",
         "Expo Router",
+        "NativeWind",
         "Offline-first",
         "Geolocation & Geofencing",
         "Reanimated & Gestures",
@@ -84,6 +89,7 @@ export const portfolioEN: Portfolio = {
         "Domain-Driven Design (DDD)",
         "Clean Architecture",
         "Multi-tenant SaaS",
+        "Monorepo (Turborepo, pnpm workspaces)",
         "Event-Driven Architecture",
         "Queues (BullMQ / Redis)",
         "Observability (Logs, Metrics, Tracing)"
@@ -93,11 +99,18 @@ export const portfolioEN: Portfolio = {
       label: "AppSec & Blue Team",
       items: [
         "Authentication (JWT, RBAC, 2FA)",
+        "Password hashing (Argon2, bcrypt)",
+        "AES-256-GCM encryption",
+        "Row Level Security (Postgres)",
+        "CSP hardening",
+        "LGPD/GDPR (database-level consent & deletion)",
         "Rate limiting",
         "Multi-tenant isolation",
         "Validation & sanitisation (Zod)",
         "Geofence anti-fraud",
-        "Audit logging"
+        "Audit logging",
+        "Security auditing (P0–P3 risk triage)",
+        "OSINT & digital forensics (FIAP postgrad, in progress)"
       ]
     },
     {
@@ -120,10 +133,10 @@ export const portfolioEN: Portfolio = {
         label: "Defence",
         subtitle: "AppSec / Blue Team",
         players: [
-          { number: 1, position: "Goalkeeper", role: "Authentication & authorisation", items: ["JWT", "RBAC", "2FA"] },
+          { number: 1, position: "Goalkeeper", role: "Authentication & authorisation", items: ["JWT", "RBAC", "2FA", "Argon2"] },
           { number: 2, position: "Full-back", role: "Validation & sanitisation", items: ["Zod", "Input sanitisation"] },
           { number: 3, position: "Centre-back", role: "Edge protection", items: ["Rate limiting", "WAF"] },
-          { number: 4, position: "Centre-back", role: "Multi-tenant isolation", items: ["Strict per-tenant isolation"] },
+          { number: 4, position: "Centre-back", role: "Isolation & encryption", items: ["Strict per-tenant isolation", "RLS", "AES-256-GCM"] },
           { number: 6, position: "Full-back", role: "Anti-fraud", items: ["Geofencing", "Check-in validation"] }
         ]
       },
@@ -223,14 +236,19 @@ export const portfolioEN: Portfolio = {
     ],
     timeline: [
       {
+        year: "2021",
+        title: "First contract: internship at Nevra Software",
+        body: "Joined Nevra Software as a development intern, supporting internal systems and the version-control workflow while studying Software Engineering at Unicesumar."
+      },
+      {
         year: "2022",
         title: "Solid engineering foundations and legacy systems",
         body: "Delphi development and enterprise systems, building fundamentals in logic, data modelling, version control and engineering practices. First experience in real production environments and agile cycles."
       },
       {
         year: "2023",
-        title: "Strategic move to modern web architecture",
-        body: "Shifted from legacy systems to modern full stack development with React, NestJS and TypeScript. Built scalable web applications and deepened REST APIs, relational databases and modular design."
+        title: "Full stack developer and modern web architecture",
+        body: "Hired as a full stack developer at Nevra Software. Shifted from legacy systems to modern development with React, NestJS and TypeScript: APIs and database integrations, legacy system evolution and agile sprints."
       },
       {
         year: "2024",
@@ -240,12 +258,22 @@ export const portfolioEN: Portfolio = {
       {
         year: "2024",
         title: "Co-founding YourBest and product vision",
-        body: "Co-founder and architect of YourBest, a mobile marketplace built in a monorepo with React Native (Expo), Next.js and NestJS. Robust authentication, domain modelling and a base ready for sustainable growth."
+        body: "Co-CEO and architect of YourBest, a mobile marketplace built in a monorepo (Turborepo + pnpm) with React Native (Expo), Next.js and NestJS with WebSockets. Reinforced authentication, domain modelling, product roadmap, metrics and technical team leadership."
       },
       {
         year: "2025",
         title: "Consolidating as an architecture-driven engineer",
         body: "Focus on scalable systems, DDD, observability and frictionless experience. Continuous growth across backend, mobile and product-driven architecture, consolidating my role as a Senior Full Stack Software Engineer."
+      },
+      {
+        year: "2026",
+        title: "Grupo G6: end-to-end technical owner",
+        body: "Full stack developer (independent contractor) at Grupo G6, technical owner of the medical shift-scheduling web system and mobile app used by hospitals, from architecture to delivery: JWT authentication, Argon2 and bcrypt hashing, secrets encrypted with AES-256-GCM and CI/CD on GitHub Actions."
+      },
+      {
+        year: "2026",
+        title: "Blue Team postgrad at FIAP",
+        body: "Started a postgraduate degree in Blue Team (Cybersecurity). Phase 1 completed (information security, risks and vulnerabilities, virtualization, Linux, networking and shell scripting); phase 2 in progress, covering cyber intelligence, OSINT, social engineering, counterintelligence and digital forensics."
       }
     ]
   },
@@ -280,30 +308,31 @@ export const portfolioEN: Portfolio = {
       slug: "yourbest",
       title: "YourBest",
       summary:
-        "Full stack mobile marketplace connecting independent beauty professionals with clients, built on scalable architecture, robust authentication and a frictionless experience.",
+        "Full stack mobile marketplace connecting independent beauty professionals with clients, with its own brand, a scalable monorepo architecture, real-time features and a frictionless experience.",
       tier: "sumula",
       status: "development",
       competition: "On-demand mobile marketplace",
-      position: "Co-founder · Architect · Full Stack",
+      position: "Co-CEO · Architect · Full Stack",
       featured: true,
       featuredSize: "wide",
-      cover: { src: "/images/yourbest/cover.jpg", alt: "YourBest - key art" },
+      cover: { src: "/images/yourbest/cover.jpg", alt: "YourBest - brand logo and app screens: booking with map, available services and schedule" },
       tags: ["Backend", "Mobile", "Fullstack", "Architecture", "Product", "Frontend", "AppSec"],
-      stack: ["React Native", "Expo", "TypeScript", "NestJS", "Next.js", "Drizzle ORM", "PostgreSQL", "Zod", "Zustand", "Tailwind CSS"],
+      stack: ["React Native", "Expo", "NativeWind", "TypeScript", "NestJS", "Socket.io", "Next.js", "Drizzle ORM", "PostgreSQL (Supabase)", "Turborepo", "pnpm", "Zod", "Zustand"],
       links: {},
       caseStudy: {
         context:
           "YourBest is a marketplace app that makes it easy to book beauty services on demand. Independent professionals sign up, list their services and visit clients at home — growing their reach and income while offering convenience to the end user.",
         role:
-          "Co-founder, responsible for the architecture and full stack development (backend, web and mobile), technical standards, domain structure and the continuous evolution of the product.",
+          "Co-CEO (Jul 2024 – Apr 2026), responsible for the architecture and full stack development (backend, web and mobile): technical standards, domain structure, product roadmap, metrics analysis and technical team leadership.",
         technicalDecisions: [
-          "Monorepo architecture separating backend, web and mobile responsibilities",
+          "Turborepo and pnpm workspaces monorepo separating backend, web and mobile",
           "NestJS backend with domain-oriented modelling and explicit contracts",
-          "Drizzle ORM with PostgreSQL for strong typing and data consistency",
+          "WebSockets (Socket.io) for real-time features",
+          "Drizzle ORM over PostgreSQL (Supabase) for strong typing and data consistency",
           "Two-factor authentication for stronger security",
-          "Structured state management with Zustand",
           "Zod validation for predictability across layers",
-          "Consistent components styled with Tailwind CSS"
+          "Next.js on the web and React Native/Expo with NativeWind on mobile; structured state with Zustand",
+          "Its own visual identity (symbol, navy and sand palette, app icon) applied consistently across the app"
         ],
         challenges: [
           "Balancing delivery speed with sustainable architecture",
@@ -315,10 +344,11 @@ export const portfolioEN: Portfolio = {
           "Technical base ready for new categories and features",
           "Intuitive mobile experience with predictable navigation",
           "Modular architecture supporting continuous product evolution",
-          "Secure system with reinforced authentication"
+          "Secure system with reinforced authentication",
+          "A brand with a full set of variations: logo, symbol, app icon and versions for light, dark and monochrome backgrounds"
         ],
         gallery: [
-          { src: "/images/yourbest/yourbest.png", alt: "YourBest - project cover" },
+          { src: "/images/yourbest/identidade-visual.jpg", alt: "YourBest - visual identity: logo on light, navy and sand backgrounds, app icons and symbol" },
           { src: "/images/yourbest/tela-principal.jpg", alt: "YourBest - home" },
           { src: "/images/yourbest/agenda.jpg", alt: "YourBest - schedule" },
           { src: "/images/yourbest/servicos-ativos.jpg", alt: "YourBest - active services" },
