@@ -67,7 +67,23 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
 - `src/components/scene/stadium/`: arena inspirada na de Itaquera (plano e medidas em [`docs/estadio-arena.md`](docs/estadio-arena.md)). Laterais iguais em dois anéis com o bloco do prédio atrás, fundos baixos com arco metálico e tirantes, telão atrás do gol norte, neblina em camadas (fBm) e gramado com as linhas do campo em shader. A câmera desce de cima da cobertura sul e depois é dirigida pelo scroll e pelo mouse.
 - Luz: 12 grupos de refletores na borda da cobertura (3 por setor) e uma linha de LED contornando a borda; sem torres. O liga/desliga é por setor (sul, leste, oeste, norte), na ordem do preloader e do apagar no apito final.
 - Torcida norte (`Arena.tsx`, `NorthCrowd`): torcedores em silhueta pulando, bandeirões e bandeiras de mastro balançando (alvinegras, sem escudo) e 6 sinalizadores com fumaça. O mesmo bloco aparece atrás do gol no pênalti.
-- Tiers de GPU (`low`, `mid`, `high`) controlam as camadas de neblina, a fumaça, o tamanho da torcida, as bandeiras, a treliça da cobertura, o DPR e o pós-processamento. Para forçar um tier em QA: `?tier=low|mid|high`. `?debug` expõe `__scene`/`__gl` no `window`.
+- Tiers de GPU (`low`, `mid`, `high`) controlam as camadas de neblina, a fumaça, o tamanho da torcida, as bandeiras, a treliça da cobertura, o DPR e o pós-processamento.
+
+### O look (etapa 1 do [plano Awwwards](docs/plano-awwwards.md))
+
+- **Câmera:** plano-sequência na linguagem de transmissão de TV (`stadium/camera-track.ts`). São dois keyframes por capítulo numa spline contínua dirigida pelo scroll, com uma trilha própria para celular em retrato. A abertura é a saída do túnel: dolly zoom de cima da cobertura sul, tremor de câmera na mão e a descida até o gramado. Ela avança pelo tempo de cada quadro (com teto), então toca inteira mesmo depois de um travamento. Nas tomadas quase a pino, o norte fica no topo da tela.
+- **Cor:** tone mapping AgX e grading por LUT 32³ gerada em código. A do Expediente é preto e branco com o vermelho do sinalizador preservado; a da Resenha, âmbar. Só a LUT do modo ativo é gerada (`stadium/lens.ts`).
+- **Lente:**
+  - grão no pós-processamento (o grão em CSS some quando ele está ativo) e flare anamórfico nos 12 grupos de refletores;
+  - letterbox 2.39:1 no túnel, na saída dele e no apito final (`Letterbox.tsx` e o preloader, que também tem a câmera na mão);
+  - no tier alto, rack focus (profundidade de campo, o estádio desfoca nos capítulos de leitura) e motion blur só nos movimentos rápidos.
+- **Luz assada:** o código aceita o modelo do Blender (`ARENA_MODEL` em `stadium/config.ts`, glTF com meshopt e KTX2; o transcodificador fica em `public/basis/`). Enquanto o modelo não existe, a estrutura continua procedural. Passo a passo da modelagem e do bake em [`docs/arena-blender.md`](docs/arena-blender.md).
+- **Desempenho:**
+  - Os shaders compilam em paralelo (`compileAsync`) quando o navegador tem `KHR_parallel_shader_compile`.
+  - Arquibancadas, torcida e bandeiras usam uma luz barata por setor (4 barras em vez de 12 cones), mais rápida de compilar.
+  - O estádio só pausa quando o jogo de pênalti está de fato na tela, e não 200 px antes, o que travava o apito final.
+- **QA:** `?debug` expõe `__camera` e `__intro` (o progresso da abertura) além de `__scene`/`__gl`.
+- **Lighthouse mobile da home, medido aqui:** o ambiente varia muito entre execuções (a mesma versão foi de 1,7 s a 2,4 s de TBT), então a comparação é pareada, alternando as versões nas mesmas condições. Antes da etapa: 2,09 / 2,12 / 2,38 s. Depois: 1,99 / 2,02 / 2,21 s. Desempenho 59–63 nas duas, LCP 3,5–3,6 s, CLS 0. Os 60 fps no tier médio precisam ser medidos num Android de verdade: aqui não há GPU. Para forçar um tier em QA: `?tier=low|mid|high`. `?debug` expõe `__scene`/`__gl` no `window`.
 - A cena só compila depois que o preloader sai de cena (`bootDone`), para não travar a abertura.
 - Os testes funcionais rodam com `--disable-webgl` (fallback); o projeto `webgl` do Playwright testa a cena.
 

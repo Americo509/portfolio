@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { ARENA, archHeight, endStandHeight } from "./config";
+import { ARENA, ARENA_MODEL, archHeight, endStandHeight } from "./config";
 import {
   crowdFragment,
   crowdVertex,
@@ -110,6 +110,92 @@ function useStandMaterial(shared: Shared, base: number, rows: number) {
 }
 
 export function ArenaStructure({ shared, additive, truss }: { shared: Shared; additive: boolean; truss: boolean }) {
+  // Com o modelo do Blender, a estrutura vem dele; o LED e o telão continuam no código.
+  // Se o carregamento falhar, volta para a estrutura procedural.
+  const [modelFailed, setModelFailed] = React.useState(false);
+  const useModel = ARENA_MODEL !== null && !modelFailed;
+  return (
+    <group>
+      {useModel ? (
+        <ArenaModel url={ARENA_MODEL!} shared={shared} onError={() => setModelFailed(true)} />
+      ) : (
+        <ProceduralStructure shared={shared} additive={additive} truss={truss} />
+      )}
+      <LedStrips shared={shared} />
+      <Screen shared={shared} />
+    </group>
+  );
+}
+
+/**
+ * A arena do Blender (glTF com meshopt e KTX2). A luz já vem assada na textura, então
+ * o material é sem iluminação; a cor escurece com os setores apagados e com o dim
+ * dos capítulos de leitura.
+ */
+function ArenaModel({ url, shared, onError }: { url: string; shared: Shared; onError: () => void }) {
+  const gl = useThree((s) => s.gl);
+  const [root, setRoot] = React.useState<THREE.Group | null>(null);
+  const materials = React.useRef<THREE.MeshBasicMaterial[]>([]);
+  const onErrorRef = React.useRef(onError);
+  onErrorRef.current = onError;
+
+  React.useEffect(() => {
+    let alive = true;
+    let ktx2: { dispose: () => void } | null = null;
+    let loaded: THREE.Group | null = null;
+    (async () => {
+      const [{ GLTFLoader }, { KTX2Loader }, { MeshoptDecoder }] = await Promise.all([
+        import("three/examples/jsm/loaders/GLTFLoader.js"),
+        import("three/examples/jsm/loaders/KTX2Loader.js"),
+        import("three/examples/jsm/libs/meshopt_decoder.module.js")
+      ]);
+      const loader = new GLTFLoader();
+      const k = new KTX2Loader().setTranscoderPath("/basis/").detectSupport(gl);
+      ktx2 = k;
+      loader.setKTX2Loader(k);
+      loader.setMeshoptDecoder(MeshoptDecoder);
+      const gltf = await loader.loadAsync(url);
+      loaded = gltf.scene;
+      const mats: THREE.MeshBasicMaterial[] = [];
+      gltf.scene.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const old = mesh.material as THREE.MeshStandardMaterial;
+        const baked = new THREE.MeshBasicMaterial({ map: old.map ?? null, side: THREE.DoubleSide, toneMapped: false });
+        old.dispose();
+        mesh.material = baked;
+        mesh.renderOrder = 1;
+        mats.push(baked);
+      });
+      materials.current = mats;
+      if (alive) setRoot(gltf.scene);
+    })().catch(() => {
+      if (alive) onErrorRef.current();
+    });
+    return () => {
+      alive = false;
+      ktx2?.dispose();
+      loaded?.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        mesh.geometry.dispose();
+        const m = mesh.material as THREE.MeshBasicMaterial;
+        m.map?.dispose();
+        m.dispose();
+      });
+    };
+  }, [url, gl]);
+
+  useFrame(() => {
+    const on = shared.uLightOn.value.reduce((a, b) => a + b, 0) / 4;
+    const k = (0.22 + 0.78 * on) * (1 - shared.uDim.value * 0.6);
+    for (const m of materials.current) m.color.setScalar(k);
+  });
+
+  return root ? <primitive object={root} /> : null;
+}
+
+function ProceduralStructure({ shared, additive, truss }: { shared: Shared; additive: boolean; truss: boolean }) {
   const { roof } = ARENA.side;
 
   const seats = React.useMemo(() => {
@@ -205,8 +291,6 @@ export function ArenaStructure({ shared, additive, truss }: { shared: Shared; ad
       <mesh geometry={solid} material={solidMat} renderOrder={1} />
       <mesh geometry={arches} material={archMat} renderOrder={1} />
       <lineSegments geometry={lines} material={lineMat} renderOrder={1} />
-      <LedStrips shared={shared} />
-      <Screen shared={shared} />
     </group>
   );
 }

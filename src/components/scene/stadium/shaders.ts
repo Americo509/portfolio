@@ -93,6 +93,27 @@ export const floodlights = /* glsl */ `
   }
 `;
 
+/**
+ * Luz barata para a estrutura, a torcida e as bandeiras: cada setor da cobertura vira
+ * uma barra de luz (o segmento entre os seus 3 grupos de refletores), e a luz cai
+ * com a distância até ela. São 4 iterações em vez dos 12 cones + 12 pontos, o que
+ * deixa esses shaders bem mais rápidos de compilar no celular.
+ */
+export const sectorLight = /* glsl */ `
+  uniform vec3 uSectorA[4];
+  uniform vec3 uSectorB[4];
+  uniform float uLightOn[4];
+  float sectorSpill(vec3 p) {
+    float s = 0.0;
+    for (int i = 0; i < 4; i++) {
+      vec3 ab = uSectorB[i] - uSectorA[i];
+      float t = clamp(dot(p - uSectorA[i], ab) / dot(ab, ab), 0.0, 1.0);
+      s += exp(-distance(p, uSectorA[i] + ab * t) * 0.05) * uLightOn[i];
+    }
+    return s * 2.2;
+  }
+`;
+
 /** Os sinalizadores da torcida: brilho vermelho que cai com a distância. */
 export const flares = /* glsl */ `
   uniform vec3 uFlares[6];
@@ -142,7 +163,7 @@ export const fogFragment = /* glsl */ `
     float light = floodlight(p) + spill(p) * 0.1;
     float glow = flareGlow(p, 0.07);
 
-    vec3 color = uFg * (0.04 + light * 1.1) + uSignal * glow * 1.7;
+    vec3 color = uFg * (0.04 + light * 1.1) + uSignal * glow * 1.0;
     float alpha = density * (0.012 + light * 0.3 + glow * 0.55) * uOpacity * uFogMul * (1.0 - uDim);
     alpha *= smoothstep(0.0, 0.18, vUv.x) * (1.0 - smoothstep(0.82, 1.0, vUv.x)) * smoothstep(0.0, 0.12, vUv.y) * (1.0 - smoothstep(0.6, 1.0, vUv.y));
     gl_FragColor = vec4(color, alpha);
@@ -316,6 +337,40 @@ export const glowFragment = /* glsl */ `
   }
 `;
 
+/**
+ * Flare anamórfico: risco horizontal fino em cada grupo de refletores, a
+ * assinatura de lente de cinema (docs/plano-awwwards.md, "Lente"). Apaga com o setor.
+ */
+export const streakVertex = /* glsl */ `
+  attribute float aSize;
+  attribute float aLight;
+  uniform float uScale;
+  uniform float uLightOn[4];
+  varying float vOn;
+  void main() {
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = aSize * uScale / -mv.z;
+    gl_Position = projectionMatrix * mv;
+    int li = int(aLight + 0.5);
+    vOn = uLightOn[li];
+  }
+`;
+
+export const streakFragment = /* glsl */ `
+  uniform vec3 uFg;
+  uniform float uDim;
+  varying float vOn;
+  void main() {
+    vec2 q = gl_PointCoord - 0.5;
+    float along = 1.0 - abs(q.x) * 2.0;
+    if (along <= 0.0) discard;
+    float line = exp(-pow(q.y * 90.0, 2.0)) + exp(-pow(q.y * 26.0, 2.0)) * 0.2;
+    float a = line * pow(along, 2.2) * 0.8 * vOn * (1.0 - uDim);
+    if (a < 0.003) discard;
+    gl_FragColor = vec4(uFg * a, a);
+  }
+`;
+
 /** Arquibancadas e estrutura: silhueta escura, fileiras claras reveladas pela luz que vaza dos refletores. */
 export const standFragment = /* glsl */ `
   uniform float uTime;
@@ -327,14 +382,14 @@ export const standFragment = /* glsl */ `
   uniform float uBase;
   uniform float uRows;
   varying vec3 vWorld;
-  ${floodlights}
+  ${sectorLight}
   ${flares}
   void main() {
     vec3 p = vWorld;
-    float lit = spill(p) + floodlight(p) * 0.5;
+    float lit = sectorSpill(p);
     float rows = uRows * step(0.58, fract(p.y * 1.35));
     vec3 color = mix(uBg, uFg, uBase) + uFg * lit * (0.06 + rows * 0.32);
-    color += uSignal * flareGlow(p, 0.09) * 0.28;
+    color += uSignal * flareGlow(p, 0.09) * 0.2;
     float far = smoothstep(90.0, 230.0, distance(p, uCamPos));
     color = mix(color, uBg, far * 0.85);
     color = mix(color, uBg, uDim * 0.6);
@@ -401,7 +456,7 @@ export const crowdVertex = /* glsl */ `
   uniform vec3 uSignal;
   uniform float uDim;
   uniform float uTone;
-  ${floodlights}
+  ${sectorLight}
   ${flares}
   varying vec3 vColor;
   varying float vArms;
@@ -416,8 +471,8 @@ export const crowdVertex = /* glsl */ `
     gl_Position = projectionMatrix * mv;
     // Luz pela posição no mundo: a mesma torcida é montada no estádio e no pênalti.
     vec3 w = (modelMatrix * vec4(p, 1.0)).xyz;
-    float lit = spill(w) * 0.6 + floodlight(w) * 0.35;
-    vColor = mix(uBg, uFg, uTone + lit * 0.22) + uSignal * flareGlow(w, 0.11) * 0.7;
+    float lit = sectorSpill(w) * 0.6;
+    vColor = mix(uBg, uFg, uTone + lit * 0.22) + uSignal * flareGlow(w, 0.11) * 0.5;
     vColor = mix(vColor, uBg, uDim * 0.6);
     vArms = step(0.72, fract(aSeed * 13.7));
   }
@@ -468,7 +523,7 @@ export const flagFragment = /* glsl */ `
   varying vec2 vUv;
   varying vec3 vWorld;
   varying float vShade;
-  ${floodlights}
+  ${sectorLight}
   ${flares}
   void main() {
     float white;
@@ -476,7 +531,7 @@ export const flagFragment = /* glsl */ `
     else if (uPattern < 1.5) white = 1.0 - step(abs(vUv.y - vUv.x * 0.8 - 0.1), 0.14);
     else white = step(abs(vUv.y - 0.5), 0.16);
     vec3 cloth = mix(mix(uBg, uFg, 0.06), mix(uBg, uFg, 0.85), white);
-    float lit = 0.22 + spill(vWorld) * 0.7 + floodlight(vWorld) * 0.4;
+    float lit = 0.22 + sectorSpill(vWorld) * 0.7;
     vec3 color = cloth * lit * vShade + uSignal * flareGlow(vWorld, 0.1) * (0.35 + white * 0.5);
     gl_FragColor = vec4(mix(color, uBg, uDim * 0.6), 1.0);
   }

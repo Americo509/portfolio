@@ -123,8 +123,11 @@ export function Preloader({ handle, copy }: { handle: string; copy: BootCopy }) 
       <div data-half="top" className="absolute inset-x-0 top-0 h-1/2 bg-bg" />
       <div data-half="bottom" className="absolute inset-x-0 bottom-0 h-1/2 bg-bg" />
       <div data-slit className="absolute inset-x-0 top-1/2 h-px origin-center scale-x-0 bg-signal" />
+      {/* Túnel: letterbox 2.39:1 e câmera na mão (docs/plano-awwwards.md, capítulo 00). */}
+      <div className="letterbox-bar letterbox-bar--top" />
+      <div className="letterbox-bar letterbox-bar--bottom" />
 
-      <div data-content className="absolute inset-0 flex flex-col justify-between p-[var(--margin)] text-fg">
+      <div data-content className="boot-handheld absolute inset-0 flex flex-col justify-between p-[var(--margin)] text-fg">
         <div className="label flex items-center justify-between text-muted">
           <span>{handle}</span>
           <span className="hidden sm:inline">{copy.title}</span>

@@ -2,6 +2,8 @@
 
 > Referência viva do redesign (aprovada). Substitui o conceito "Sistema vivo" da v1.
 > A arquitetura técnica da Fase 1 (Lenis, GSAP, canvas persistente, preloader, HUD, cursor, transições e testes) continua; mudam a pele, a narrativa, a cena e o conteúdo.
+>
+> **Out/2026:** o [plano Awwwards](plano-awwwards.md) prevalece onde divergir deste documento. Principais mudanças: a câmera vira plano-sequência na linguagem de transmissão de TV; o look ganha luz assada, LUT, AgX e lente; a jukebox e a enquete do Radar 2027 saem; o histórico de clubes deixa de ser horizontal; o ripple e o RGB shift das capas viram o telestrador.
 
 ---
 

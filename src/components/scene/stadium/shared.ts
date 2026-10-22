@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CONE_TAN, FLARES, LIGHTS } from "./config";
+import { CONE_TAN, FLARES, LIGHTS, LIGHTS_PER_SECTOR } from "./config";
 
 // Os materiais recebem os uniforms pelo construtor (args): assim o three guarda a
 // MESMA referência e o useFrame consegue animá-los. Como prop (uniforms={...}),
@@ -24,6 +24,9 @@ export function createShared(offsetZ = 0) {
     uDim: { value: 0 },
     uFogMul: { value: 1 },
     uLightOn: { value: [1, 1, 1, 1] },
+    // Cada setor como um segmento entre o primeiro e o último grupo de refletores.
+    uSectorA: { value: [0, 1, 2, 3].map((s) => LIGHTS[s * LIGHTS_PER_SECTOR].pos.clone().add(shift)) },
+    uSectorB: { value: [0, 1, 2, 3].map((s) => LIGHTS[s * LIGHTS_PER_SECTOR + LIGHTS_PER_SECTOR - 1].pos.clone().add(shift)) },
     uScale: { value: 1 },
     uCamPos: { value: new THREE.Vector3() }
   };

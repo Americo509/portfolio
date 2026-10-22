@@ -152,6 +152,11 @@ html.resenha .expediente-only {
   opacity: 0.09;
 }
 
+/* Com a cena e o pós-processamento ativos, o grão vem do shader (docs/plano-awwwards.md, "Lente"). */
+[data-post-grain] .grain {
+  display: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .grain {
     animation: grain-shift 0.8s steps(4) infinite;
@@ -164,6 +169,45 @@ html.resenha .expediente-only {
   50% { transform: translate(2%, -3%); }
   75% { transform: translate(-1%, -2%); }
   100% { transform: translate(0, 0); }
+}
+
+/* ---------- Letterbox 2.39:1 e câmera na mão (docs/plano-awwwards.md, "Lente") ---------- */
+.letterbox-bar {
+  position: absolute;
+  inset-inline: 0;
+  height: min(12vh, max(0px, calc((100vh - 100vw / 2.39) / 2)));
+  background: #000;
+  pointer-events: none;
+  transition: none;
+}
+.letterbox-bar--top {
+  top: 0;
+  transform-origin: top;
+}
+.letterbox-bar--bottom {
+  bottom: 0;
+  transform-origin: bottom;
+}
+/* Jogo de dia: sem barras pretas sobre o papel. */
+html:not(.dark):not(.resenha) .letterbox-bar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .boot-handheld {
+    animation: handheld 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes handheld {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  14% { transform: translate(0.6px, -0.4px) rotate(0.08deg); }
+  29% { transform: translate(-0.5px, 0.5px) rotate(-0.06deg); }
+  43% { transform: translate(0.3px, 0.7px) rotate(0.05deg); }
+  57% { transform: translate(-0.7px, -0.3px) rotate(-0.08deg); }
+  71% { transform: translate(0.5px, -0.6px) rotate(0.04deg); }
+  86% { transform: translate(-0.3px, 0.4px) rotate(-0.05deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }
 
 /* ---------- Foco e acessibilidade ---------- */

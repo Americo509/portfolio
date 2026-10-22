@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { motionState, useApp } from "@/lib/store";
 import { useReducedMotion } from "@/lib/use-media";
 import { guessTier, hasWebGL, type GpuTier } from "@/lib/webgl";
+import { Letterbox } from "./Letterbox";
 import { loadScene } from "./load";
 import { StaticStadium } from "./StaticStadium";
 
@@ -96,6 +97,7 @@ export function SceneRoot() {
               onReady={() => setStatus("ready")}
             />
           </SceneBoundary>
+          <Letterbox />
         </div>
       ) : null}
     </div>

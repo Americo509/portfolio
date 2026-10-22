@@ -94,6 +94,7 @@ export function PenaltyGame({
 
   const [webgl, setWebgl] = React.useState<boolean | null>(null);
   const [visible, setVisible] = React.useState(false);
+  const [onScreen, setOnScreen] = React.useState(false);
   const [phase, setPhase] = React.useState<Phase>("aiming");
   const [shootout, setShootout] = React.useState<Shootout>(newShootout);
   const [kicks, setKicks] = React.useState<Kick[]>([]);
@@ -112,18 +113,25 @@ export function PenaltyGame({
     } catch {}
   }, []);
 
-  // Só monta o canvas quando o jogo entra na tela; enquanto isso, pausa o estádio.
+  // Monta o canvas um pouco antes de o jogo entrar na tela (margem de 200 px), mas só
+  // pausa o estádio quando o jogo está de fato na tela: o apito final vem logo
+  // depois, e a cena precisa rodar para os setores apagarem.
   React.useEffect(() => {
     const el = root.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "200px" });
-    io.observe(el);
-    return () => io.disconnect();
+    const near = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "200px" });
+    const inView = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.15 });
+    near.observe(el);
+    inView.observe(el);
+    return () => {
+      near.disconnect();
+      inView.disconnect();
+    };
   }, []);
   React.useEffect(() => {
-    setGameActive(visible && !!webgl);
+    setGameActive(onScreen && !!webgl);
     return () => setGameActive(false);
-  }, [visible, webgl, setGameActive]);
+  }, [onScreen, webgl, setGameActive]);
 
   const announce = (text: string) => setMessage(text);
 
