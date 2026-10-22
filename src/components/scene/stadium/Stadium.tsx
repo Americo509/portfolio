@@ -205,7 +205,9 @@ function Streaks({ shared }: { shared: Shared }) {
  * Também escreve o estado da lente (foco, letterbox e velocidade para o motion blur).
  */
 function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
-  const intro = React.useRef({ t: 0, wait: 0.25 });
+  // A saída do túnel é da home: quem chega direto numa página interna já começa no
+  // quadro de fundo, sem o dolly zoom atrás do texto.
+  const intro = React.useRef({ t: mode === "hero" ? 0 : 1, wait: 0.25 });
   const s = React.useRef({ x: 0, y: 0, lights: [1, 1, 1, 1], ready: false, frames: 0 });
   // A abertura só começa quando a cena está pronta e aparecendo; antes disso ela
   // ainda compila e faz o fade, e o dolly zoom passaria escondido.
@@ -270,10 +272,11 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
     st.x += (motionState.pointer.x - st.x) * 0.04;
     st.y += (motionState.pointer.y - st.y) * 0.04;
 
-    // Apito final: os setores da cobertura apagam um a um conforme o capítulo avança (o norte por último).
+    // Apito final: os setores da cobertura apagam um a um conforme o capítulo avança (o
+    // norte por último). Nas páginas internas, refletores a meia-luz.
     const final = mode === "hero" && motionState.chapter === "final";
     for (let i = 0; i < 4; i++) {
-      const on = final ? 1 - THREE.MathUtils.smoothstep(motionState.chapterProgress, 0.12 + i * 0.14, 0.24 + i * 0.14) : 1;
+      const on = final ? 1 - THREE.MathUtils.smoothstep(motionState.chapterProgress, 0.12 + i * 0.14, 0.24 + i * 0.14) : mode === "hero" ? 1 : 0.4;
       st.lights[i] += (on - st.lights[i]) * k * 2;
       shared.uLightOn.value[i] = st.lights[i];
     }
@@ -386,10 +389,16 @@ export function Stadium({ tier, palette, mode, stage }: { tier: GpuTier; palette
     scene.background = palette.bg.clone();
   }, [palette, shared, scene]);
 
+  // Fora da home a cena fica de fundo: os sinalizadores apagam (nada de brilho
+  // vermelho atrás do texto) e a torcida pula e balança menos. Transição suave ao
+  // trocar de página.
+  const hype = React.useRef(mode === "hero" ? 1 : 0);
   useFrame((_, delta) => {
     shared.uTime.value += delta;
     const t = shared.uTime.value;
-    shared.uFlare.value = 0.85 + 0.15 * Math.sin(t * 13) * Math.sin(t * 3.7);
+    hype.current += ((mode === "hero" ? 1 : 0) - hype.current) * (1 - Math.exp(-delta * 1.5));
+    shared.uFlare.value = (0.85 + 0.15 * Math.sin(t * 13) * Math.sin(t * 3.7)) * hype.current;
+    shared.uEnergy.value = 0.25 + 0.75 * hype.current;
   });
 
   return (

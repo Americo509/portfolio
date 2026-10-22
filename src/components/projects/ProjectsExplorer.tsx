@@ -102,7 +102,7 @@ export function ProjectsExplorer({
           <span />
         </div>
         <ol>
-          {filtered.map((p, i) => (
+          {filtered.map((p) => (
             <li key={p.slug} className="border-b border-line">
               <Link
                 href={localeHref(locale, `/projects/${p.slug}`)}
@@ -111,7 +111,8 @@ export function ProjectsExplorer({
                 onFocus={() => setHovered(p)}
                 className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-1 py-5 md:grid-cols-[3rem_minmax(0,1.4fr)_minmax(0,1fr)_9rem_minmax(0,1fr)_2rem]"
               >
-                <span className="label tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</span>
+                {/* O número da Campanha, o mesmo da súmula e da capa, filtrado ou não. */}
+                <span className="label tabular-nums text-muted">{projectNumber(projects, p.slug)}</span>
                 <span>
                   <span className="block text-[clamp(1.25rem,2.4vw,2.1rem)] leading-tight transition-transform duration-500 ease-cine group-hover:translate-x-2">
                     {p.title}

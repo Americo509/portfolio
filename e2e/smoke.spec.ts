@@ -157,6 +157,15 @@ test.describe("súmulas", () => {
     await expect(page.getByText(/nada vira prontuário sem o "Aprovar"/)).toBeVisible();
   });
 
+  test("categoria de base: o número da capa e da lista é o da súmula", async ({ page }) => {
+    await page.goto("/projects/spotify");
+    await expect(page.getByText(/Súmula da partida · #11/)).toBeVisible();
+    await expect(page.getByRole("img", { name: /Spotify/ }).locator("text").first()).toHaveText("#11");
+    await page.goto("/projects");
+    await page.getByPlaceholder(/Buscar/).fill("spotify");
+    await expect(page.locator('main ol a[href="/projects/spotify"]')).toContainText("11");
+  });
+
   test("Sol Poretti aponta para o site público", async ({ page }) => {
     await page.goto("/projects/sol-poretti");
     await expect(page.getByRole("link", { name: "Ver ao vivo →" })).toHaveAttribute("href", "https://solporettinutri.com.br");

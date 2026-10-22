@@ -10,7 +10,7 @@ import {
   crowdVertex,
   flagFragment,
   flagVertex,
-  glowFragment,
+  flareCoreFragment,
   glowVertex,
   ledFragment,
   ledVertex,
@@ -417,20 +417,30 @@ function FlareCores({ shared, blending, signal }: { shared: Shared; blending: TH
     const flares = shared.uFlares.value;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(flares.flatMap((f) => [f.x, f.y, f.z]), 3));
-    g.setAttribute("aSize", new THREE.Float32BufferAttribute(flares.map(() => 2.6), 1));
+    g.setAttribute("aSize", new THREE.Float32BufferAttribute(flares.map(() => 3.4), 1));
     g.setAttribute("aColor", new THREE.Float32BufferAttribute(flares.flatMap(() => [signal.r * 1.2, signal.g * 1.2, signal.b * 1.2]), 3));
     // aLight 4: sempre aceso, mesmo com os setores apagados.
     g.setAttribute("aLight", new THREE.Float32BufferAttribute(flares.map(() => 4), 1));
     return g;
   }, [shared, signal]);
   const uniforms = React.useMemo(
-    () => ({ uScale: shared.uScale, uTime: shared.uTime, uDim: shared.uDim, uLightOn: shared.uLightOn, uFlicker: { value: 1 } }),
-    [shared]
+    () => ({
+      uScale: shared.uScale,
+      uTime: shared.uTime,
+      uDim: shared.uDim,
+      uLightOn: shared.uLightOn,
+      uFlicker: { value: 1 },
+      uFlare: shared.uFlare,
+      uHot: { value: blending === THREE.AdditiveBlending ? 1 : 0 }
+    }),
+    [shared, blending]
   );
   React.useEffect(() => () => geo.dispose(), [geo]);
   return (
     <points geometry={geo} renderOrder={3} frustumCulled={false}>
-      <shaderMaterial args={[{ vertexShader: glowVertex, fragmentShader: glowFragment, uniforms, transparent: true, depthWrite: false, blending }]} />
+      <shaderMaterial
+        args={[{ vertexShader: glowVertex, fragmentShader: flareCoreFragment, uniforms, transparent: true, depthWrite: false, blending }]}
+      />
     </points>
   );
 }
@@ -502,7 +512,7 @@ function Flags({ shared, count }: { shared: Shared; count: number }) {
     const t = shared.uTime.value;
     specs.forEach((f, i) => {
       const g = refs.current[i];
-      if (g) g.rotation.z = Math.sin(t * f.speed + f.seed) * f.swing;
+      if (g) g.rotation.z = Math.sin(t * f.speed + f.seed) * f.swing * shared.uEnergy.value;
     });
     poleMat.color.copy(shared.uBg.value).lerp(shared.uFg.value, 0.25);
   });

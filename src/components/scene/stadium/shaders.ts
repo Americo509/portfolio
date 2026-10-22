@@ -114,7 +114,11 @@ export const sectorLight = /* glsl */ `
   }
 `;
 
-/** Os sinalizadores da torcida: brilho vermelho que cai com a distância. */
+/**
+ * Os sinalizadores da torcida: a luz que eles jogam em volta. A queda é curta (o
+ * sinalizador é um ponto, não um holofote): quem está a poucos metros fica vermelho,
+ * o resto da arquibancada não. Cada material passa a própria queda.
+ */
 export const flares = /* glsl */ `
   uniform vec3 uFlares[6];
   uniform float uFlare;
@@ -168,10 +172,10 @@ export const fogFragment = /* glsl */ `
     // Só espalhamento: dentro dos cones e em volta dos sinalizadores. Sem termo de
     // ambiente, o resto da fumaça some no preto.
     float light = floodlight(p);
-    float glow = flareGlow(p, 0.07);
+    float glow = flareGlow(p, 0.2);
 
-    vec3 color = uBg + uFg * light * 1.25 + uSignal * glow * 0.9;
-    float alpha = density * (light * 0.26 + glow * 0.36) * uOpacity * uFogMul * (1.0 - uDim);
+    vec3 color = uBg + uFg * light * 1.25 + uSignal * glow * 1.6;
+    float alpha = density * (light * 0.26 + glow * 0.5) * uOpacity * uFogMul * (1.0 - uDim);
     alpha *= smoothstep(0.0, 0.18, vUv.x) * (1.0 - smoothstep(0.82, 1.0, vUv.x)) * smoothstep(0.0, 0.12, vUv.y) * (1.0 - smoothstep(0.6, 1.0, vUv.y));
     gl_FragColor = vec4(color, alpha);
   }
@@ -224,7 +228,7 @@ export const pitchFragment = /* glsl */ `
   }
 `;
 
-/** Fumaça dos sinalizadores: partículas que sobem e abrem, vermelhas na base e cinzas no alto. */
+/** Fumaça dos sinalizadores: partículas que sobem e abrem; acesas só junto do fogo, cinzas logo acima. */
 export const smokeVertex = /* glsl */ `
   attribute float aSeed;
   attribute float aFlare;
@@ -252,13 +256,14 @@ export const smokeFragment = /* glsl */ `
   uniform vec3 uFg;
   uniform vec3 uSignal;
   uniform float uDim;
+  uniform float uFlare;
   varying float vT;
   varying float vSeed;
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float puff = 1.0 - smoothstep(0.0, 0.5, d);
-    vec3 color = mix(uSignal * 1.2, uFg * 0.16, smoothstep(0.0, 0.3, vT));
-    float alpha = puff * puff * (1.0 - vT) * smoothstep(0.0, 0.06, vT) * 0.12 * (1.0 - uDim * 0.7);
+    vec3 color = mix(uSignal * 1.3, uFg * 0.14, smoothstep(0.0, 0.07, vT));
+    float alpha = puff * puff * (1.0 - vT) * smoothstep(0.0, 0.06, vT) * 0.12 * (1.0 - uDim * 0.7) * uFlare;
     if (alpha < 0.003) discard;
     gl_FragColor = vec4(color, alpha);
   }
@@ -346,6 +351,28 @@ export const glowFragment = /* glsl */ `
 `;
 
 /**
+ * Núcleo do sinalizador: magnésio queimando, quase branco, com um halo curto na cor
+ * do acento. Nos temas claros (uHot 0, sem blending aditivo) o branco sumiria no
+ * fundo, então o núcleo fica na cor do acento.
+ */
+export const flareCoreFragment = /* glsl */ `
+  uniform float uDim;
+  uniform float uHot;
+  uniform float uFlare;
+  varying vec3 vColor;
+  varying float vOn;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    float core = 1.0 - smoothstep(0.03, 0.09, d);
+    float halo = pow(1.0 - smoothstep(0.0, 0.45, d), 3.0);
+    float a = max(core, halo) * (1.0 - uDim) * vOn * min(1.0, uFlare * 1.2);
+    if (a < 0.01) discard;
+    vec3 hot = mix(vColor, vec3(1.0, 0.95, 0.9), uHot) * (1.0 + uHot * 1.4);
+    gl_FragColor = vec4(mix(vColor * halo * 1.4, hot, core), a);
+  }
+`;
+
+/**
  * Flare anamórfico: risco horizontal fino em cada grupo de refletores, a
  * assinatura de lente de cinema (docs/plano-awwwards.md, "Lente"). Apaga com o setor.
  */
@@ -397,7 +424,7 @@ export const standFragment = /* glsl */ `
     float lit = sectorSpill(p);
     float rows = uRows * step(0.58, fract(p.y * 1.35));
     vec3 color = mix(uBg, uFg, uBase) + uFg * lit * (0.06 + rows * 0.32);
-    color += uSignal * flareGlow(p, 0.09) * 0.2;
+    color += uSignal * flareGlow(p, 0.32) * 0.8;
     float far = smoothstep(90.0, 230.0, distance(p, uCamPos));
     color = mix(color, uBg, far * 0.85);
     color = mix(color, uBg, uDim * 0.6);
@@ -464,6 +491,7 @@ export const crowdVertex = /* glsl */ `
   uniform vec3 uSignal;
   uniform float uDim;
   uniform float uTone;
+  uniform float uEnergy;
   ${sectorLight}
   ${flares}
   varying vec3 vColor;
@@ -472,15 +500,15 @@ export const crowdVertex = /* glsl */ `
     vec3 p = position;
     float beat = uTime * (2.1 + aSeed * 0.5) + aSeed * 6.2831;
     float jumper = step(0.45, fract(aSeed * 7.13));
-    p.y += 0.95 + jumper * max(0.0, sin(beat)) * 0.38 + (1.0 - jumper) * sin(beat * 0.5) * 0.05;
-    p.x += (1.0 - jumper) * sin(beat * 0.5) * 0.12;
+    p.y += 0.95 + (jumper * max(0.0, sin(beat)) * 0.38 + (1.0 - jumper) * sin(beat * 0.5) * 0.05) * uEnergy;
+    p.x += (1.0 - jumper) * sin(beat * 0.5) * 0.12 * uEnergy;
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_PointSize = 2.1 * uScale / -mv.z;
     gl_Position = projectionMatrix * mv;
     // Luz pela posição no mundo: a mesma torcida é montada no estádio e no pênalti.
     vec3 w = (modelMatrix * vec4(p, 1.0)).xyz;
     float lit = sectorSpill(w) * 0.6;
-    vColor = mix(uBg, uFg, uTone + lit * 0.22) + uSignal * flareGlow(w, 0.11) * 0.5;
+    vColor = mix(uBg, uFg, uTone + lit * 0.22) + uSignal * flareGlow(w, 0.32) * 1.5;
     vColor = mix(vColor, uBg, uDim * 0.6);
     vArms = step(0.72, fract(aSeed * 13.7));
   }
@@ -504,6 +532,7 @@ export const flagVertex = /* glsl */ `
   uniform float uTime;
   uniform float uSeed;
   uniform float uSize;
+  uniform float uEnergy;
   varying vec2 vUv;
   varying vec3 vWorld;
   varying float vShade;
@@ -512,7 +541,7 @@ export const flagVertex = /* glsl */ `
     vec3 p = position;
     float t = uTime * 3.0 + uSeed;
     float wave = sin(uv.x * 5.0 - t) * 0.16 + sin(uv.x * 9.0 + uv.y * 3.0 - t * 1.4) * 0.05;
-    p.z += wave * uv.x * uSize;
+    p.z += wave * uv.x * uSize * (0.4 + 0.6 * uEnergy);
     p.y -= uv.x * uv.x * 0.06 * uSize;
     vShade = 0.75 + 0.25 * cos(uv.x * 5.0 - t);
     vec4 world = modelMatrix * vec4(p, 1.0);
@@ -540,7 +569,7 @@ export const flagFragment = /* glsl */ `
     else white = step(abs(vUv.y - 0.5), 0.16);
     vec3 cloth = mix(mix(uBg, uFg, 0.06), mix(uBg, uFg, 0.85), white);
     float lit = 0.22 + sectorSpill(vWorld) * 0.7;
-    vec3 color = cloth * lit * vShade + uSignal * flareGlow(vWorld, 0.1) * (0.35 + white * 0.5);
+    vec3 color = cloth * lit * vShade + uSignal * flareGlow(vWorld, 0.3) * (0.6 + white * 0.9);
     gl_FragColor = vec4(mix(color, uBg, uDim * 0.6), 1.0);
   }
 `;

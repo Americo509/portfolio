@@ -115,8 +115,8 @@ const MOBILE = keys([
 
 /** Páginas internas: um quadro fixo, escurecido, atrás do conteúdo. */
 export const AMBIENT = {
-  desktop: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.82, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot,
-  mobile: { pos: [0, 4, 60], look: [0, 11, -40], fov: 62, dim: 0.82, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot
+  desktop: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.9, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot,
+  mobile: { pos: [0, 4, 60], look: [0, 11, -40], fov: 62, dim: 0.9, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot
 };
 
 /**

@@ -86,6 +86,9 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
   - A LUT devolve ao acento (vermelho no Expediente, âmbar na Resenha) a saturação que o AgX tira, em proporção à que sobrou.
   - A neblina é preta onde não há luz e só aparece nos fachos e em volta dos sinalizadores.
   - Os 12 cones de feixe são estreitos e quebrados pela poeira; eram eles que acinzentavam o meio do quadro.
+  - O sinalizador é um ponto: núcleo quase branco, halo curto e luz que cai em poucos metros (na torcida, nas bandeiras, na arquibancada e na fumaça). No hero, o vermelho saturado ocupa menos de 1% do quadro, todo em volta dos 6 sinalizadores; o âmbar na Resenha, idem.
+  - LUT da Resenha: sombras fundas neutras; o calor entra dos meios-tons para cima, no creme, e o âmbar cheio fica só nos sinalizadores.
+- **Páginas internas mais calmas:** sem a abertura (a saída do túnel é da home), sinalizadores e fumaça apagados, refletores a 40% e a torcida pulando e balançando menos (`uEnergy`). A transição é suave ao trocar de página.
 - **Montagem em etapas (`StageRunner` em `Scene.tsx`):** gramado e estrutura, neblina e feixes, torcida, lâmpadas e pós. Só roda quando o aparelho tem `KHR_parallel_shader_compile`: cada etapa é compilada com `compileAsync` antes de ser desenhada, e só no fim a cena fica pronta e a abertura começa. Sem a extensão, a cena monta inteira e desenha direto (esperar não esconde nada quando a compilação é na CPU).
 - **Ferramentas do `?debug`:**
   - **Diretor de câmera:** câmera livre, slider que percorre a trilha, a spline desenhada na cena e um botão que copia o quadro-chave já no formato de `camera-track.ts`.

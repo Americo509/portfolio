@@ -52,6 +52,9 @@ function accent(
   satHigh: number,
   /** Fração da luminosidade do tom em que ele já sai cheio (o âmbar é claro e precisa de menos). */
   reach: number,
+  /** Faixa de luminância em que o acento entra: abaixo dela, a sombra fica neutra. */
+  yLow: number,
+  yHigh: number,
   out: Float32Array,
   i: number
 ) {
@@ -61,7 +64,7 @@ function accent(
   const w =
     (1 - THREE.MathUtils.smoothstep(dh, width, width * 1.8)) *
     clamp01((sat - satLow) / (satHigh - satLow)) *
-    THREE.MathUtils.smoothstep(y, 0.05, 0.16);
+    THREE.MathUtils.smoothstep(y, yLow, yHigh);
   // Luminosidade relativa à do tom da marca: o núcleo claro chega no tom cheio.
   const k = Math.min(1, Math.max(0.16, y / (luma(...target) * reach)));
   out[i] = base[0] + (target[0] * k - base[0]) * w;
@@ -91,23 +94,33 @@ const gradeNight: Grade = (r, g, b, out, i) => {
   tmp[0] = clamp01(cr + high * 0.012 - shadow * 0.004);
   tmp[1] = clamp01(cg + high * 0.01);
   tmp[2] = clamp01(cb + shadow * 0.012 - high * 0.008);
-  // Qualquer resto de vermelho (até o rosado que o AgX deixa) vira o vermelho do sinalizador.
-  accent(r, g, b, tmp, SIGNAL, 0, 16, 0.08, 0.46, 1, out, i);
+  // O vermelho que já é vermelho (o halo do sinalizador, que o AgX deixa salmão) volta
+  // ao tom da marca; o rosado fraco em volta fica como está, para a mancha não crescer.
+  accent(r, g, b, tmp, SIGNAL, 0, 16, 0.16, 0.5, 1, 0.05, 0.16, out, i);
 };
 
-/** Resenha: noite âmbar de balcão de bar; o dourado vira grading, não só troca de cor. */
+/** Creme das luzes da Resenha, normalizado para luminância 1 (saturação ~0,34). */
+const CREAM: [number, number, number] = [1 / 0.875, 0.86 / 0.875, 0.66 / 0.875];
+
+/**
+ * Resenha: noite de balcão de bar. As sombras fundas ficam neutras (preto é preto);
+ * o calor entra dos meios-tons para cima e não passa do creme. O âmbar cheio fica só
+ * para os sinalizadores, via accent.
+ */
 const gradeResenha: Grade = (r, g, b, out, i) => {
   const y = luma(r, g, b);
   const t = contrast(y, 0.4, 1.3, 1.08);
-  const warm = THREE.MathUtils.smoothstep(t, 0.0, 0.85);
-  // Sombras em marrom de madeira escura, altas em dourado de chope; 28% da cor original fica.
-  const keep = 0.28;
-  tmp[0] = clamp01(t * (0.62 + 0.38 * warm) * (1 - keep) + (y + (r - y) * 1.1) * keep);
-  tmp[1] = clamp01(t * (0.4 + 0.44 * warm) * (1 - keep) + (y + (g - y) * 1.1) * keep);
-  tmp[2] = clamp01(t * (0.22 + 0.34 * warm) * (1 - keep) + (y + (b - y) * 1.1) * keep);
-  // Só o âmbar saturado (sinalizadores) vai para o tom cheio; o creme das luzes
-  // (#F7D9A8, mesma matiz, saturação 0,32) fica no grading.
-  accent(r, g, b, tmp, AMBER, 38, 14, 0.3, 0.5, 0.7, out, i);
+  // 0 nas sombras fundas, 1 dos meios-tons em diante.
+  const warm = THREE.MathUtils.smoothstep(t, 0.06, 0.45);
+  // Um pouco da cor original (30%) volta junto com o calor, nunca nas sombras.
+  const keep = 0.3 * warm;
+  tmp[0] = clamp01(t * (1 + (CREAM[0] - 1) * warm) + (r - y) * keep);
+  tmp[1] = clamp01(t * (1 + (CREAM[1] - 1) * warm) + (g - y) * keep);
+  tmp[2] = clamp01(t * (1 + (CREAM[2] - 1) * warm) + (b - y) * keep);
+  // Só o âmbar já saturado e claro (o halo dos sinalizadores) vai para o tom cheio;
+  // o creme das luzes (#F7D9A8, mesma matiz, saturação 0,32) fica no grading, e o
+  // gramado no escuro (quente na cena, mas escuro) fica neutro.
+  accent(r, g, b, tmp, AMBER, 38, 14, 0.42, 0.62, 0.7, 0.18, 0.4, out, i);
 };
 
 function buildLut(grade: Grade, size = 32) {

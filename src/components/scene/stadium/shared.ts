@@ -21,6 +21,8 @@ export function createShared(offsetZ = 0) {
     uSignal: { value: new THREE.Color() },
     uFlares: { value: FLARES.map((f) => f.clone().add(shift)) },
     uFlare: { value: 1 },
+    /** Ânimo da torcida: 1 na home; menos nas páginas internas (pula e balança menos). */
+    uEnergy: { value: 1 },
     uDim: { value: 0 },
     uFogMul: { value: 1 },
     uLightOn: { value: [1, 1, 1, 1] },
