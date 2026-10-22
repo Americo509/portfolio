@@ -17,6 +17,8 @@ export function createShared(offsetZ = 0) {
     uLightDir: { value: LIGHTS.map((l) => l.dir.clone()) },
     uConeTan: { value: CONE_TAN },
     uFg: { value: new THREE.Color() },
+    /** Cor da luz dos refletores no ar (feixes e névoa): a do tema, ou dourada na Resenha. */
+    uBeam: { value: new THREE.Color() },
     uBg: { value: new THREE.Color() },
     uSignal: { value: new THREE.Color() },
     uFlares: { value: FLARES.map((f) => f.clone().add(shift)) },
@@ -35,3 +37,16 @@ export function createShared(offsetZ = 0) {
 }
 
 export type Shared = ReturnType<typeof createShared>;
+
+const luminance = (c: THREE.Color) => 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+/** Luminância (linear) do vermelho do Expediente, a referência de energia do sinalizador. */
+const SIGNAL_LUMINANCE = luminance(new THREE.Color("#E61919"));
+
+/**
+ * A luz do sinalizador com a mesma energia em qualquer modo: só o filtro muda. O
+ * âmbar da Resenha é ~2,5x mais luminoso que o vermelho e, com o mesmo ganho,
+ * estourava (e o AgX o lavava de creme).
+ */
+export function signalLight(c: THREE.Color) {
+  return c.clone().multiplyScalar(Math.min(1, SIGNAL_LUMINANCE / luminance(c)));
+}

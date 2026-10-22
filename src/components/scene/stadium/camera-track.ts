@@ -113,11 +113,16 @@ const MOBILE = keys([
   { at: 6.9, pos: [0, 11, 46], look: [-4, 9, -68], fov: 54 }
 ]);
 
-/** Páginas internas: um quadro fixo, escurecido, atrás do conteúdo. */
+/**
+ * Páginas internas: um quadro fixo, escurecido e desfocado atrás do conteúdo, com o
+ * mesmo desfoque dos capítulos de leitura (foco a 4 m, nada do estádio fica nítido).
+ * No tier sem profundidade de campo, só escurece mais (AMBIENT_DIM_NO_BLUR).
+ */
 export const AMBIENT = {
-  desktop: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.9, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot,
-  mobile: { pos: [0, 4, 60], look: [0, 11, -40], fov: 62, dim: 0.9, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot
+  desktop: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.93, fog: 1, focus: 4, range: 3, bokeh: 3.5, letterbox: 0 } as Shot,
+  mobile: { pos: [0, 4, 60], look: [0, 11, -40], fov: 62, dim: 0.93, fog: 1, focus: 4, range: 3, bokeh: 3.5, letterbox: 0 } as Shot
 };
+export const AMBIENT_DIM_NO_BLUR = 0.95;
 
 /**
  * Saída do túnel: dolly zoom de cima da cobertura sul (tele, longe) até a borda

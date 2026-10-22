@@ -190,11 +190,20 @@ export default function Scene({
 
   const palette = React.useMemo<StadiumPalette>(() => {
     if (theme === "resenha")
-      // Pós-jogo: refletores esquentam (âmbar de balcão de bar) e a neblina fica dourada.
-      return { fg: new THREE.Color("#F7D9A8"), bg: new THREE.Color("#0A0806"), signal: new THREE.Color("#F59E0B"), additive: true };
-    return theme === "dark"
-      ? { fg: new THREE.Color("#F5F5F0"), bg: new THREE.Color("#080808"), signal: new THREE.Color("#E61919"), additive: true }
-      : { fg: new THREE.Color("#080808"), bg: new THREE.Color("#F5F5F0"), signal: new THREE.Color("#C21414"), additive: false };
+      // Pós-jogo: refletores esquentam (creme de balcão de bar) e os feixes e a neblina ficam dourados.
+      return {
+        fg: new THREE.Color("#F7D9A8"),
+        bg: new THREE.Color("#0A0806"),
+        signal: new THREE.Color("#F59E0B"),
+        beam: new THREE.Color("#F0D29A"),
+        additive: true
+      };
+    if (theme === "dark") {
+      const fg = new THREE.Color("#F5F5F0");
+      return { fg, bg: new THREE.Color("#080808"), signal: new THREE.Color("#E61919"), beam: fg, additive: true };
+    }
+    const fg = new THREE.Color("#080808");
+    return { fg, bg: new THREE.Color("#F5F5F0"), signal: new THREE.Color("#C21414"), beam: fg, additive: false };
   }, [theme]);
 
   return (
@@ -224,7 +233,7 @@ export default function Scene({
       />
       {parallel === null ? null : (
         <>
-          <Stadium tier={tier} palette={palette} mode={mode} stage={shown} />
+          <Stadium tier={tier} palette={palette} mode={mode} stage={shown} blur={post === "full" && theme !== "light"} />
           {shown >= LAST_STAGE && post !== "none" && theme !== "light" ? <Effects level={post} resenha={theme === "resenha"} /> : null}
           {parallel ? (
             <StageRunner stage={stage} onStage={setStage} onCompiling={setCompiling} onReady={onReady} />

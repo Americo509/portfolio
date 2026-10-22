@@ -112,15 +112,17 @@ const gradeResenha: Grade = (r, g, b, out, i) => {
   const t = contrast(y, 0.4, 1.3, 1.08);
   // 0 nas sombras fundas, 1 dos meios-tons em diante.
   const warm = THREE.MathUtils.smoothstep(t, 0.06, 0.45);
-  // Um pouco da cor original (30%) volta junto com o calor, nunca nas sombras.
-  const keep = 0.3 * warm;
+  // Parte da cor original (60%) volta junto com o calor, nunca nas sombras: é o que
+  // deixa os feixes e a névoa dourados (#F0D29A na cena) sem saturar a arquibancada.
+  const keep = 0.6 * warm;
   tmp[0] = clamp01(t * (1 + (CREAM[0] - 1) * warm) + (r - y) * keep);
   tmp[1] = clamp01(t * (1 + (CREAM[1] - 1) * warm) + (g - y) * keep);
   tmp[2] = clamp01(t * (1 + (CREAM[2] - 1) * warm) + (b - y) * keep);
-  // Só o âmbar já saturado e claro (o halo dos sinalizadores) vai para o tom cheio;
-  // o creme das luzes (#F7D9A8, mesma matiz, saturação 0,32) fica no grading, e o
-  // gramado no escuro (quente na cena, mas escuro) fica neutro.
-  accent(r, g, b, tmp, AMBER, 38, 14, 0.42, 0.62, 0.7, 0.18, 0.4, out, i);
+  // Só a luz dos sinalizadores vai para o âmbar cheio. Ela chega aqui em ~33° e
+  // saturação ~0,45, mais laranja e mais saturada que o dourado dos feixes (#F0D29A,
+  // 0,36) e o creme das luzes (#F7D9A8, 0,32): faixa de matiz estreita e saturação
+  // mínima acima da deles. O gramado no escuro fica de fora pela luminância.
+  accent(r, g, b, tmp, AMBER, 33, 4, 0.34, 0.5, 0.7, 0.18, 0.4, out, i);
 };
 
 function buildLut(grade: Grade, size = 32) {

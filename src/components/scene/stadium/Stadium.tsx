@@ -6,11 +6,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { motionState, useApp } from "@/lib/store";
 import type { GpuTier } from "@/lib/webgl";
 import { ARENA, CONE_TAN, LIGHTS, TIER_SETTINGS } from "./config";
-import { AMBIENT, CHAPTER_ORDER, INTRO, TRACKS, sampleTrack, type Shot } from "./camera-track";
+import { AMBIENT, AMBIENT_DIM_NO_BLUR, CHAPTER_ORDER, INTRO, TRACKS, sampleTrack, type Shot } from "./camera-track";
 import { lens } from "./lens-state";
 import { cameraLive, useCameraDebug } from "../debug";
 import { ArenaStructure, NorthCrowd } from "./Arena";
-import { createShared, type Shared } from "./shared";
+import { createShared, signalLight, type Shared } from "./shared";
 import {
   beamFragment,
   beamVertex,
@@ -23,7 +23,14 @@ import {
   worldVertex
 } from "./shaders";
 
-export type StadiumPalette = { fg: THREE.Color; bg: THREE.Color; signal: THREE.Color; additive: boolean };
+export type StadiumPalette = {
+  fg: THREE.Color;
+  bg: THREE.Color;
+  signal: THREE.Color;
+  /** Luz dos refletores no ar (feixes e névoa). */
+  beam: THREE.Color;
+  additive: boolean;
+};
 export type SceneMode = "hero" | "ambient";
 
 function Fog({ shared, layers, blending }: { shared: Shared; layers: number; blending: THREE.Blending }) {
@@ -67,7 +74,7 @@ function Beams({ shared, blending, strength }: { shared: Shared; blending: THREE
           uSector: { value: l.sector },
           uLightOn: shared.uLightOn,
           uTime: shared.uTime,
-          uFg: shared.uFg,
+          uBeam: shared.uBeam,
           uCamPos: shared.uCamPos,
           uDim: shared.uDim,
           uOrigin: { value: l.pos.clone() },
@@ -204,7 +211,7 @@ function Streaks({ shared }: { shared: Shared }) {
  * percorre a spline pelo scroll, com parallax do mouse e warp de FOV pela velocidade.
  * Também escreve o estado da lente (foco, letterbox e velocidade para o motion blur).
  */
-function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
+function CameraRig({ shared, mode, blur }: { shared: Shared; mode: SceneMode; blur: boolean }) {
   // A saída do túnel é da home: quem chega direto numa página interna já começa no
   // quadro de fundo, sem o dolly zoom atrás do texto.
   const intro = React.useRef({ t: mode === "hero" ? 0 : 1, wait: 0.25 });
@@ -255,6 +262,7 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
       sample.pos.set(...a.pos);
       sample.look.set(...a.look);
       Object.assign(sample.lens, a);
+      if (!blur) sample.lens.dim = AMBIENT_DIM_NO_BLUR;
     }
 
     // Amortecimento independente de framerate.
@@ -372,7 +380,20 @@ const DebugScene = React.lazy(() => import("./DebugScene").then((m) => ({ defaul
  * estrutura e câmera; 1 neblina e feixes; 2 torcida; 3 lâmpadas e flares; 4 (no
  * Scene) o pós-processamento.
  */
-export function Stadium({ tier, palette, mode, stage }: { tier: GpuTier; palette: StadiumPalette; mode: SceneMode; stage: number }) {
+export function Stadium({
+  tier,
+  palette,
+  mode,
+  stage,
+  blur
+}: {
+  tier: GpuTier;
+  palette: StadiumPalette;
+  mode: SceneMode;
+  stage: number;
+  /** O pós tem profundidade de campo (tier alto, tema escuro). */
+  blur: boolean;
+}) {
   const [debug] = React.useState(() => new URLSearchParams(window.location.search).has("debug"));
   const shared = React.useMemo(createShared, []);
   const settings = TIER_SETTINGS[tier];
@@ -385,7 +406,8 @@ export function Stadium({ tier, palette, mode, stage }: { tier: GpuTier; palette
   React.useEffect(() => {
     shared.uFg.value.copy(palette.fg);
     shared.uBg.value.copy(palette.bg);
-    shared.uSignal.value.copy(palette.signal);
+    shared.uSignal.value.copy(signalLight(palette.signal));
+    shared.uBeam.value.copy(palette.beam);
     scene.background = palette.bg.clone();
   }, [palette, shared, scene]);
 
@@ -403,7 +425,7 @@ export function Stadium({ tier, palette, mode, stage }: { tier: GpuTier; palette
 
   return (
     <>
-      <CameraRig shared={shared} mode={mode} />
+      <CameraRig shared={shared} mode={mode} blur={blur} />
       <Pitch shared={shared} />
       <ArenaStructure shared={shared} additive={palette.additive} truss={settings.truss} />
       {stage >= 1 ? (

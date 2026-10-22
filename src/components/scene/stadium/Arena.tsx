@@ -11,7 +11,7 @@ import {
   flagFragment,
   flagVertex,
   flareCoreFragment,
-  glowVertex,
+  flareCoreVertex,
   ledFragment,
   ledVertex,
   screenFragment,
@@ -20,7 +20,7 @@ import {
   standFragment,
   worldVertex
 } from "./shaders";
-import type { Shared } from "./shared";
+import { signalLight, type Shared } from "./shared";
 
 // Arena inspirada na de Itaquera (docs/estadio-arena.md §7): laterais iguais em
 // dois anéis com o bloco do prédio atrás, fundos baixos com arco e tirantes,
@@ -415,12 +415,14 @@ function FlareSmoke({ shared, count, blending }: { shared: Shared; count: number
 function FlareCores({ shared, blending, signal }: { shared: Shared; blending: THREE.Blending; signal: THREE.Color }) {
   const geo = React.useMemo(() => {
     const flares = shared.uFlares.value;
+    const c = signalLight(signal).multiplyScalar(1.2);
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(flares.flatMap((f) => [f.x, f.y, f.z]), 3));
     g.setAttribute("aSize", new THREE.Float32BufferAttribute(flares.map(() => 3.4), 1));
-    g.setAttribute("aColor", new THREE.Float32BufferAttribute(flares.flatMap(() => [signal.r * 1.2, signal.g * 1.2, signal.b * 1.2]), 3));
-    // aLight 4: sempre aceso, mesmo com os setores apagados.
+    g.setAttribute("aColor", new THREE.Float32BufferAttribute(flares.flatMap(() => [c.r, c.g, c.b]), 3));
+    // aLight 4: sempre aceso, mesmo com os setores apagados (o ?debug acha os núcleos por ele).
     g.setAttribute("aLight", new THREE.Float32BufferAttribute(flares.map(() => 4), 1));
+    g.setAttribute("aIndex", new THREE.Float32BufferAttribute(flares.map((_, i) => i), 1));
     return g;
   }, [shared, signal]);
   const uniforms = React.useMemo(
@@ -428,8 +430,6 @@ function FlareCores({ shared, blending, signal }: { shared: Shared; blending: TH
       uScale: shared.uScale,
       uTime: shared.uTime,
       uDim: shared.uDim,
-      uLightOn: shared.uLightOn,
-      uFlicker: { value: 1 },
       uFlare: shared.uFlare,
       uHot: { value: blending === THREE.AdditiveBlending ? 1 : 0 }
     }),
@@ -439,7 +439,7 @@ function FlareCores({ shared, blending, signal }: { shared: Shared; blending: TH
   return (
     <points geometry={geo} renderOrder={3} frustumCulled={false}>
       <shaderMaterial
-        args={[{ vertexShader: glowVertex, fragmentShader: flareCoreFragment, uniforms, transparent: true, depthWrite: false, blending }]}
+        args={[{ vertexShader: flareCoreVertex, fragmentShader: flareCoreFragment, uniforms, transparent: true, depthWrite: false, blending }]}
       />
     </points>
   );
