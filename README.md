@@ -86,7 +86,7 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
   - A LUT devolve ao acento (vermelho no Expediente, âmbar na Resenha) a saturação que o AgX tira, em proporção à que sobrou.
   - A neblina é preta onde não há luz e só aparece nos fachos e em volta dos sinalizadores.
   - Os 12 cones de feixe são estreitos e quebrados pela poeira; eram eles que acinzentavam o meio do quadro.
-- **Montagem em etapas (`StageRunner` em `Scene.tsx`):** gramado e estrutura, neblina e feixes, torcida, lâmpadas e pós. Cada etapa é compilada antes de ser desenhada: com `compileAsync` quando há `KHR_parallel_shader_compile`; sem ele, com `gl.compile` e uma espera. Só no fim a cena fica pronta e a abertura começa.
+- **Montagem em etapas (`StageRunner` em `Scene.tsx`):** gramado e estrutura, neblina e feixes, torcida, lâmpadas e pós. Só roda quando o aparelho tem `KHR_parallel_shader_compile`: cada etapa é compilada com `compileAsync` antes de ser desenhada, e só no fim a cena fica pronta e a abertura começa. Sem a extensão, a cena monta inteira e desenha direto (esperar não esconde nada quando a compilação é na CPU).
 - **Ferramentas do `?debug`:**
   - **Diretor de câmera:** câmera livre, slider que percorre a trilha, a spline desenhada na cena e um botão que copia o quadro-chave já no formato de `camera-track.ts`.
   - **Overlay de desempenho:** fps, mediana e p95 dos últimos 10 s, tier, DPR, pós, compilação paralela, tempo até a cena ficar pronta e maior travamento na montagem. O botão "testar 10 s" diz se passou no critério (mediana ≥ 55 fps e p95 ≤ 20 ms).

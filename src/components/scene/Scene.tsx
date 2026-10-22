@@ -19,21 +19,17 @@ const LAST_STAGE = 4;
 
 const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-/** Tempo que cada etapa espera, com o desenho parado, enquanto a GPU compila. */
-const COMPILE_WAIT_MS = 180;
 
 /**
  * Monta a cena em etapas (docs/plano-awwwards.md, revisão da etapa 1): gramado e
- * estrutura; neblina e feixes; torcida; lâmpadas; pós-processamento.
+ * estrutura; neblina e feixes; torcida; lâmpadas; pós-processamento. Só roda com
+ * KHR_parallel_shader_compile.
  *
  * No Chrome os shaders compilam no processo da GPU; a página só trava quando
- * pergunta se terminou, o que o three faz no primeiro desenho de cada programa. Por
- * isso cada etapa é compilada antes de ser desenhada, com o desenho parado:
- * - com KHR_parallel_shader_compile, compileAsync consulta sem bloquear;
- * - sem a extensão, gl.compile só dispara a compilação (não pergunta nada) e a etapa
- *   espera um instante; no primeiro desenho a resposta já está pronta.
- * Só no fim a cena avisa que está pronta: o fade e a abertura começam com tudo
- * compilado.
+ * pergunta se terminou, o que o three faz no primeiro desenho de cada programa. Com
+ * a extensão, compileAsync consulta sem bloquear, então cada etapa é compilada antes
+ * de ser desenhada, com o desenho parado. Só no fim a cena avisa que está pronta: o
+ * fade e a abertura começam com tudo compilado.
  */
 function StageRunner({
   stage,
@@ -51,18 +47,9 @@ function StageRunner({
   React.useEffect(() => {
     let alive = true;
     (async () => {
-      if (stage === 0) {
-        started.current = performance.now();
-        perfLive.parallel = gl.extensions.has("KHR_parallel_shader_compile");
-      }
+      if (stage === 0) started.current = performance.now();
       onCompiling(true);
-      if (gl.extensions.has("KHR_parallel_shader_compile")) {
-        await gl.compileAsync(scene, camera).catch(() => undefined);
-      } else {
-        gl.compile(scene, camera);
-        gl.getContext().flush();
-        await wait(COMPILE_WAIT_MS);
-      }
+      await gl.compileAsync(scene, camera).catch(() => undefined);
       if (!alive) return;
       onCompiling(false);
       // Um quadro para a etapa ser desenhada antes de montar a próxima; o tempo dele
@@ -84,6 +71,28 @@ function StageRunner({
     // Roda uma vez por etapa.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
+  return null;
+}
+
+/**
+ * Sem compilação paralela (ex.: SwiftShader, aparelhos antigos), esperar não esconde
+ * nada: a cena monta inteira e desenha direto, e avisa que está pronta no segundo
+ * quadro. Medido na revisão do commit 87ac1ef: a montagem em etapas sem a extensão
+ * piorava o TBT em ~190 ms.
+ */
+function ReadySignal({ onReady }: { onReady: () => void }) {
+  const frames = React.useRef(0);
+  const started = React.useRef(0);
+  const done = React.useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    if (frames.current === 0) started.current = performance.now();
+    if (++frames.current >= 2) {
+      done.current = true;
+      perfLive.readyMs = performance.now() - started.current;
+      onReady();
+    }
+  });
   return null;
 }
 
@@ -159,9 +168,12 @@ export default function Scene({
   const [dpr, setDpr] = React.useState(() => Math.min(settings.dpr, window.devicePixelRatio || 1));
   const [post, setPost] = React.useState(settings.post);
   const [hidden, setHidden] = React.useState(false);
+  // null até o renderer existir: aí se sabe se o aparelho compila shaders em paralelo.
+  const [parallel, setParallel] = React.useState<boolean | null>(null);
   const [stage, setStage] = React.useState(0);
-  // Começa parado: nada é desenhado (e compilado às cegas) antes do StageRunner.
+  // Começa parado: nada é desenhado (e compilado às cegas) antes de escolher o caminho.
   const [compiling, setCompiling] = React.useState(true);
+  const shown = parallel ? stage : LAST_STAGE;
   // Para o overlay de desempenho do ?debug.
   React.useEffect(() => {
     perfLive.tier = tier;
@@ -192,6 +204,12 @@ export default function Scene({
       camera={{ position: [52, 74, 130], fov: 28, near: 0.5, far: 600 }}
       gl={{ antialias: false, powerPreference: "high-performance" }}
       style={{ position: "absolute", inset: 0 }}
+      onCreated={({ gl }) => {
+        const p = gl.extensions.has("KHR_parallel_shader_compile");
+        perfLive.parallel = p;
+        setParallel(p);
+        if (!p) setCompiling(false);
+      }}
     >
       <PerformanceMonitor
         flipflops={3}
@@ -204,9 +222,17 @@ export default function Scene({
           setPost("none");
         }}
       />
-      <Stadium tier={tier} palette={palette} mode={mode} stage={stage} />
-      {stage >= 4 && post !== "none" && theme !== "light" ? <Effects level={post} resenha={theme === "resenha"} /> : null}
-      <StageRunner stage={stage} onStage={setStage} onCompiling={setCompiling} onReady={onReady} />
+      {parallel === null ? null : (
+        <>
+          <Stadium tier={tier} palette={palette} mode={mode} stage={shown} />
+          {shown >= LAST_STAGE && post !== "none" && theme !== "light" ? <Effects level={post} resenha={theme === "resenha"} /> : null}
+          {parallel ? (
+            <StageRunner stage={stage} onStage={setStage} onCompiling={setCompiling} onReady={onReady} />
+          ) : (
+            <ReadySignal onReady={onReady} />
+          )}
+        </>
+      )}
     </Canvas>
   );
 }
