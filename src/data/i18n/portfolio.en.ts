@@ -733,10 +733,10 @@ export const portfolioEN: Portfolio = {
       loading: "Floodlights %",
       lines: [
         "> leaving the tunnel: {handle} · build v19.10",
-        "> floodlight 1/4 .............. ok",
-        "> floodlight 2/4 .............. ok",
-        "> floodlight 3/4 .............. ok",
-        "> floodlight 4/4 .............. ok — kick-off"
+        "> south stand ................. ok",
+        "> east stand .................. ok",
+        "> west stand .................. ok",
+        "> north stand ................. ok — kick-off"
       ]
     },
     hero: { primaryCta: "See projects", secondaryCta: "Get in touch" },

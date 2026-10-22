@@ -2,35 +2,97 @@ import * as THREE from "three";
 import type { GpuTier } from "@/lib/webgl";
 
 /**
- * Geometria do estádio (unidades ≈ metros). Campo de 68 × 105 centrado na
- * origem, sobre o plano XZ; a câmera fica atrás de um dos gols olhando o campo.
+ * Geometria da arena (unidades ≈ metros), inspirada na arena de Itaquera
+ * (docs/estadio-arena.md §7). Campo de 68 × 105 centrado na origem, sobre o
+ * plano XZ. Norte = −z (o fundo que a câmera do hero vê), oeste = −x.
  */
 export const PITCH = { width: 68, length: 105 };
 
-const tower = (x: number, z: number, tx: number, tz: number) => {
-  const pos = new THREE.Vector3(x, 38, z);
-  const dir = new THREE.Vector3(tx, 0, tz).sub(pos).normalize();
-  return { pos, dir };
+export const ARENA = {
+  /** Laterais (leste e oeste iguais): dois anéis, cobertura e o bloco do prédio atrás. */
+  side: {
+    halfLength: 56,
+    lower: { from: 40, to: 62, h: [0.8, 12] as const },
+    upper: { from: 64, to: 84, h: [16, 38] as const },
+    building: { from: 84, to: 96, h: 48, halfLength: 90 },
+    roof: { inner: 44, outer: 96, h: [40, 50] as const, halfLength: 60, depth: 4 }
+  },
+  /** Fundos (norte e sul): anel único e baixo, cobertura fina pendurada no arco. */
+  end: {
+    from: 60.5,
+    to: 84.5,
+    halfWidth: 36,
+    h: [0.8, 14] as const,
+    roof: { from: 60, to: 88, h: 24, halfWidth: 40 }
+  },
+  /** Arcos sobre os fundos, apoiados em pilares nos cantos abertos. */
+  arch: { z: 72, halfSpan: 60, spring: 30, apex: 46, hangerStep: 8 },
+  /** Telão atrás da arquibancada norte. */
+  screen: { z: -86.5, width: 24, h: [14, 22] as const }
 };
 
-/** 4 refletores nos cantos, mirando o miolo do campo. */
-export const FLOODLIGHTS = [
-  tower(-46, -64, 22, 6),
-  tower(46, -64, -18, 10),
-  tower(-46, 64, -6, -30),
-  tower(46, 64, 14, -34)
+/** Altura da arquibancada do fundo numa distância |z| do meio-campo. */
+export const endStandHeight = (absZ: number) => {
+  const { from, to, h } = ARENA.end;
+  return h[0] + ((absZ - from) / (to - from)) * (h[1] - h[0]);
+};
+
+/** Altura do arco num x (parábola entre os pilares). */
+export const archHeight = (x: number) => {
+  const { halfSpan, spring, apex } = ARENA.arch;
+  return spring + (apex - spring) * (1 - (x / halfSpan) ** 2);
+};
+
+/**
+ * Setores da cobertura. A ordem é a do apagar no apito final (o norte, atrás
+ * do sinalizador, apaga por último) e a das linhas do preloader.
+ */
+export const SECTORS = ["south", "east", "west", "north"] as const;
+export const LIGHTS_PER_SECTOR = 3;
+
+const roofLight = (sector: number, pos: [number, number, number], target: [number, number, number]) => {
+  const p = new THREE.Vector3(...pos);
+  return { sector, pos: p, dir: new THREE.Vector3(...target).sub(p).normalize() };
+};
+
+/**
+ * Grupos de refletores na borda interna da cobertura (3 por setor), mirando o
+ * gramado. Sem torres: a luz desce da cobertura em cortina.
+ */
+export const LIGHTS = [
+  // sul (borda da cobertura do fundo)
+  roofLight(0, [-24, 24, 60], [-14, 0, 26]),
+  roofLight(0, [0, 24, 60], [0, 0, 22]),
+  roofLight(0, [24, 24, 60], [14, 0, 26]),
+  // leste
+  roofLight(1, [44, 40, -36], [8, 0, -30]),
+  roofLight(1, [44, 40, 0], [6, 0, 0]),
+  roofLight(1, [44, 40, 36], [8, 0, 30]),
+  // oeste
+  roofLight(2, [-44, 40, -36], [-8, 0, -30]),
+  roofLight(2, [-44, 40, 0], [-6, 0, 0]),
+  roofLight(2, [-44, 40, 36], [-8, 0, 30]),
+  // norte
+  roofLight(3, [-24, 24, -60], [-14, 0, -26]),
+  roofLight(3, [0, 24, -60], [0, 0, -22]),
+  roofLight(3, [24, 24, -60], [14, 0, -26])
 ];
 
 /** Meia-abertura do cone de luz (tan do ângulo). */
-export const CONE_TAN = 0.14;
+export const CONE_TAN = 0.16;
 
-/** O sinalizador: na arquibancada do fundo, um pouco à esquerda. */
-export const FLARE = new THREE.Vector3(-20, 12.5, -61);
+/**
+ * Sinalizadores na mão da torcida, na arquibancada norte. O primeiro é o
+ * principal: a câmera do apito final mira nele.
+ */
+const flareAt = (x: number, absZ: number) => new THREE.Vector3(x, endStandHeight(absZ) + 2.1, -absZ);
+export const FLARES = [flareAt(-14, 68), flareAt(9, 72), flareAt(-27, 66), flareAt(24, 70), flareAt(-3, 78), flareAt(29, 77)];
+export const FLARE = FLARES[0];
 
-/** Câmera: começa no alto do refletor e desce até o nível do campo. */
+/** Câmera: começa acima da cobertura do fundo sul e desce até o nível do campo. */
 export const CAMERA = {
   start: { pos: new THREE.Vector3(40, 46, 66), look: new THREE.Vector3(0, 0, -6), fov: 58 },
-  end: { pos: new THREE.Vector3(-10, 3.4, 56), look: new THREE.Vector3(18, 8, -30), fov: 42 }
+  end: { pos: new THREE.Vector3(-10, 3.4, 56), look: new THREE.Vector3(10, 9, -40), fov: 42 }
 };
 
 type Preset = { pos: [number, number, number]; look: [number, number, number]; fov: number; dim: number; fog: number };
@@ -40,8 +102,9 @@ type Preset = { pos: [number, number, number]; look: [number, number, number]; f
  * desliza suavemente de um para o outro conforme o scroll.
  */
 export const CHAPTER_PRESETS: Record<"hero" | "lineup" | "matches" | "method" | "academy" | "penalties" | "final" | "ambient", Preset> = {
-  hero: { pos: [-10, 3.4, 56], look: [18, 8, -30], fov: 42, dim: 0, fog: 1 },
-  // Vista tática de cima: o gramado vira a prancheta.
+  // Do gramado, olhando a arquibancada norte com o telão e o arco.
+  hero: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0, fog: 1 },
+  // Vista tática de cima, pela abertura da cobertura: o gramado vira a prancheta.
   lineup: { pos: [0, 66, 38], look: [0, 0, -6], fov: 44, dim: 0.35, fog: 0.2 },
   // Travelling lateral pela linha de fundo.
   matches: { pos: [-34, 7, 18], look: [20, 6, -40], fov: 38, dim: 0.72, fog: 0.8 },
@@ -50,13 +113,16 @@ export const CHAPTER_PRESETS: Record<"hero" | "lineup" | "matches" | "method" | 
   academy: { pos: [18, 4, 8], look: [-20, 6, -40], fov: 38, dim: 0.84, fog: 1 },
   // Pênaltis: a cena do estádio pausa (o jogo tem o próprio canvas); só o enquadramento de volta à grande área.
   penalties: { pos: [0, 2.2, 40], look: [0, 1.5, 52.5], fov: 38, dim: 0.85, fog: 1 },
-  // Apito final: a câmera vira para o sinalizador enquanto os refletores apagam.
-  final: { pos: [-4, 3, 18], look: [-20, 11, -61], fov: 34, dim: 0.15, fog: 1 },
-  ambient: { pos: [-10, 3.4, 56], look: [18, 8, -30], fov: 42, dim: 0.82, fog: 1 }
+  // Apito final: a câmera vira para a torcida e o sinalizador enquanto os setores apagam.
+  final: { pos: [-4, 3, 18], look: [FLARE.x, FLARE.y + 2, FLARE.z], fov: 34, dim: 0.15, fog: 1 },
+  ambient: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.82, fog: 1 }
 };
 
-export const TIER_SETTINGS: Record<GpuTier, { fogLayers: number; smoke: number; dpr: number; post: "none" | "bloom" | "full" }> = {
-  low: { fogLayers: 3, smoke: 90, dpr: 1, post: "none" },
-  mid: { fogLayers: 5, smoke: 220, dpr: 1.5, post: "bloom" },
-  high: { fogLayers: 8, smoke: 480, dpr: 1.75, post: "full" }
+export const TIER_SETTINGS: Record<
+  GpuTier,
+  { fogLayers: number; smoke: number; dpr: number; post: "none" | "bloom" | "full"; crowd: number; flags: number; truss: boolean }
+> = {
+  low: { fogLayers: 3, smoke: 120, dpr: 1, post: "none", crowd: 900, flags: 4, truss: false },
+  mid: { fogLayers: 5, smoke: 300, dpr: 1.5, post: "bloom", crowd: 1800, flags: 10, truss: true },
+  high: { fogLayers: 8, smoke: 600, dpr: 1.75, post: "full", crowd: 2600, flags: 16, truss: true }
 };

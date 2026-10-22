@@ -69,14 +69,14 @@ O HUD vira **o relógio do jogo**: o progresso do scroll vira minuto de jogo (`1
 
 | # | Momento | Seção | Visual e interação |
 |---|---|---|---|
-| 00 | **Túnel** | Preloader | Concreto escuro. Os refletores acendem um a um (`> refletor 3/4 ........ ok`) e o som da torcida chega abafado (só se o som estiver ligado). O obturador anamórfico abre como a saída do túnel. |
-| 01 | **Entrada em campo** | Hero | Estádio à noite em **neblina volumétrica falsa** (shader de ruído), **cones de luz de 4 refletores** cortando a fumaça e um **sinalizador vermelho** pulsando ao longe, com fumaça própria. Nome em cartaz gigante, faixa diagonal atravessando a tela. A câmera desce do alto do refletor até o nível do campo. |
+| 00 | **Túnel** | Preloader | Concreto escuro. Os setores da cobertura acendem um a um (`> setor oeste ........ ok`) e o som da torcida chega abafado (só se o som estiver ligado). O obturador anamórfico abre como a saída do túnel. |
+| 01 | **Entrada em campo** | Hero | Estádio à noite em **neblina volumétrica falsa** (shader de ruído), **cortina de luz descendo da borda da cobertura** e a **torcida norte com sinalizadores vermelhos e bandeirões** sob o telão e o arco (arena de Itaquera, ver `docs/estadio-arena.md`). Nome em cartaz gigante, faixa diagonal atravessando a tela. A câmera desce de cima da cobertura sul até o nível do campo. |
 | 02 | **Escalação** | Toolbox | A rede da Fase 1 **vira prancheta**: os nós se reorganizam numa formação 4-3-3 desenhada a giz. Cada posição é uma competência, e o hover mostra o "cartão do jogador" com as tecnologias. Os pulsos de evento viram **passes** (defesa → meio → ataque), que é literalmente o fluxo de uma requisição. |
 | 03 | **Jogos históricos** | Projetos em destaque | Cada projeto é uma **súmula**: placar, escalação (stack), lances decisivos, VAR e placar final. Planos WebGL com a key art (veja §10), deformados pela velocidade do scroll. |
 | 04 | **Preleção** | Como eu penso | As 5 fases como **jogada ensaiada**: um traço de giz percorre 01 → 05 na prancheta, sincronizado com o scroll. O texto é grande e o reveal é palavra por palavra. |
 | 05 | **Categorias de base** | Projetos antigos | *(depende da sua resposta, veja §12)* Os primeiros projetos (Apple Watch, Cardápio, Audio Book, Spotify, CookShow) como "revelados na base", em formato compacto. |
 | 06 | **Disputa de pênaltis** | Jogo (teaser) | Gol a giz, uma cobrança jogável direto na home e "Jogar a disputa completa →" levando a `/penalti`. |
-| 07 | **Apito final** | Contato | A neblina baixa, os refletores apagam um a um e sobra o sinalizador, que vira o CTA. A chave da Resenha aparece aqui como convite: "O jogo acabou. Bora pra resenha?" |
+| 07 | **Apito final** | Contato | A neblina baixa, os setores da cobertura apagam um a um (o norte por último) e sobram os sinalizadores da torcida, que viram o CTA. A chave da Resenha aparece aqui como convite: "O jogo acabou. Bora pra resenha?" |
 
 ### Formação da Escalação (4-3-3)
 

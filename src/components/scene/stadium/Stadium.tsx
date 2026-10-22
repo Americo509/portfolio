@@ -6,7 +6,9 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { gsap } from "@/lib/gsap";
 import { motionState } from "@/lib/store";
 import type { GpuTier } from "@/lib/webgl";
-import { CAMERA, CHAPTER_PRESETS, CONE_TAN, FLARE, FLOODLIGHTS, TIER_SETTINGS } from "./config";
+import { ARENA, CAMERA, CHAPTER_PRESETS, CONE_TAN, LIGHTS, TIER_SETTINGS } from "./config";
+import { ArenaStructure, NorthCrowd } from "./Arena";
+import { createShared, type Shared } from "./shared";
 import {
   beamFragment,
   beamVertex,
@@ -14,38 +16,11 @@ import {
   glowFragment,
   glowVertex,
   pitchFragment,
-  smokeFragment,
-  smokeVertex,
   worldVertex
 } from "./shaders";
 
-// Os materiais recebem os uniforms pelo construtor (args): assim o three guarda a
-// MESMA referência e o useFrame consegue animá-los. Como prop (uniforms={...}),
-// os wrappers são copiados e valores primitivos (uTime, uScale) congelam.
-
 export type StadiumPalette = { fg: THREE.Color; bg: THREE.Color; signal: THREE.Color; additive: boolean };
 export type SceneMode = "hero" | "ambient";
-
-type Shared = ReturnType<typeof createShared>;
-
-function createShared() {
-  return {
-    uTime: { value: 0 },
-    uLightPos: { value: FLOODLIGHTS.map((l) => l.pos.clone()) },
-    uLightDir: { value: FLOODLIGHTS.map((l) => l.dir.clone()) },
-    uConeTan: { value: CONE_TAN },
-    uFg: { value: new THREE.Color() },
-    uBg: { value: new THREE.Color() },
-    uSignal: { value: new THREE.Color() },
-    uFlarePos: { value: FLARE.clone() },
-    uFlare: { value: 1 },
-    uDim: { value: 0 },
-    uFogMul: { value: 1 },
-    uLightOn: { value: [1, 1, 1, 1] },
-    uScale: { value: 1 },
-    uCamPos: { value: new THREE.Vector3() }
-  };
-}
 
 function Fog({ shared, layers, blending }: { shared: Shared; layers: number; blending: THREE.Blending }) {
   const materials = React.useMemo(
@@ -75,17 +50,17 @@ function Fog({ shared, layers, blending }: { shared: Shared; layers: number; ble
   );
 }
 
-/** Feixes dos refletores como cones geométricos (a neblina em camadas sozinha vira "fatias"). */
+/** Feixes dos grupos de refletores como cones geométricos (a neblina em camadas sozinha vira "fatias"). */
 function Beams({ shared, blending, strength }: { shared: Shared; blending: THREE.Blending; strength: number }) {
   const beams = React.useMemo(
     () =>
-      FLOODLIGHTS.map((l) => {
+      LIGHTS.map((l) => {
         // Comprimento até o chão ao longo da direção do refletor.
         const length = l.pos.y / Math.max(0.2, -l.dir.y);
         const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), l.dir.clone().negate());
         const position = l.pos.clone().addScaledVector(l.dir, length / 2);
         const uniforms = {
-          uIndex: { value: FLOODLIGHTS.indexOf(l) },
+          uSector: { value: l.sector },
           uLightOn: shared.uLightOn,
           uTime: shared.uTime,
           uFg: shared.uFg,
@@ -133,84 +108,43 @@ function Pitch({ shared }: { shared: Shared }) {
   );
 }
 
-/** Arquibancadas em silhueta: só existem para recortar a neblina iluminada atrás delas. */
-function Stands({ color }: { color: THREE.Color }) {
-  const stands: { pos: [number, number, number]; size: [number, number, number]; rot?: [number, number, number] }[] = [
-    { pos: [0, 3.5, -63], size: [150, 7, 6], rot: [0.5, 0, 0] },
-    { pos: [0, 9, -70], size: [170, 8, 6], rot: [0.5, 0, 0] },
-    { pos: [-48, 3.5, -30], size: [6, 7, 70], rot: [0, 0, -0.5] },
-    { pos: [48, 3.5, -30], size: [6, 7, 70], rot: [0, 0, 0.5] }
-  ];
-  return (
-    <group>
-      {stands.map((s, i) => (
-        <mesh key={i} position={s.pos} rotation={s.rot ?? [0, 0, 0]} renderOrder={1}>
-          <boxGeometry args={s.size} />
-          <meshBasicMaterial color={color} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Towers({ color }: { color: THREE.Color }) {
-  return (
-    <group>
-      {FLOODLIGHTS.map((l, i) => (
-        <group key={i}>
-          <mesh position={[l.pos.x, l.pos.y / 2, l.pos.z]}>
-            <cylinderGeometry args={[0.35, 0.6, l.pos.y, 6]} />
-            <meshBasicMaterial color={color} />
-          </mesh>
-          <mesh
-            position={l.pos}
-            onUpdate={(m) => m.lookAt(l.pos.clone().add(l.dir))}
-          >
-            <planeGeometry args={[9, 4.5]} />
-            <meshBasicMaterial color={color} side={THREE.DoubleSide} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
-
-/** Cabeças dos refletores (6 lâmpadas cada) + núcleo do sinalizador. */
+/** Lâmpadas da borda da cobertura: os grupos grandes e as pequenas ao longo da borda. */
 function Glows({ shared, palette }: { shared: Shared; palette: StadiumPalette }) {
   const geo = React.useMemo(() => {
     const pos: number[] = [];
     const size: number[] = [];
     const color: number[] = [];
     const light: number[] = [];
-    FLOODLIGHTS.forEach((l, li) => {
-      const side = new THREE.Vector3().crossVectors(l.dir, new THREE.Vector3(0, 1, 0)).normalize();
-      const up = new THREE.Vector3().crossVectors(side, l.dir).normalize();
-      for (let c = -1; c <= 1; c++)
-        for (let r = 0; r < 2; r++) {
-          const p = l.pos.clone().addScaledVector(side, c * 2.6).addScaledVector(up, (r - 0.5) * 1.8).addScaledVector(l.dir, 0.5);
-          pos.push(p.x, p.y, p.z);
-          size.push(4.5);
-          color.push(1, 1, 1);
-          light.push(li);
-        }
-      // Clarão (glare) de cada refletor.
-      const glare = l.pos.clone().addScaledVector(l.dir, 1.2);
-      pos.push(glare.x, glare.y, glare.z);
-      size.push(26);
-      color.push(0.55, 0.55, 0.55);
-      light.push(li);
+    const lamp = (p: THREE.Vector3, s: number, c: number, sector: number) => {
+      pos.push(p.x, p.y, p.z);
+      size.push(s);
+      color.push(c, c, c);
+      light.push(sector);
+    };
+    LIGHTS.forEach((l) => {
+      // Laterais: a fileira de lâmpadas corre ao longo de z; fundos, ao longo de x.
+      const along = Math.abs(l.pos.x) > 30 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(1, 0, 0);
+      for (let c = -2; c <= 2; c++) lamp(l.pos.clone().addScaledVector(along, c * 2.2).addScaledVector(l.dir, 0.4), 3.6, 1, l.sector);
+      lamp(l.pos.clone().addScaledVector(l.dir, 1.2), 24, 0.5, l.sector);
     });
-    pos.push(FLARE.x, FLARE.y, FLARE.z);
-    size.push(9);
-    light.push(4);
-    color.push(palette.signal.r * 1.4, palette.signal.g * 1.4 + 0.15, palette.signal.b * 1.4 + 0.1);
+    // Lâmpadas menores espalhadas pela borda, entre os grupos.
+    const { roof } = ARENA.side;
+    const er = ARENA.end.roof;
+    for (let z = -roof.halfLength + 3; z < roof.halfLength; z += 6) {
+      lamp(new THREE.Vector3(roof.inner, roof.h[0] - 0.6, z), 2, 0.8, 1);
+      lamp(new THREE.Vector3(-roof.inner, roof.h[0] - 0.6, z), 2, 0.8, 2);
+    }
+    for (let x = -er.halfWidth + 4; x < er.halfWidth; x += 6) {
+      lamp(new THREE.Vector3(x, er.h - 0.9, er.from), 2, 0.8, 0);
+      lamp(new THREE.Vector3(x, er.h - 0.9, -er.from), 2, 0.8, 3);
+    }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute("aSize", new THREE.Float32BufferAttribute(size, 1));
     g.setAttribute("aColor", new THREE.Float32BufferAttribute(color, 3));
     g.setAttribute("aLight", new THREE.Float32BufferAttribute(light, 1));
     return g;
-  }, [palette]);
+  }, []);
   const uniforms = React.useMemo(
     () => ({ uScale: shared.uScale, uTime: shared.uTime, uDim: shared.uDim, uLightOn: shared.uLightOn, uFlicker: { value: 1 } }),
     [shared]
@@ -234,26 +168,8 @@ function Glows({ shared, palette }: { shared: Shared; palette: StadiumPalette })
   );
 }
 
-function Smoke({ shared, count, blending }: { shared: Shared; count: number; blending: THREE.Blending }) {
-  const geo = React.useMemo(() => {
-    const g = new THREE.BufferGeometry();
-    const seeds = new Float32Array(count).map(() => Math.random());
-    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
-    g.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
-    return g;
-  }, [count]);
-  React.useEffect(() => () => geo.dispose(), [geo]);
-  return (
-    <points geometry={geo} renderOrder={2} frustumCulled={false}>
-      <shaderMaterial
-        args={[{ vertexShader: smokeVertex, fragmentShader: smokeFragment, uniforms: shared, transparent: true, depthWrite: false, blending }]}
-      />
-    </points>
-  );
-}
-
 /**
- * Câmera: descida do alto do refletor até o enquadramento do capítulo atual
+ * Câmera: descida de cima da cobertura sul até o enquadramento do capítulo atual
  * (uma vez); depois desliza entre os presets de cada capítulo da home, com
  * parallax do mouse e "warp" de FOV pela velocidade do scroll.
  */
@@ -299,7 +215,7 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
     st.dim += (preset.dim - st.dim) * k;
     st.fog += (preset.fog - st.fog) * k;
 
-    // Apito final: os refletores apagam um a um conforme o capítulo avança.
+    // Apito final: os setores da cobertura apagam um a um conforme o capítulo avança (o norte por último).
     for (let i = 0; i < 4; i++) {
       const on = chapter === "final" ? 1 - THREE.MathUtils.smoothstep(cp, 0.12 + i * 0.14, 0.24 + i * 0.14) : 1;
       st.lights[i] += (on - st.lights[i]) * k * 2;
@@ -350,20 +266,14 @@ export function Stadium({ tier, palette, mode }: { tier: GpuTier; palette: Stadi
     shared.uFlare.value = 0.85 + 0.15 * Math.sin(t * 13) * Math.sin(t * 3.7);
   });
 
-  const structure = React.useMemo(
-    () => palette.bg.clone().lerp(palette.fg, palette.additive ? 0.018 : 0.1),
-    [palette]
-  );
-
   return (
     <>
       <CameraRig shared={shared} mode={mode} />
       <Pitch shared={shared} />
-      <Stands color={structure} />
-      <Towers color={structure} />
+      <ArenaStructure shared={shared} additive={palette.additive} truss={settings.truss} />
+      <NorthCrowd shared={shared} crowd={settings.crowd} flags={settings.flags} smoke={settings.smoke} additive={palette.additive} />
       <Fog shared={shared} layers={settings.fogLayers} blending={blending} />
-      <Beams shared={shared} blending={blending} strength={palette.additive ? 0.3 : 0.12} />
-      <Smoke shared={shared} count={settings.smoke} blending={blending} />
+      <Beams shared={shared} blending={blending} strength={palette.additive ? 0.3 : 0.11} />
       <Glows shared={shared} palette={palette} />
     </>
   );

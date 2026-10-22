@@ -62,10 +62,12 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
 - **Motion** (`motion`): microinterações de UI em componentes React; substituiu o `framer-motion`.
 - **zustand**: estado discreto compartilhado entre o DOM e a cena (preloader concluído, status da cena).
 
-### Cena do estádio (Fase 2B)
+### Cena do estádio (Fase 2B; arena desde out/2026)
 
-- `src/components/scene/stadium/`: neblina em camadas (fBm), cones de luz dos 4 refletores, gramado com as linhas do campo em shader, arquibancadas em silhueta, sinalizador com fumaça, e a câmera que desce do refletor e depois é dirigida pelo scroll e pelo mouse.
-- Tiers de GPU (`low`, `mid`, `high`) controlam as camadas de neblina, as partículas, o DPR e o pós-processamento. Para forçar um tier em QA: `?tier=low|mid|high`. `?debug` expõe `__scene`/`__gl` no `window`.
+- `src/components/scene/stadium/`: arena inspirada na de Itaquera (plano e medidas em [`docs/estadio-arena.md`](docs/estadio-arena.md)). Laterais iguais em dois anéis com o bloco do prédio atrás, fundos baixos com arco metálico e tirantes, telão atrás do gol norte, neblina em camadas (fBm) e gramado com as linhas do campo em shader. A câmera desce de cima da cobertura sul e depois é dirigida pelo scroll e pelo mouse.
+- Luz: 12 grupos de refletores na borda da cobertura (3 por setor) e uma linha de LED contornando a borda; sem torres. O liga/desliga é por setor (sul, leste, oeste, norte), na ordem do preloader e do apagar no apito final.
+- Torcida norte (`Arena.tsx`, `NorthCrowd`): torcedores em silhueta pulando, bandeirões e bandeiras de mastro balançando (alvinegras, sem escudo) e 6 sinalizadores com fumaça. O mesmo bloco aparece atrás do gol no pênalti.
+- Tiers de GPU (`low`, `mid`, `high`) controlam as camadas de neblina, a fumaça, o tamanho da torcida, as bandeiras, a treliça da cobertura, o DPR e o pós-processamento. Para forçar um tier em QA: `?tier=low|mid|high`. `?debug` expõe `__scene`/`__gl` no `window`.
 - A cena só compila depois que o preloader sai de cena (`bootDone`), para não travar a abertura.
 - Os testes funcionais rodam com `--disable-webgl` (fallback); o projeto `webgl` do Playwright testa a cena.
 
@@ -78,7 +80,7 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
 ### Disputa de pênaltis (Fase 4)
 
 - Lógica pura e testada em `src/lib/penalty/engine.ts`: zonas 3 × 3, goleiro que decide antes de ver a bola lendo a frequência das suas zonas (90% leitura, 10% aleatório), regras oficiais (5 cobranças, decisão antecipada e morte súbita) e o **Modo Muralha 2012** (2 defesas seguidas = mais alcance).
-- Cena 3D própria (`src/components/penalty/PenaltyScene.tsx`): goleiro estilizado (alto, camisa 12, luvas grandes e arquinho; sem rosto e sem marca), rede que deforma no gol, trajetória com efeito, câmera lenta, tremor e flashes no gol. O estádio de fundo pausa enquanto o jogo está na tela.
+- Cena 3D própria (`src/components/penalty/PenaltyScene.tsx`): goleiro estilizado (alto, camisa 12, luvas grandes e arquinho; sem rosto e sem marca), rede que deforma no gol, trajetória com efeito, câmera lenta, tremor e flashes no gol. Atrás do gol, a torcida norte da arena com bandeirões e sinalizadores (parada com movimento reduzido). O estádio de fundo pausa enquanto o jogo está na tela.
 - Controles: mouse/toque (mirar, segurar para força, arrastar para efeito) e teclado (setas + espaço). Som procedural (Web Audio), desligado por padrão.
 - Sem WebGL, o gol vira uma grade 3 × 3 de botões com a mesma lógica.
 - Teaser de uma cobrança na home e a disputa completa em `/penalti`.

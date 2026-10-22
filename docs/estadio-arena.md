@@ -1,6 +1,6 @@
 # Estádio inspirado na arena de Itaquera (plano para o futuro)
 
-Status: **fase 1 (referências) entregue em out/2026**; a implementação ainda não começou. Este documento registra a direção combinada para quando o estádio do site for trocado por um inspirado na arquitetura da arena do Corinthians (Neo Química Arena).
+Status: **fases 1 e 2 entregues em out/2026** (referências, esboço e estrutura com luz e torcida, inclusive no pênalti). Próximas: telão dinâmico e o 2D. Este documento registra a direção combinada para quando o estádio do site for trocado por um inspirado na arquitetura da arena do Corinthians (Neo Química Arena).
 
 ## 1. Quem faz o quê
 
@@ -67,9 +67,9 @@ O que as referências mostram e muda o plano:
 ## 5. Fases sugeridas
 
 1. **Referência:** ✅ fotos e duas concept arts em `design/reference/arena/`, analisadas no §3. Esboço de proporções entregue no §7, aguardando sua aprovação antes de mexer na cena.
-2. **Estrutura:** arquibancadas assimétricas, cobertura e luz da borda, substituindo as torres. Preloader e apito final passam a falar em setores.
+2. **Estrutura:** ✅ laterais iguais (leste = oeste, decisão do Gustavo ao aprovar o esboço), fundos baixos com arco e tirantes, cobertura com treliça e linha de LED, 12 grupos de luz no lugar das torres, preloader e apito final em setores. Junto: a torcida norte com bandeirões, bandeiras de mastro e 6 sinalizadores, também atrás do gol no pênalti.
 3. **Telão:** conteúdo dinâmico (capítulo, placar dos pênaltis, Modo Resenha).
-4. **2D:** key arts e OG image novas (se quiser), fallback estático e estádio do pênalti.
+4. **2D:** key arts e OG image novas (se quiser) e o fallback estático. (O estádio do pênalti já ganhou a torcida norte na fase 2.)
 5. **Opcional:** o preloader vira a chegada à arena, com a câmera de fora vendo a fachada de LED acender e entrando pelo túnel. É a fase mais cara; só vale se as outras ficarem leves.
 
 ## 6. Prompts para o Nano Banana
@@ -97,7 +97,7 @@ Medidas estimadas a partir das referências e ajustadas para a câmera da cena; 
 |---|---|---|
 | Recuo do campo | 6 m nas laterais, 8 m nos fundos | — |
 | Lateral oeste | 2 anéis: inferior de 0,8 a 12 m (x −40 a −62), superior de 16 a 38 m (x −64 a −84); prédio maciço de 48 m atrás (x −84 a −96) | caixa inclinada em x = −48 |
-| Lateral leste | 2 anéis: inferior de 0,8 a 12 m (x 40 a 62), superior de 15 a 30 m (x 63 a 78); parede de 34 m | caixa inclinada em x = 48 |
+| Lateral leste | **igual à oeste** (aprovado assim): 2 anéis até 38 m e bloco de 48 m atrás | caixa inclinada em x = 48 |
 | Fundos (norte e sul) | anel único de 0,8 a 14 m, de z ±60,5 a ±84,5, largura 72 m; cantos abertos | duas caixas no norte (z −63 e −70), nada no sul |
 | Coberturas laterais | treliça de ~4 m de altura; borda interna em x = ±44, a 40 m (oeste) e 36 m (leste) | — |
 | Coberturas dos fundos | finas, a 24 m, de z ±60 a ±88, penduradas no arco | — |

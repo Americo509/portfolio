@@ -55,25 +55,55 @@ export const noise = /* glsl */ `
   }
 `;
 
-/** Iluminação dos 4 cones de refletor num ponto do mundo (compartilhado por neblina e gramado). */
+/**
+ * Iluminação dos 12 grupos de refletores na borda da cobertura (3 por setor) num
+ * ponto do mundo, compartilhada por neblina, gramado e arquibancadas. uLightOn é
+ * por setor: o apito final apaga um setor inteiro de cada vez.
+ */
 export const floodlights = /* glsl */ `
-  uniform vec3 uLightPos[4];
-  uniform vec3 uLightDir[4];
+  uniform vec3 uLightPos[12];
+  uniform vec3 uLightDir[12];
   uniform float uLightOn[4];
   uniform float uConeTan;
+  float sectorOn(int i) {
+    if (i < 3) return uLightOn[0];
+    if (i < 6) return uLightOn[1];
+    if (i < 9) return uLightOn[2];
+    return uLightOn[3];
+  }
   float floodlight(vec3 p) {
     float light = 0.0;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 12; i++) {
       vec3 v = p - uLightPos[i];
       float along = dot(v, uLightDir[i]);
       if (along > 0.0) {
         float perp = length(v - uLightDir[i] * along);
         float r = along * uConeTan;
-        float beam = 1.0 - smoothstep(r * 0.45, r, perp);
-        light += beam * exp(-along * 0.009) * uLightOn[i];
+        float beam = 1.0 - smoothstep(r * 0.4, r, perp);
+        light += beam * exp(-along * 0.012) * sectorOn(i);
       }
     }
-    return light;
+    return light * 0.8;
+  }
+  // Luz que vaza dos refletores para o que está perto deles (arquibancadas, torcida).
+  float spill(vec3 p) {
+    float s = 0.0;
+    for (int i = 0; i < 12; i++) s += exp(-distance(p, uLightPos[i]) * 0.05) * sectorOn(i);
+    return s;
+  }
+`;
+
+/** Os sinalizadores da torcida: brilho vermelho que cai com a distância. */
+export const flares = /* glsl */ `
+  uniform vec3 uFlares[6];
+  uniform float uFlare;
+  float flareGlow(vec3 p, float falloff) {
+    float g = 0.0;
+    for (int i = 0; i < 6; i++) {
+      float flick = 0.8 + 0.2 * sin(uTime * (11.0 + float(i) * 1.7) + float(i) * 4.0);
+      g += exp(-pow(distance(p, uFlares[i]) * falloff, 2.0)) * flick;
+    }
+    return g * uFlare;
   }
 `;
 
@@ -93,8 +123,6 @@ export const fogFragment = /* glsl */ `
   uniform float uTime;
   uniform vec3 uFg;
   uniform vec3 uSignal;
-  uniform vec3 uFlarePos;
-  uniform float uFlare;
   uniform float uOpacity;
   uniform float uFogMul;
   uniform float uDim;
@@ -103,17 +131,19 @@ export const fogFragment = /* glsl */ `
   varying vec2 vUv;
   ${noise}
   ${floodlights}
+  ${flares}
   void main() {
     vec3 p = vWorld;
     float n = fbm(vec3(p.x * 0.03 + uTime * 0.025 + uSeed, p.y * 0.045 - uTime * 0.01, p.z * 0.02 + uSeed * 3.0));
     float density = smoothstep(-0.45, 0.75, n);
     density *= mix(1.0, 0.3, smoothstep(0.0, 42.0, p.y));
 
-    float light = floodlight(p);
-    float flareGlow = exp(-pow(distance(p, uFlarePos) * 0.06, 2.0)) * uFlare;
+    // Cones dos refletores + a névoa que acende logo abaixo da borda da cobertura.
+    float light = floodlight(p) + spill(p) * 0.1;
+    float glow = flareGlow(p, 0.07);
 
-    vec3 color = uFg * (0.04 + light * 1.1) + uSignal * flareGlow * 2.2;
-    float alpha = density * (0.012 + light * 0.3 + flareGlow * 0.7) * uOpacity * uFogMul * (1.0 - uDim);
+    vec3 color = uFg * (0.04 + light * 1.1) + uSignal * glow * 1.7;
+    float alpha = density * (0.012 + light * 0.3 + glow * 0.55) * uOpacity * uFogMul * (1.0 - uDim);
     alpha *= smoothstep(0.0, 0.18, vUv.x) * (1.0 - smoothstep(0.82, 1.0, vUv.x)) * smoothstep(0.0, 0.12, vUv.y) * (1.0 - smoothstep(0.6, 1.0, vUv.y));
     gl_FragColor = vec4(color, alpha);
   }
@@ -166,17 +196,18 @@ export const pitchFragment = /* glsl */ `
   }
 `;
 
-/** Fumaça do sinalizador: partículas que sobem e abrem, vermelhas na base e cinzas no alto. */
+/** Fumaça dos sinalizadores: partículas que sobem e abrem, vermelhas na base e cinzas no alto. */
 export const smokeVertex = /* glsl */ `
   attribute float aSeed;
+  attribute float aFlare;
   uniform float uTime;
-  uniform vec3 uFlarePos;
+  uniform vec3 uFlares[6];
   uniform float uScale;
   varying float vT;
   varying float vSeed;
   void main() {
     float t = fract(uTime * (0.045 + aSeed * 0.035) + aSeed);
-    vec3 p = uFlarePos;
+    vec3 p = uFlares[int(aFlare + 0.5)];
     p.x += sin(aSeed * 40.0 + uTime * 0.35) * t * 7.0 + t * t * 10.0;
     p.y += t * 30.0;
     p.z += cos(aSeed * 17.0 + uTime * 0.2) * t * 5.0;
@@ -227,7 +258,7 @@ export const beamFragment = /* glsl */ `
   uniform float uDim;
   uniform float uStrength;
   uniform float uLightOn[4];
-  uniform int uIndex;
+  uniform int uSector;
   varying vec3 vWorld;
   varying vec3 vNormal;
   ${noise}
@@ -243,12 +274,12 @@ export const beamFragment = /* glsl */ `
     float fall = pow(1.0 - along, 1.6) * smoothstep(0.0, 0.04, along);
     float dust = 0.65 + 0.35 * snoise(vWorld * 0.06 + vec3(0.0, -uTime * 0.15, uTime * 0.05));
     float ground = smoothstep(0.0, 4.0, vWorld.y);
-    float a = body * fall * dust * ground * uStrength * uLightOn[uIndex] * (1.0 - uDim * 0.8);
+    float a = body * fall * dust * ground * uStrength * uLightOn[uSector] * (1.0 - uDim * 0.8);
     gl_FragColor = vec4(uFg, a);
   }
 `;
 
-/** Brilho pontual: cabeças dos refletores e o núcleo do sinalizador. */
+/** Brilho pontual: lâmpadas da borda da cobertura e os núcleos dos sinalizadores. */
 export const glowVertex = /* glsl */ `
   attribute float aSize;
   attribute vec3 aColor;
@@ -265,7 +296,7 @@ export const glowVertex = /* glsl */ `
     gl_PointSize = aSize * flicker * uScale / -mv.z;
     gl_Position = projectionMatrix * mv;
     vColor = aColor;
-    // aLight: índice do refletor (0-3) ou 4 para o sinalizador (sempre aceso).
+    // aLight: setor da lâmpada (0-3) ou 4 para os sinalizadores (sempre acesos).
     int li = int(aLight + 0.5);
     vOn = li < 4 ? uLightOn[li] : 1.0;
   }
@@ -282,5 +313,171 @@ export const glowFragment = /* glsl */ `
     float a = (core + halo) * (1.0 - uDim) * vOn;
     if (a < 0.01) discard;
     gl_FragColor = vec4(vColor * (core * 2.0 + halo), a);
+  }
+`;
+
+/** Arquibancadas e estrutura: silhueta escura, fileiras claras reveladas pela luz que vaza dos refletores. */
+export const standFragment = /* glsl */ `
+  uniform float uTime;
+  uniform vec3 uFg;
+  uniform vec3 uBg;
+  uniform vec3 uSignal;
+  uniform vec3 uCamPos;
+  uniform float uDim;
+  uniform float uBase;
+  uniform float uRows;
+  varying vec3 vWorld;
+  ${floodlights}
+  ${flares}
+  void main() {
+    vec3 p = vWorld;
+    float lit = spill(p) + floodlight(p) * 0.5;
+    float rows = uRows * step(0.58, fract(p.y * 1.35));
+    vec3 color = mix(uBg, uFg, uBase) + uFg * lit * (0.06 + rows * 0.32);
+    color += uSignal * flareGlow(p, 0.09) * 0.28;
+    float far = smoothstep(90.0, 230.0, distance(p, uCamPos));
+    color = mix(color, uBg, far * 0.85);
+    color = mix(color, uBg, uDim * 0.6);
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+/** Linha de LED na borda interna da cobertura, acesa por setor. */
+export const ledVertex = /* glsl */ `
+  attribute float aSector;
+  varying float vSector;
+  void main() {
+    vSector = aSector;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+export const ledFragment = /* glsl */ `
+  uniform vec3 uFg;
+  uniform vec3 uBg;
+  uniform float uLightOn[4];
+  uniform float uDim;
+  varying float vSector;
+  void main() {
+    int s = int(vSector + 0.5);
+    float on = s == 0 ? uLightOn[0] : s == 1 ? uLightOn[1] : s == 2 ? uLightOn[2] : uLightOn[3];
+    vec3 off = mix(uBg, uFg, 0.08);
+    gl_FragColor = vec4(mix(off, uFg * 1.6, on * (1.0 - uDim * 0.7)), 1.0);
+  }
+`;
+
+/** Telão: painel escuro com a grade de pixels e uma faixa de varredura lenta. */
+export const screenFragment = /* glsl */ `
+  uniform float uTime;
+  uniform vec3 uFg;
+  uniform vec3 uBg;
+  uniform vec3 uSignal;
+  uniform float uDim;
+  varying vec2 vUv;
+  void main() {
+    vec2 cell = vUv * vec2(120.0, 40.0);
+    vec2 f = fract(cell) - 0.5;
+    float px = 1.0 - smoothstep(0.25, 0.42, length(f));
+    float scan = smoothstep(0.0, 0.08, 0.08 - abs(fract(vUv.y - uTime * 0.05) - 0.5) + 0.42);
+    float band = 1.0 - smoothstep(0.0, 0.035, abs(vUv.y - 0.5 - 0.06 * sin(vUv.x * 6.0 + uTime * 0.6)));
+    float level = 0.05 + 0.08 * scan + 0.35 * band;
+    vec3 color = mix(uBg, uFg, 0.03) + uFg * px * level + uSignal * px * band * 0.25;
+    float edge = step(0.012, vUv.x) * step(vUv.x, 0.988) * step(0.03, vUv.y) * step(vUv.y, 0.97);
+    color = mix(mix(uBg, uFg, 0.12), color, edge);
+    gl_FragColor = vec4(mix(color, uBg, uDim * 0.6), 1.0);
+  }
+`;
+
+/**
+ * Torcida: um ponto por torcedor, desenhado como silhueta (cabeça, ombros e, em
+ * parte deles, braços levantados). Pula no ritmo, iluminada pelos sinalizadores.
+ */
+export const crowdVertex = /* glsl */ `
+  attribute float aSeed;
+  uniform float uTime;
+  uniform float uScale;
+  uniform vec3 uFg;
+  uniform vec3 uBg;
+  uniform vec3 uSignal;
+  uniform float uDim;
+  uniform float uTone;
+  ${floodlights}
+  ${flares}
+  varying vec3 vColor;
+  varying float vArms;
+  void main() {
+    vec3 p = position;
+    float beat = uTime * (2.1 + aSeed * 0.5) + aSeed * 6.2831;
+    float jumper = step(0.45, fract(aSeed * 7.13));
+    p.y += 0.95 + jumper * max(0.0, sin(beat)) * 0.38 + (1.0 - jumper) * sin(beat * 0.5) * 0.05;
+    p.x += (1.0 - jumper) * sin(beat * 0.5) * 0.12;
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_PointSize = 2.1 * uScale / -mv.z;
+    gl_Position = projectionMatrix * mv;
+    // Luz pela posição no mundo: a mesma torcida é montada no estádio e no pênalti.
+    vec3 w = (modelMatrix * vec4(p, 1.0)).xyz;
+    float lit = spill(w) * 0.6 + floodlight(w) * 0.35;
+    vColor = mix(uBg, uFg, uTone + lit * 0.22) + uSignal * flareGlow(w, 0.11) * 0.7;
+    vColor = mix(vColor, uBg, uDim * 0.6);
+    vArms = step(0.72, fract(aSeed * 13.7));
+  }
+`;
+
+export const crowdFragment = /* glsl */ `
+  varying vec3 vColor;
+  varying float vArms;
+  void main() {
+    vec2 q = gl_PointCoord;
+    float head = 1.0 - step(0.11, length((q - vec2(0.5, 0.2)) * vec2(1.0, 0.9)));
+    float body = step(0.31, q.y) * step(abs(q.x - 0.5), 0.19 - (q.y - 0.31) * 0.04);
+    float arms = vArms * (step(abs(q.x - 0.27), 0.045) + step(abs(q.x - 0.73), 0.045)) * step(0.02, q.y) * step(q.y, 0.42);
+    if (max(head, max(body, arms)) < 0.5) discard;
+    gl_FragColor = vec4(vColor, 1.0);
+  }
+`;
+
+/** Bandeiras e bandeirões: o pano ondula a partir do mastro; listras alvinegras, sem escudo. */
+export const flagVertex = /* glsl */ `
+  uniform float uTime;
+  uniform float uSeed;
+  uniform float uSize;
+  varying vec2 vUv;
+  varying vec3 vWorld;
+  varying float vShade;
+  void main() {
+    vUv = uv;
+    vec3 p = position;
+    float t = uTime * 3.0 + uSeed;
+    float wave = sin(uv.x * 5.0 - t) * 0.16 + sin(uv.x * 9.0 + uv.y * 3.0 - t * 1.4) * 0.05;
+    p.z += wave * uv.x * uSize;
+    p.y -= uv.x * uv.x * 0.06 * uSize;
+    vShade = 0.75 + 0.25 * cos(uv.x * 5.0 - t);
+    vec4 world = modelMatrix * vec4(p, 1.0);
+    vWorld = world.xyz;
+    gl_Position = projectionMatrix * viewMatrix * world;
+  }
+`;
+
+export const flagFragment = /* glsl */ `
+  uniform float uTime;
+  uniform vec3 uFg;
+  uniform vec3 uBg;
+  uniform vec3 uSignal;
+  uniform float uDim;
+  uniform float uPattern;
+  varying vec2 vUv;
+  varying vec3 vWorld;
+  varying float vShade;
+  ${floodlights}
+  ${flares}
+  void main() {
+    float white;
+    if (uPattern < 0.5) white = step(0.5, fract(vUv.x * 4.0));
+    else if (uPattern < 1.5) white = 1.0 - step(abs(vUv.y - vUv.x * 0.8 - 0.1), 0.14);
+    else white = step(abs(vUv.y - 0.5), 0.16);
+    vec3 cloth = mix(mix(uBg, uFg, 0.06), mix(uBg, uFg, 0.85), white);
+    float lit = 0.22 + spill(vWorld) * 0.7 + floodlight(vWorld) * 0.4;
+    vec3 color = cloth * lit * vShade + uSignal * flareGlow(vWorld, 0.1) * (0.35 + white * 0.5);
+    gl_FragColor = vec4(mix(color, uBg, uDim * 0.6), 1.0);
   }
 `;

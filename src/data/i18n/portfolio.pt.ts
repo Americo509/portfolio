@@ -747,10 +747,10 @@ export const portfolioPT: Portfolio = {
       loading: "Refletores %",
       lines: [
         "> saindo do túnel: {handle} · build v19.10",
-        "> refletor 1/4 ................ ok",
-        "> refletor 2/4 ................ ok",
-        "> refletor 3/4 ................ ok",
-        "> refletor 4/4 ................ ok — bola rolando"
+        "> setor sul ................... ok",
+        "> setor leste ................. ok",
+        "> setor oeste ................. ok",
+        "> setor norte ................. ok — bola rolando"
       ]
     },
     hero: { primaryCta: "Ver projetos", secondaryCta: "Falar comigo" },

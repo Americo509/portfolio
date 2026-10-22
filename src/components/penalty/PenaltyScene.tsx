@@ -6,6 +6,9 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { Outlines } from "@react-three/drei";
 import { gsap } from "@/lib/gsap";
 import { GOAL, zoneCenter, type Outcome } from "@/lib/penalty/engine";
+import { NorthCrowd } from "@/components/scene/stadium/Arena";
+import { PITCH, endStandHeight } from "@/components/scene/stadium/config";
+import { createShared } from "@/components/scene/stadium/shared";
 
 export type KickPlan = {
   target: { x: number; y: number };
@@ -294,11 +297,39 @@ function Backdrop({ dark }: { dark: boolean }) {
   );
 }
 
-/** Flashes de fotógrafos na arquibancada atrás do gol (só no gol). */
+/**
+ * A torcida norte da arena atrás do gol, com bandeirões e sinalizadores. O gol
+ * do pênalti fica em z = 0, que é a linha de fundo norte da arena deslocada.
+ */
+const NORTH_OFFSET = PITCH.length / 2;
+
+function NorthEnd({ dark, reduce }: { dark: boolean; reduce: boolean }) {
+  const shared = React.useMemo(() => createShared(NORTH_OFFSET), []);
+  React.useEffect(() => {
+    shared.uFg.value.set(dark ? FG : "#080808");
+    shared.uBg.value.set(dark ? "#080808" : "#F5F5F0");
+    shared.uSignal.value.set(SIGNAL);
+  }, [dark, shared]);
+  useFrame((state, delta) => {
+    // Com movimento reduzido, a torcida fica parada (sem pulo, bandeira nem fumaça andando).
+    if (!reduce) shared.uTime.value += delta;
+    const t = shared.uTime.value;
+    shared.uFlare.value = 0.85 + 0.15 * Math.sin(t * 13) * Math.sin(t * 3.7);
+    const cam = state.camera as THREE.PerspectiveCamera;
+    shared.uScale.value = (state.size.height * state.gl.getPixelRatio()) / (2 * Math.tan((cam.fov * Math.PI) / 360));
+    shared.uCamPos.value.copy(cam.position);
+  });
+  return <NorthCrowd shared={shared} crowd={1500} flags={10} smoke={260} additive={dark} offsetZ={NORTH_OFFSET} withStand />;
+}
+
+/** Flashes de fotógrafos na torcida atrás do gol (só no gol). */
 function Flashes({ burst }: { burst: React.MutableRefObject<number> }) {
   const geo = React.useMemo(() => {
     const p: number[] = [];
-    for (let i = 0; i < 40; i++) p.push((Math.random() - 0.5) * 34, 1 + Math.random() * 7, -14 - Math.random() * 6);
+    for (let i = 0; i < 40; i++) {
+      const z = -10 - Math.random() * 12;
+      p.push((Math.random() - 0.5) * 60, endStandHeight(NORTH_OFFSET - z) + 1 + Math.random() * 1.5, z);
+    }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
     return g;
@@ -477,11 +508,7 @@ function SceneContent({ control, aim, onAim, muralha, reduce, dark }: Props) {
         <ringGeometry args={[0.16, 0.2, 32]} />
         <meshBasicMaterial color={SIGNAL} transparent opacity={0.9} depthTest={false} />
       </mesh>
-      {/* Arquibancada atrás do gol */}
-      <mesh position={[0, 1.6, -18]}>
-        <boxGeometry args={[60, 3.2, 4]} />
-        <meshStandardMaterial color={dark ? "#0b0b0b" : "#cfcfc8"} />
-      </mesh>
+      <NorthEnd dark={dark} reduce={reduce} />
       <Flashes burst={burst} />
       {/* Plano invisível para mirar com o ponteiro */}
       <mesh position={[0, 1.5, 0]} onPointerMove={onMove} onPointerDown={onMove} visible={false}>
