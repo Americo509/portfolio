@@ -193,7 +193,8 @@ test.describe("home em capítulos", () => {
     await expect(nine).toBeVisible({ timeout: 10_000 });
     await nine.click();
     await expect(nine).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByText("#09")).toBeVisible();
+    // Escopo na prancheta: a capa da base (Categorias de base) também mostra "#09".
+    await expect(page.locator('[data-chapter="lineup"]').getByText("#09")).toBeVisible();
     await expect(page.getByText("Offline-first", { exact: true })).toBeVisible();
   });
 

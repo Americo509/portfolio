@@ -3,13 +3,21 @@ import type { ChapterKey } from "@/lib/store";
 
 /**
  * Plano-sequência da home na linguagem de transmissão de TV (docs/plano-awwwards.md,
- * "A linguagem: transmissão de TV"). Cada capítulo tem dois keyframes (entrada e
- * saída); a câmera percorre uma spline contínua por todos eles, dirigida pelo
- * scroll, em vez de saltar entre presets. Há uma trilha para desktop e outra para
- * celular em retrato, com enquadramentos verticais próprios.
+ * "A linguagem: transmissão de TV" e "Câmera autorada").
  *
- * Campos da lente: focus/range em metros (profundidade de campo, só no tier alto),
- * bokeh de 0 a ~4, letterbox de 0 a 1 (barras 2.39:1).
+ * Uma trilha só, contínua, atravessando os capítulos: posição e alvo correm por
+ * splines Catmull-Rom centrípetas parametrizadas por comprimento de arco (a
+ * velocidade não dá trancos nos pontos de controle). Os quadros-chave marcam onde a
+ * câmera muda de intenção: chega, desacelera para a leitura (trechos longos no
+ * scroll e curtos no espaço), acelera na transição, passando por quadros de "via"
+ * (grua, mergulho, trilho). Cada segmento tem o próprio easing.
+ *
+ * `at` é o progresso global da home: índice do capítulo + progresso dentro dele
+ * (0 a 1). Para dirigir, use a ferramenta do ?debug: câmera livre, slider da
+ * trilha e o botão que copia o quadro no formato abaixo.
+ *
+ * Lente: focus/range em metros (profundidade de campo, só no tier alto), bokeh de
+ * 0 a ~4, letterbox de 0 a 1 (barras 2.39:1).
  */
 export type Shot = {
   pos: [number, number, number];
@@ -23,118 +31,98 @@ export type Shot = {
   letterbox: number;
 };
 
-type ChapterShots = Record<ChapterKey, [Shot, Shot]>;
+/** Easing do segmento que SAI deste quadro até o próximo. */
+export type Ease = "linear" | "in" | "out" | "inOut";
 
-const shot = (s: Partial<Shot> & Pick<Shot, "pos" | "look" | "fov">): Shot => ({
-  dim: 0,
-  fog: 1,
-  focus: 110,
-  range: 90,
-  bokeh: 0,
-  letterbox: 0,
-  ...s
-});
+export type Key = Shot & { at: number; ease: Ease };
+
+type KeyInput = Partial<Shot> & Pick<Shot, "pos" | "look"> & { at: number; ease?: Ease };
+
+/** Quadro-chave com os padrões da lente; os campos omitidos herdam do quadro anterior. */
+function keys(list: KeyInput[]): Key[] {
+  let prev: Shot = { pos: [0, 0, 0], look: [0, 0, 0], fov: 42, dim: 0, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 };
+  return list.map((k) => {
+    const full: Key = { ...prev, ease: "linear", ...k };
+    prev = full;
+    return full;
+  });
+}
 
 /** Ordem dos capítulos na home: o progresso global é índice + progresso no capítulo. */
 export const CHAPTER_ORDER: ChapterKey[] = ["hero", "lineup", "matches", "method", "academy", "penalties", "final"];
 
-/**
- * Onde cada keyframe cai dentro do capítulo. O hero já começa ativo em ~0,55
- * (a seção ocupa a primeira tela inteira e o gatilho fica a 55% da altura).
- */
-const AT: Record<ChapterKey, [number, number]> = {
-  hero: [0.55, 0.95],
-  lineup: [0.15, 0.85],
-  matches: [0.15, 0.85],
-  method: [0.15, 0.85],
-  academy: [0.15, 0.85],
-  penalties: [0.15, 0.85],
-  final: [0.1, 0.9]
-};
-
-const DESKTOP: ChapterShots = {
-  // 01 Entrada em campo: do gramado, a torcida norte sob o telão e o arco; empurra devagar.
-  hero: [
-    shot({ pos: [-10, 3.4, 52], look: [8, 9, -40], fov: 42 }),
-    shot({ pos: [-6, 3, 44], look: [6, 9.5, -45], fov: 40 })
-  ],
-  // 02 Escalação: câmera tática (spidercam), o gramado vira a prancheta.
-  lineup: [
-    // Quase a pino: x da câmera igual ao do alvo, senão o quadro gira; a spidercam desliza em z.
-    shot({ pos: [0, 66, 40], look: [0, 0, -4], fov: 44, dim: 0.35, fog: 0.2, focus: 75, range: 80 }),
-    shot({ pos: [0, 70, 30], look: [0, 0, -10], fov: 42, dim: 0.35, fog: 0.2, focus: 75, range: 80 })
-  ],
+const DESKTOP = keys([
+  // 01 Entrada em campo: do gramado, a torcida norte sob o telão e o arco. O hero já
+  // começa ativo em ~0,55 (a seção ocupa a primeira tela e o gatilho fica a 55%).
+  { at: 0.5, pos: [-10, 3.4, 52], look: [8, 9, -40], fov: 42 },
+  { at: 0.92, pos: [-6, 3, 45], look: [6, 9.5, -45], fov: 40, ease: "in" },
+  // Grua: sobe atrás do gol sul.
+  { at: 1.08, pos: [0, 26, 58], look: [0, 4, -10], fov: 46, dim: 0.15, fog: 0.6, ease: "out" },
+  // 02 Escalação: spidercam quase a pino (x da câmera = x do alvo); desliza devagar na leitura.
+  { at: 1.22, pos: [0, 64, 42], look: [0, 0, -4], fov: 44, dim: 0.35, fog: 0.2, focus: 75, range: 80 },
+  { at: 1.78, pos: [0, 70, 30], look: [0, 0, -10], fov: 42, ease: "in" },
+  // Mergulho até o canto oeste da linha de fundo.
+  { at: 2.06, pos: [-30, 22, 34], look: [6, 6, -30], fov: 40, dim: 0.55, fog: 0.5, focus: 60, range: 50, ease: "out" },
   // 03 Jogos históricos: replay, travelling baixo pela linha de fundo.
-  matches: [
-    shot({ pos: [-36, 6.5, 22], look: [18, 6, -40], fov: 38, dim: 0.72, fog: 0.8, focus: 60, range: 50, bokeh: 0.6 }),
-    shot({ pos: [10, 6.5, 22], look: [42, 6, -40], fov: 38, dim: 0.72, fog: 0.8, focus: 60, range: 50, bokeh: 0.6 })
-  ],
-  // 04 Preleção: close rasteiro no círculo central; o foco vem para perto e o estádio desfoca.
-  method: [
-    shot({ pos: [0, 1.6, 22], look: [0, 3, -30], fov: 32, dim: 0.8, focus: 4, range: 3, bokeh: 3.5 }),
-    shot({ pos: [0, 1.4, 14], look: [0, 3.5, -30], fov: 30, dim: 0.8, focus: 4, range: 3, bokeh: 3.5 })
-  ],
-  // 05 Categorias de base: câmera de trilho na lateral, travelling mais rápido.
-  academy: [
-    shot({ pos: [40, 4, 34], look: [2, 3, 22], fov: 38, dim: 0.84, focus: 14, range: 10, bokeh: 1.5 }),
-    shot({ pos: [40, 4, -34], look: [2, 3, -46], fov: 38, dim: 0.84, focus: 14, range: 10, bokeh: 1.5 })
-  ],
-  // 06 Disputa de pênaltis: atrás do batedor (a cena pausa quando o jogo está ativo).
-  penalties: [
-    shot({ pos: [0, 2.2, 38], look: [0, 1.5, 52.5], fov: 38, dim: 0.85 }),
-    shot({ pos: [0, 2, 40], look: [0, 1.4, 52.5], fov: 38, dim: 0.85 })
-  ],
-  // 07 Apito final: plano geral; os setores apagam e sobram os sinalizadores. A
-  // torcida fica no terço direito e o fundo escurece: o título e o CTA, à esquerda,
-  // não podem disputar contraste com o vermelho dos sinalizadores.
-  final: [
-    shot({ pos: [-28, 16, 46], look: [-30, 8, -66], fov: 40, dim: 0.42, focus: 120, range: 60, bokeh: 0.8, letterbox: 1 }),
-    shot({ pos: [-18, 12, 38], look: [-34, 8, -68], fov: 36, dim: 0.42, focus: 115, range: 50, bokeh: 0.8, letterbox: 1 })
-  ]
-};
+  { at: 2.18, pos: [-36, 6.5, 22], look: [18, 6, -40], fov: 38, dim: 0.72, fog: 0.8, bokeh: 0.6 },
+  { at: 2.84, pos: [10, 6.5, 22], look: [42, 6, -40], ease: "in" },
+  // Desce para o gramado, perto do círculo central.
+  { at: 3.08, pos: [4, 2.6, 26], look: [0, 3, -30], fov: 34, dim: 0.78, focus: 8, range: 6, bokeh: 2, ease: "out" },
+  // 04 Preleção: close rasteiro; o foco vem para perto e o estádio desfoca.
+  { at: 3.18, pos: [0, 1.6, 22], look: [0, 3, -30], fov: 32, dim: 0.8, focus: 4, range: 3, bokeh: 3.5 },
+  { at: 3.82, pos: [0, 1.4, 14], look: [0, 3.5, -30], fov: 30, ease: "in" },
+  // Sai do close em direção ao trilho da lateral leste.
+  { at: 4.06, pos: [24, 3.5, 26], look: [2, 3, 10], fov: 36, dim: 0.82, focus: 10, range: 8, bokeh: 2, ease: "out" },
+  // 05 Categorias de base: câmera de trilho, velocidade constante e mais rápida.
+  { at: 4.15, pos: [40, 4, 34], look: [2, 3, 22], fov: 38, dim: 0.84, focus: 14, range: 10, bokeh: 1.5 },
+  { at: 4.85, pos: [40, 4, -34], look: [2, 3, -46], ease: "inOut" },
+  // Contorna por cima da lateral até ficar atrás do batedor.
+  { at: 5.05, pos: [30, 9, 12], look: [4, 2, 44], fov: 40, dim: 0.85, bokeh: 0, focus: 110, range: 90, ease: "out" },
+  // 06 Disputa de pênaltis: atrás do batedor (a cena pausa quando o jogo está na tela).
+  { at: 5.18, pos: [0, 2.2, 38], look: [0, 1.5, 52.5], fov: 38 },
+  { at: 5.82, pos: [0, 2, 40], look: [0, 1.4, 52.5], ease: "in" },
+  // Grua para trás, por cima da arquibancada sul; o letterbox começa a entrar.
+  { at: 6.0, pos: [-12, 10, 52], look: [-16, 8, -30], fov: 42, dim: 0.3, letterbox: 0.6, ease: "out" },
+  // 07 Apito final: plano geral com a torcida no terço direito e o fundo escurecido,
+  // para o título e o CTA (à esquerda) não disputarem contraste com o vermelho.
+  { at: 6.12, pos: [-28, 16, 46], look: [-30, 8, -66], fov: 40, dim: 0.42, focus: 120, range: 60, bokeh: 0.8, letterbox: 1 },
+  { at: 6.9, pos: [-18, 12, 38], look: [-34, 8, -68], fov: 36 }
+]);
 
 /** Retrato: FOV vertical maior e câmera centrada, para o arco e a torcida caberem em pé. */
-const MOBILE: ChapterShots = {
-  hero: [
-    shot({ pos: [0, 4, 60], look: [0, 11, -40], fov: 62 }),
-    shot({ pos: [0, 3.6, 52], look: [0, 11.5, -45], fov: 60 })
-  ],
-  lineup: [
-    shot({ pos: [0, 92, 10], look: [0, 0, -2], fov: 60, dim: 0.35, fog: 0.2, focus: 95, range: 90 }),
-    shot({ pos: [0, 96, 4], look: [0, 0, -6], fov: 58, dim: 0.35, fog: 0.2, focus: 95, range: 90 })
-  ],
-  matches: [
-    shot({ pos: [-20, 8, 30], look: [8, 7, -40], fov: 56, dim: 0.72, fog: 0.8, focus: 60, range: 50, bokeh: 0.6 }),
-    shot({ pos: [6, 8, 30], look: [24, 7, -40], fov: 56, dim: 0.72, fog: 0.8, focus: 60, range: 50, bokeh: 0.6 })
-  ],
-  method: [
-    shot({ pos: [0, 1.7, 22], look: [0, 4, -30], fov: 50, dim: 0.8, focus: 4, range: 3, bokeh: 3.5 }),
-    shot({ pos: [0, 1.5, 15], look: [0, 4.5, -30], fov: 48, dim: 0.8, focus: 4, range: 3, bokeh: 3.5 })
-  ],
-  academy: [
-    shot({ pos: [36, 5, 30], look: [4, 4, 18], fov: 56, dim: 0.84, focus: 14, range: 10, bokeh: 1.5 }),
-    shot({ pos: [36, 5, -30], look: [4, 4, -42], fov: 56, dim: 0.84, focus: 14, range: 10, bokeh: 1.5 })
-  ],
-  penalties: [
-    shot({ pos: [0, 2.4, 36], look: [0, 1.6, 52.5], fov: 55, dim: 0.85 }),
-    shot({ pos: [0, 2.2, 38], look: [0, 1.5, 52.5], fov: 55, dim: 0.85 })
-  ],
-  final: [
-    shot({ pos: [0, 14, 54], look: [0, 9, -66], fov: 58, dim: 0.42, focus: 120, range: 60, bokeh: 0.8, letterbox: 1 }),
-    shot({ pos: [0, 11, 46], look: [-4, 9, -68], fov: 54, dim: 0.42, focus: 115, range: 50, bokeh: 0.8, letterbox: 1 })
-  ]
-};
+const MOBILE = keys([
+  { at: 0.5, pos: [0, 4, 60], look: [0, 11, -40], fov: 62 },
+  { at: 0.92, pos: [0, 3.6, 52], look: [0, 11.5, -45], fov: 60, ease: "in" },
+  { at: 1.08, pos: [0, 34, 64], look: [0, 4, -8], fov: 62, dim: 0.15, fog: 0.6, ease: "out" },
+  { at: 1.22, pos: [0, 92, 10], look: [0, 0, -2], fov: 60, dim: 0.35, fog: 0.2, focus: 95, range: 90 },
+  { at: 1.78, pos: [0, 96, 4], look: [0, 0, -6], fov: 58, ease: "in" },
+  { at: 2.06, pos: [-18, 26, 40], look: [4, 6, -30], fov: 58, dim: 0.55, fog: 0.5, focus: 60, range: 50, ease: "out" },
+  { at: 2.18, pos: [-20, 8, 30], look: [8, 7, -40], fov: 56, dim: 0.72, fog: 0.8, bokeh: 0.6 },
+  { at: 2.84, pos: [6, 8, 30], look: [24, 7, -40], ease: "in" },
+  { at: 3.08, pos: [2, 2.8, 26], look: [0, 4, -30], fov: 52, dim: 0.78, focus: 8, range: 6, bokeh: 2, ease: "out" },
+  { at: 3.18, pos: [0, 1.7, 22], look: [0, 4, -30], fov: 50, dim: 0.8, focus: 4, range: 3, bokeh: 3.5 },
+  { at: 3.82, pos: [0, 1.5, 15], look: [0, 4.5, -30], fov: 48, ease: "in" },
+  { at: 4.06, pos: [20, 4, 26], look: [4, 4, 10], fov: 54, dim: 0.82, focus: 10, range: 8, bokeh: 2, ease: "out" },
+  { at: 4.15, pos: [36, 5, 30], look: [4, 4, 18], fov: 56, dim: 0.84, focus: 14, range: 10, bokeh: 1.5 },
+  { at: 4.85, pos: [36, 5, -30], look: [4, 4, -42], ease: "inOut" },
+  { at: 5.05, pos: [26, 10, 14], look: [4, 2, 44], fov: 56, dim: 0.85, bokeh: 0, focus: 110, range: 90, ease: "out" },
+  { at: 5.18, pos: [0, 2.4, 36], look: [0, 1.6, 52.5], fov: 55 },
+  { at: 5.82, pos: [0, 2.2, 38], look: [0, 1.5, 52.5], ease: "in" },
+  { at: 6.0, pos: [0, 12, 58], look: [0, 9, -30], fov: 58, dim: 0.3, letterbox: 0.6, ease: "out" },
+  { at: 6.12, pos: [0, 14, 54], look: [0, 9, -66], fov: 58, dim: 0.42, focus: 120, range: 60, bokeh: 0.8, letterbox: 1 },
+  { at: 6.9, pos: [0, 11, 46], look: [-4, 9, -68], fov: 54 }
+]);
 
 /** Páginas internas: um quadro fixo, escurecido, atrás do conteúdo. */
 export const AMBIENT = {
-  desktop: shot({ pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.82 }),
-  mobile: shot({ pos: [0, 4, 60], look: [0, 11, -40], fov: 62, dim: 0.82 })
+  desktop: { pos: [-10, 3.4, 56], look: [10, 9, -40], fov: 42, dim: 0.82, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot,
+  mobile: { pos: [0, 4, 60], look: [0, 11, -40], fov: 62, dim: 0.82, fog: 1, focus: 110, range: 90, bokeh: 0, letterbox: 0 } as Shot
 };
 
 /**
  * Saída do túnel: dolly zoom de cima da cobertura sul (tele, longe) até a borda
  * da cobertura (grande-angular, perto), com a torcida norte do mesmo tamanho na
- * tela; depois a descida até o primeiro keyframe do hero.
+ * tela; depois a descida até o primeiro quadro do hero.
  */
 export const INTRO = {
   subject: new THREE.Vector3(0, 8, -72),
@@ -147,52 +135,63 @@ export const INTRO = {
   descent: 2.2
 };
 
-type Key = { at: number; shot: Shot };
+// ---------------------------------------------------------------------------
+// Avaliação: splines por comprimento de arco.
 
-function buildKeys(shots: ChapterShots): Key[] {
-  return CHAPTER_ORDER.flatMap((c, i) => [
-    { at: i + AT[c][0], shot: shots[c][0] },
-    { at: i + AT[c][1], shot: shots[c][1] }
-  ]);
+export type Track = {
+  keys: Key[];
+  pos: THREE.CatmullRomCurve3;
+  look: THREE.CatmullRomCurve3;
+  /** Fração do comprimento de arco em cada quadro-chave (posição e alvo). */
+  posU: number[];
+  lookU: number[];
+};
+
+/** Fração do comprimento de arco em que a curva passa por cada ponto de controle. */
+function arcFractions(curve: THREE.CatmullRomCurve3, count: number) {
+  const divisions = (count - 1) * 64;
+  const lengths = curve.getLengths(divisions);
+  const total = lengths[lengths.length - 1] || 1;
+  return Array.from({ length: count }, (_, i) => lengths[i * 64] / total);
 }
 
-export const TRACKS = { desktop: buildKeys(DESKTOP), mobile: buildKeys(MOBILE) };
-
-const v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-
-function catmull(out: THREE.Vector3, p0: THREE.Vector3, p1: THREE.Vector3, p2: THREE.Vector3, p3: THREE.Vector3, t: number) {
-  const t2 = t * t;
-  const t3 = t2 * t;
-  return out.set(
-    0.5 * (2 * p1.x + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
-    0.5 * (2 * p1.y + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3),
-    0.5 * (2 * p1.z + (-p0.z + p2.z) * t + (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t2 + (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t3)
-  );
+function buildTrack(list: Key[]): Track {
+  const pos = new THREE.CatmullRomCurve3(list.map((k) => new THREE.Vector3(...k.pos)), false, "centripetal");
+  const look = new THREE.CatmullRomCurve3(list.map((k) => new THREE.Vector3(...k.look)), false, "centripetal");
+  // Mais divisões que o padrão (200) para getPointAt seguir o arco com precisão.
+  pos.arcLengthDivisions = look.arcLengthDivisions = (list.length - 1) * 64;
+  return { keys: list, pos, look, posU: arcFractions(pos, list.length), lookU: arcFractions(look, list.length) };
 }
 
-const ease = (t: number) => t * t * (3 - 2 * t);
+export const TRACKS = { desktop: buildTrack(DESKTOP), mobile: buildTrack(MOBILE) };
+
+const EASE: Record<Ease, (t: number) => number> = {
+  linear: (t) => t,
+  in: (t) => t * t,
+  out: (t) => 1 - (1 - t) * (1 - t),
+  inOut: (t) => t * t * (3 - 2 * t)
+};
+
+const LENS_KEYS = ["fov", "dim", "fog", "focus", "range", "bokeh", "letterbox"] as const;
 
 /** Avalia a trilha no progresso global g (índice do capítulo + progresso dentro dele). */
-export function sampleTrack(keys: Key[], g: number, out: { pos: THREE.Vector3; look: THREE.Vector3; lens: Omit<Shot, "pos" | "look"> }) {
-  const last = keys.length - 1;
-  const x = THREE.MathUtils.clamp(g, keys[0].at, keys[last].at);
+export function sampleTrack(track: Track, g: number, out: { pos: THREE.Vector3; look: THREE.Vector3; lens: Omit<Shot, "pos" | "look"> }) {
+  const k = track.keys;
+  const last = k.length - 1;
+  const x = THREE.MathUtils.clamp(g, k[0].at, k[last].at);
   let i = 0;
-  while (i < last - 1 && x > keys[i + 1].at) i++;
-  const a = keys[i];
-  const b = keys[i + 1];
-  const t = (x - a.at) / Math.max(1e-6, b.at - a.at);
-  const k0 = keys[Math.max(0, i - 1)].shot;
-  const k3 = keys[Math.min(last, i + 2)].shot;
-  catmull(out.pos, v[0].set(...k0.pos), v[1].set(...a.shot.pos), v[2].set(...b.shot.pos), v[3].set(...k3.pos), t);
-  catmull(out.look, v[0].set(...k0.look), v[1].set(...a.shot.look), v[2].set(...b.shot.look), v[3].set(...k3.look), t);
-  const e = ease(t);
-  const L = out.lens;
-  L.fov = THREE.MathUtils.lerp(a.shot.fov, b.shot.fov, e);
-  L.dim = THREE.MathUtils.lerp(a.shot.dim, b.shot.dim, e);
-  L.fog = THREE.MathUtils.lerp(a.shot.fog, b.shot.fog, e);
-  L.focus = THREE.MathUtils.lerp(a.shot.focus, b.shot.focus, e);
-  L.range = THREE.MathUtils.lerp(a.shot.range, b.shot.range, e);
-  L.bokeh = THREE.MathUtils.lerp(a.shot.bokeh, b.shot.bokeh, e);
-  L.letterbox = THREE.MathUtils.lerp(a.shot.letterbox, b.shot.letterbox, e);
+  while (i < last - 1 && x > k[i + 1].at) i++;
+  const a = k[i];
+  const b = k[i + 1];
+  const e = EASE[a.ease](THREE.MathUtils.clamp((x - a.at) / Math.max(1e-6, b.at - a.at), 0, 1));
+  track.pos.getPointAt(THREE.MathUtils.clamp(THREE.MathUtils.lerp(track.posU[i], track.posU[i + 1], e), 0, 1), out.pos);
+  track.look.getPointAt(THREE.MathUtils.clamp(THREE.MathUtils.lerp(track.lookU[i], track.lookU[i + 1], e), 0, 1), out.look);
+  for (const key of LENS_KEYS) out.lens[key] = THREE.MathUtils.lerp(a[key], b[key], e);
   return out;
+}
+
+/** Linha de código de um quadro-chave, no formato de DESKTOP/MOBILE (ferramenta do ?debug). */
+export function keyToCode(at: number, pos: THREE.Vector3, look: THREE.Vector3, fov: number) {
+  const r = (v: number) => Math.round(v * 10) / 10;
+  return `{ at: ${Math.round(at * 100) / 100}, pos: [${r(pos.x)}, ${r(pos.y)}, ${r(pos.z)}], look: [${r(look.x)}, ${r(look.y)}, ${r(look.z)}], fov: ${Math.round(fov)} },`;
 }

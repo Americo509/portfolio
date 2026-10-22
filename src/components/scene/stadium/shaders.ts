@@ -139,10 +139,16 @@ export const worldVertex = /* glsl */ `
   }
 `;
 
-/** Neblina volumétrica "falsa": camadas de planos com fBm, iluminadas pelos cones e pelo sinalizador. */
+/**
+ * Neblina volumétrica "falsa": camadas de planos com fBm. Como fumaça de verdade no
+ * escuro, ela é invisível onde não há luz: a cor base é a do fundo (quase preta) e
+ * o brilho vem só do espalhamento dos cones e dos sinalizadores. A densidade cai
+ * com a altura (fumaça de arquibancada fica embaixo).
+ */
 export const fogFragment = /* glsl */ `
   uniform float uTime;
   uniform vec3 uFg;
+  uniform vec3 uBg;
   uniform vec3 uSignal;
   uniform float uOpacity;
   uniform float uFogMul;
@@ -156,15 +162,16 @@ export const fogFragment = /* glsl */ `
   void main() {
     vec3 p = vWorld;
     float n = fbm(vec3(p.x * 0.03 + uTime * 0.025 + uSeed, p.y * 0.045 - uTime * 0.01, p.z * 0.02 + uSeed * 3.0));
-    float density = smoothstep(-0.45, 0.75, n);
-    density *= mix(1.0, 0.3, smoothstep(0.0, 42.0, p.y));
+    float density = smoothstep(-0.15, 0.85, n);
+    density *= exp(-max(p.y, 0.0) * 0.045);
 
-    // Cones dos refletores + a névoa que acende logo abaixo da borda da cobertura.
-    float light = floodlight(p) + spill(p) * 0.1;
+    // Só espalhamento: dentro dos cones e em volta dos sinalizadores. Sem termo de
+    // ambiente, o resto da fumaça some no preto.
+    float light = floodlight(p);
     float glow = flareGlow(p, 0.07);
 
-    vec3 color = uFg * (0.04 + light * 1.1) + uSignal * glow * 1.0;
-    float alpha = density * (0.012 + light * 0.3 + glow * 0.55) * uOpacity * uFogMul * (1.0 - uDim);
+    vec3 color = uBg + uFg * light * 1.25 + uSignal * glow * 0.9;
+    float alpha = density * (light * 0.26 + glow * 0.36) * uOpacity * uFogMul * (1.0 - uDim);
     alpha *= smoothstep(0.0, 0.18, vUv.x) * (1.0 - smoothstep(0.82, 1.0, vUv.x)) * smoothstep(0.0, 0.12, vUv.y) * (1.0 - smoothstep(0.6, 1.0, vUv.y));
     gl_FragColor = vec4(color, alpha);
   }
@@ -291,9 +298,10 @@ export const beamFragment = /* glsl */ `
     vec3 vR = normalize(view - uDir * dot(view, uDir));
     float facing = abs(dot(nR, vR));
     float along = clamp(dot(vWorld - uOrigin, uDir) / uLength, 0.0, 1.0);
-    float body = pow(facing, 2.0);
+    // Facho, não parede: miolo concentrado e poeira que quebra a luz em faixas.
+    float body = pow(facing, 3.5);
     float fall = pow(1.0 - along, 1.6) * smoothstep(0.0, 0.04, along);
-    float dust = 0.65 + 0.35 * snoise(vWorld * 0.06 + vec3(0.0, -uTime * 0.15, uTime * 0.05));
+    float dust = max(0.0, 0.35 + 0.65 * snoise(vWorld * 0.07 + vec3(0.0, -uTime * 0.15, uTime * 0.05)));
     float ground = smoothstep(0.0, 4.0, vWorld.y);
     float a = body * fall * dust * ground * uStrength * uLightOn[uSector] * (1.0 - uDim * 0.8);
     gl_FragColor = vec4(uFg, a);

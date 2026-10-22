@@ -188,6 +188,12 @@ html.resenha .expediente-only {
   bottom: 0;
   transform-origin: bottom;
 }
+/* ?debug, câmera livre: a cena sobe por cima do conteúdo para receber o mouse. */
+[data-camera-free] .scene-layer {
+  z-index: 75;
+  pointer-events: auto;
+}
+
 /* Jogo de dia: sem barras pretas sobre o papel. */
 html:not(.dark):not(.resenha) .letterbox-bar {
   display: none;

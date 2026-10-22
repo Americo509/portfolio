@@ -9,6 +9,7 @@ import { localeHref, type Locale } from "@/lib/i18n";
 import { useFinePointer, useReducedMotion } from "@/lib/use-media";
 import { StatusBadge } from "@/components/projects/StatusBadge";
 import type { Portfolio, Project } from "@/types/portfolio.types";
+import { BaseCover, projectNumber } from "./BaseCover";
 
 function normalize(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
@@ -140,7 +141,7 @@ export function ProjectsExplorer({
           ref={preview}
           aria-hidden="true"
           className="pointer-events-none fixed left-0 top-0 z-30 h-48 w-80 overflow-hidden border border-line bg-surface transition-opacity duration-300"
-          style={{ opacity: hovered?.cover ? 1 : 0 }}
+          style={{ opacity: hovered?.cover || hovered?.tier === "base" ? 1 : 0 }}
         >
           {projects.map((p) =>
             p.cover ? (
@@ -153,6 +154,14 @@ export function ProjectsExplorer({
                 className="object-cover grayscale transition-opacity duration-300"
                 style={{ opacity: hovered?.slug === p.slug ? 1 : 0 }}
               />
+            ) : p.tier === "base" ? (
+              <div
+                key={p.slug}
+                className="absolute inset-0 transition-opacity duration-300"
+                style={{ opacity: hovered?.slug === p.slug ? 1 : 0 }}
+              >
+                <BaseCover number={projectNumber(projects, p.slug)} label={p.title} />
+              </div>
             ) : null
           )}
         </div>

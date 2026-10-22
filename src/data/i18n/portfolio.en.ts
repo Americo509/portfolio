@@ -577,7 +577,6 @@ export const portfolioEN: Portfolio = {
       status: "done",
       competition: "Final-year project · Web platform",
       position: "Full Stack",
-      cover: { src: "/images/cookshow.jpg", alt: "CookShow - project cover" },
       tags: ["Backend", "Fullstack", "Architecture", "Product", "Frontend"],
       stack: ["NestJS", "React", "TypeScript", "Tailwind CSS", "PostgreSQL", "TypeORM", "Jest", "Vercel", "GitLab CI"],
       links: { github: "https://github.com/Americo509" },
@@ -603,7 +602,7 @@ export const portfolioEN: Portfolio = {
           "A practical solution to reduce household food waste",
           "A robust project demonstrating architecture and testing skills"
         ],
-        gallery: [{ src: "/images/cookshow.jpg", alt: "CookShow - project cover" }]
+        gallery: []
       }
     },
     {
@@ -615,7 +614,6 @@ export const portfolioEN: Portfolio = {
       status: "study",
       competition: "Study · Landing page",
       position: "Front-end",
-      cover: { src: "/images/pagina-apple-watch.png", alt: "Apple Watch Sales Page - cover" },
       tags: ["Frontend", "Product"],
       stack: ["HTML", "CSS", "JavaScript"],
       links: { github: "https://github.com/Americo509" },
@@ -635,7 +633,7 @@ export const portfolioEN: Portfolio = {
           "Balancing animation and performance"
         ],
         results: ["A visually refined landing page", "A smooth, consistent experience", "Solid demonstration of front-end fundamentals"],
-        gallery: [{ src: "/images/pagina-apple-watch.png", alt: "Apple Watch Sales Page - cover" }]
+        gallery: []
       }
     },
     {
@@ -646,7 +644,6 @@ export const portfolioEN: Portfolio = {
       status: "study",
       competition: "Study · Web app",
       position: "Front-end",
-      cover: { src: "/images/cardapio-digital.png", alt: "Digital Menu - cover" },
       tags: ["Frontend", "Product"],
       stack: ["React", "Vite", "JavaScript"],
       links: { github: "https://github.com/Americo509" },
@@ -660,7 +657,7 @@ export const portfolioEN: Portfolio = {
         ],
         challenges: ["Keeping navigation simple across many categories", "Ensuring responsiveness on mobile devices"],
         results: ["A light, well-organised interface", "Ready for future extensions (search and filters)"],
-        gallery: [{ src: "/images/cardapio-digital.png", alt: "Digital Menu - cover" }]
+        gallery: []
       }
     },
     {
@@ -671,7 +668,6 @@ export const portfolioEN: Portfolio = {
       status: "study",
       competition: "Study · Media player",
       position: "Front-end",
-      cover: { src: "/images/audio-book.png", alt: "Audio Book - cover" },
       tags: ["Frontend", "Product"],
       stack: ["HTML", "CSS", "JavaScript"],
       links: { github: "https://github.com/Americo509" },
@@ -685,7 +681,7 @@ export const portfolioEN: Portfolio = {
         ],
         challenges: ["Keeping UI state in sync with playback", "Intuitive navigation between tracks"],
         results: ["A working player with clear controls", "Solid demonstration of JavaScript fundamentals"],
-        gallery: [{ src: "/images/audio-book.png", alt: "Audio Book - cover" }]
+        gallery: []
       }
     },
     {
@@ -696,7 +692,6 @@ export const portfolioEN: Portfolio = {
       status: "study",
       competition: "Study · UI clone",
       position: "Front-end",
-      cover: { src: "/images/spotify.png", alt: "Spotify UI - cover" },
       tags: ["Frontend"],
       stack: ["React", "CSS"],
       links: { github: "https://github.com/Americo509" },
@@ -710,7 +705,7 @@ export const portfolioEN: Portfolio = {
         ],
         challenges: ["Visual consistency across sections", "Reproducing a complex layout in an organised way"],
         results: ["An interface close to the original product", "Well-structured components", "Shows command of complex layouts in React"],
-        gallery: [{ src: "/images/spotify.png", alt: "Spotify UI - cover" }]
+        gallery: []
       }
     }
   ],

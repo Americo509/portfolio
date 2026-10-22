@@ -33,11 +33,8 @@ Regra: tudo em `public/` (e as imagens em `src/app/`) é publicado no deploy. Na
 | `public/images/sol-poretti-clinico/*.jpg` | Prints do sistema clínico, com pacientes fictícios em ambiente local | Próprio (sistema e identidade visual feitos pelo Gustavo) | 2026-10-21 | Gustavo |
 | `public/images/sol-poretti/*.jpg` | Prints da landing page solporettinutri.com.br | Próprio | 2026-10-21 | Gustavo |
 | `public/images/resenha/cromo-08.jpg`, `cromo-19.jpg` | Fotos do Gustavo; escudo e marca da camisa cobertos, rosto do torcedor ao lado desfocado | Próprio | 2026-10-21 | Gustavo |
+| Capas das Categorias de base (`src/components/projects/BaseCover.tsx`) | SVG procedural com o número do projeto; substituiu os prints dos projetos de estudo, que incluíam marca da Apple e do Spotify (removidos em 2026-10-22) | Próprio | 2026-10-22 | Gustavo (com Claude) |
 | `public/images/resenha/cromo-10.jpg`, `cromo-77.jpg` | Ilustrações procedurais | Próprio | 2026-10-21 | Gustavo (com Claude) |
-| `public/images/cookshow.jpg` | Print do projeto de TCC | Próprio | 2026-02-26 | Gustavo |
-| `public/images/pagina-apple-watch.png` | Print de projeto de estudo | Próprio · **revisar:** mostra produto e marca da Apple | 2026-02-26 | Gustavo |
-| `public/images/spotify.png` | Print de clone de interface (estudo) | Próprio · **revisar:** mostra marca do Spotify | 2026-02-26 | Gustavo |
-| `public/images/cardapio-digital.png`, `audio-book.png` | Prints de projetos de estudo | Próprio | 2026-02-26 | Gustavo |
 
 ## Som
 

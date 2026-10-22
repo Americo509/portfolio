@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { FxImage } from "@/components/fx/FxImage";
 import { ProjectGallery } from "@/components/ProjectGallery";
+import { BaseCover, projectNumber } from "@/components/projects/BaseCover";
 import { BlueprintCover } from "@/components/projects/BlueprintCover";
 import { StatusBadge } from "@/components/projects/StatusBadge";
 import { getPortfolio } from "@/lib/get-portfolio";
@@ -58,6 +59,8 @@ export function ProjectView({ locale, slug }: { locale: Locale; slug: string }) 
         <div className="relative col-span-12 aspect-[16/9] border border-line">
           {p.cover ? (
             <FxImage src={p.cover.src} alt={p.cover.alt} className="absolute inset-0" sizes="100vw" priority />
+          ) : p.tier === "base" ? (
+            <BaseCover number={projectNumber(portfolio.projects, p.slug)} label={`${copy.sections.base.eyebrow} · ${p.title}`} />
           ) : (
             <BlueprintCover slug={p.slug} label={`${mr.title} · ${p.title}`} />
           )}
@@ -161,6 +164,10 @@ export function ProjectView({ locale, slug }: { locale: Locale; slug: string }) 
             {next.cover ? (
               <span className="relative col-span-12 hidden aspect-[16/10] overflow-hidden border border-line md:col-span-3 md:block">
                 <Image src={next.cover.src} alt="" fill sizes="25vw" className="object-cover grayscale transition duration-700 group-hover:grayscale-0" />
+              </span>
+            ) : next.tier === "base" ? (
+              <span aria-hidden="true" className="relative col-span-12 hidden aspect-[16/10] overflow-hidden border border-line md:col-span-3 md:block">
+                <BaseCover number={projectNumber(portfolio.projects, next.slug)} label={next.title} />
               </span>
             ) : null}
           </div>

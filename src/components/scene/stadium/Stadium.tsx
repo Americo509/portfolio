@@ -8,6 +8,7 @@ import type { GpuTier } from "@/lib/webgl";
 import { ARENA, CONE_TAN, LIGHTS, TIER_SETTINGS } from "./config";
 import { AMBIENT, CHAPTER_ORDER, INTRO, TRACKS, sampleTrack, type Shot } from "./camera-track";
 import { lens } from "./lens-state";
+import { cameraLive, useCameraDebug } from "../debug";
 import { ArenaStructure, NorthCrowd } from "./Arena";
 import { createShared, type Shared } from "./shared";
 import {
@@ -239,9 +240,13 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
       else intro.current.t = Math.min(1, intro.current.t + step / (INTRO.dolly + INTRO.descent));
     }
 
-    // Alvo da trilha: progresso global na home, quadro fixo nas páginas internas.
+    // Alvo da trilha: progresso global na home (ou o do slider do ?debug), quadro fixo
+    // nas páginas internas.
+    const dbg = useCameraDebug.getState();
+    cameraLive.track = portrait ? "mobile" : "desktop";
     if (mode === "hero") {
-      const g = CHAPTER_ORDER.indexOf(motionState.chapter) + motionState.chapterProgress;
+      const g = dbg.scrub ?? CHAPTER_ORDER.indexOf(motionState.chapter) + motionState.chapterProgress;
+      cameraLive.g = g;
       sampleTrack(portrait ? TRACKS.mobile : TRACKS.desktop, g, sample);
     } else {
       const a = portrait ? AMBIENT.mobile : AMBIENT.desktop;
@@ -307,15 +312,23 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
 
     // Nas tomadas quase a pino (spidercam), o "para cima" padrão fica quase paralelo ao
     // olhar e o quadro gira; ali o norte vira o topo da tela.
-    const steep = THREE.MathUtils.smoothstep(-tmp.f.subVectors(look, pos).normalize().y, 0.75, 0.95);
-    cam.up.set(0, 1 - steep, -steep).normalize();
-    cam.position.copy(pos);
-    cam.lookAt(look);
-    fov += Math.abs(motionState.velocityNorm) * 12;
-    if (Math.abs(cam.fov - fov) > 0.01) {
-      cam.fov = fov;
-      cam.updateProjectionMatrix();
+    if (dbg.free) {
+      // Câmera livre do ?debug: a órbita manda; aqui só se lê a posição para o diretor.
+      pos.copy(cam.position);
+    } else {
+      const steep = THREE.MathUtils.smoothstep(-tmp.f.subVectors(look, pos).normalize().y, 0.75, 0.95);
+      cam.up.set(0, 1 - steep, -steep).normalize();
+      cam.position.copy(pos);
+      cam.lookAt(look);
+      fov += Math.abs(motionState.velocityNorm) * 12;
+      if (Math.abs(cam.fov - fov) > 0.01) {
+        cam.fov = fov;
+        cam.updateProjectionMatrix();
+      }
+      cameraLive.look = look.toArray() as [number, number, number];
     }
+    cameraLive.pos = cam.position.toArray() as [number, number, number];
+    cameraLive.fov = cam.fov;
 
     // Lente: foco, letterbox (no túnel e no apito final) e a velocidade angular da
     // câmera projetada na tela, que vira o motion blur só nos movimentos rápidos.
@@ -348,7 +361,16 @@ function CameraRig({ shared, mode }: { shared: Shared; mode: SceneMode }) {
   return null;
 }
 
-export function Stadium({ tier, palette, mode }: { tier: GpuTier; palette: StadiumPalette; mode: SceneMode }) {
+// Diretor de câmera e coleta de desempenho: só carregam no ?debug.
+const DebugScene = React.lazy(() => import("./DebugScene").then((m) => ({ default: m.DebugScene })));
+
+/**
+ * Etapas de montagem (o Scene avança uma por tarefa, ver StageRunner): 0 gramado,
+ * estrutura e câmera; 1 neblina e feixes; 2 torcida; 3 lâmpadas e flares; 4 (no
+ * Scene) o pós-processamento.
+ */
+export function Stadium({ tier, palette, mode, stage }: { tier: GpuTier; palette: StadiumPalette; mode: SceneMode; stage: number }) {
+  const [debug] = React.useState(() => new URLSearchParams(window.location.search).has("debug"));
   const shared = React.useMemo(createShared, []);
   const settings = TIER_SETTINGS[tier];
   const { scene, gl } = useThree();
@@ -375,11 +397,33 @@ export function Stadium({ tier, palette, mode }: { tier: GpuTier; palette: Stadi
       <CameraRig shared={shared} mode={mode} />
       <Pitch shared={shared} />
       <ArenaStructure shared={shared} additive={palette.additive} truss={settings.truss} />
-      <NorthCrowd shared={shared} crowd={settings.crowd} flags={settings.flags} smoke={settings.smoke} additive={palette.additive} />
-      <Fog shared={shared} layers={settings.fogLayers} blending={blending} />
-      <Beams shared={shared} blending={blending} strength={palette.additive ? 0.3 : 0.11} />
-      <Glows shared={shared} palette={palette} />
-      {palette.additive && <Streaks shared={shared} />}
+      {stage >= 1 ? (
+        <>
+          <Fog shared={shared} layers={settings.fogLayers} blending={blending} />
+          <Beams shared={shared} blending={blending} strength={palette.additive ? 0.24 : 0.11} />
+        </>
+      ) : null}
+      {stage >= 2 ? (
+        <NorthCrowd
+          shared={shared}
+          crowd={settings.crowd}
+          flags={settings.flags}
+          smoke={settings.smoke}
+          additive={palette.additive}
+          signal={palette.signal}
+        />
+      ) : null}
+      {stage >= 3 ? (
+        <>
+          <Glows shared={shared} palette={palette} />
+          {palette.additive && <Streaks shared={shared} />}
+        </>
+      ) : null}
+      {debug ? (
+        <React.Suspense fallback={null}>
+          <DebugScene />
+        </React.Suspense>
+      ) : null}
     </>
   );
 }

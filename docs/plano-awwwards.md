@@ -201,7 +201,16 @@ Um vídeo de 30 a 60 segundos do plano-sequência, com o mosaico e o telestrador
 Seis etapas, nesta ordem, cada uma com aprovação do Gustavo antes da próxima. Toda etapa fecha com a rotina de sempre: lint, typecheck, build, Playwright, screenshots em desktop e mobile (com reduced motion e sem WebGL), commit e resumo.
 
 1. **O look.** Arena no Blender com bake, glTF com meshopt e KTX2, LUTs, AgX, lente e câmera autorada com trilha mobile.
-   - *Status (22/10):* a parte de código está pronta (LUTs, AgX, grão, flare anamórfico, letterbox, rack focus, motion blur, plano-sequência com trilha mobile, dolly zoom e o carregador do glTF com meshopt e KTX2). Falta a arena no Blender ([guia](arena-blender.md)) e medir os 60 fps num Android intermediário. A tipografia cinética fica para a etapa 2, junto com o mosaico, porque mexe no h1 (o LCP).
+   - *Status (22/10):* a parte de código está pronta (LUTs, AgX, grão, flare anamórfico, letterbox, rack focus, motion blur, plano-sequência com trilha mobile, dolly zoom e o carregador do glTF com meshopt e KTX2). A tipografia cinética fica para a etapa 2, junto com o mosaico, porque mexe no h1 (o LCP); o HTML já nasce no estado final (wdth 62) e a animação não pode mexer no layout (CLS).
+   - *Revisão (22/10), aprovadas:* troca do Theatre.js por `camera-track.ts` e tipografia cinética na etapa 2. Feito em seguida:
+     - **Vermelho:** a LUT devolve a saturação na faixa de matiz do acento depois do AgX, em proporção à saturação que sobrou e com as sombras neutras. Núcleo do sinalizador medido em `#DF1B1A` (alvo `#E61919`); na Resenha, `#F0950A` (alvo `#F59E0B`). A aberração cromática só existe com o scroll em movimento (parada, a franja virava contorno vermelho).
+     - **Neblina:** cor base no preto, brilho só onde há espalhamento (cones e sinalizadores) e densidade caindo com a altura. O véu cinza vinha sobretudo dos 12 cones de feixe, largos e sobrepostos: ficaram estreitos, com borda dura e poeira quebrando a luz. No centro do quadro do hero, a luminância média foi de 0,47 para 0,31 e o cinza neutro de 59% para 34% (o resto é a própria arquibancada iluminada).
+     - **Câmera:** uma trilha contínua com quadros de via e de leitura, splines por comprimento de arco e easing por segmento.
+     - **Diretor de câmera e overlay de desempenho** no `?debug`.
+     - **Shaders:** montagem em etapas, compilando cada etapa antes de desenhá-la (compileAsync com a extensão; sem ela, compila e espera). Ver a meta da etapa 6 abaixo.
+     - **Categorias de base:** capa procedural única com o número do projeto; os prints saíram.
+   - *Plano B do bake (avaliação, sem implementar):* recomendado o `ProgressiveLightMap` do próprio three r186, rodando offline num script com o Chromium headless e exportando um `.glb` com o lightmap para o `ARENA_MODEL`. O `@react-three/lightmap` foi descartado: feito para R3F 6 e three 0.128, grava a UV do lightmap como `uv2` (o three passou a usar `uv1` na r151). O `three-gpu-pathtracer` é compatível, mas não gera lightmap.
+   - *Falta para fechar:* o bake (plano B) e o teste no Android com o overlay (mediana ≥ 55 fps e p95 ≤ 20 ms por 10 s no hero, tier médio).
    - *Pronto quando:* as screenshots de antes e depois mostram o salto; o hero roda a 60 fps no tier mid; o TBT da home no mobile não piora em relação ao registrado no README; os testes webgl e axe passam.
 2. **Mosaico da torcida.** Nome, 4-3-3, #08 e "BORA PRA RESENHA?".
    - *Pronto quando:* o LCP do h1 não muda; o tier low funciona; reduced motion e sem WebGL mostram só o cartaz do DOM.
@@ -212,7 +221,8 @@ Seis etapas, nesta ordem, cada uma com aprovação do Gustavo antes da próxima.
 5. **Som.** Gravação na arena, edição, portão de áudio, lowpass na saída do túnel e torcida espacializada.
    - *Pronto quando:* o padrão continua sem som; os arquivos estão normalizados e leves; cada arquivo está em `docs/assets-licenses.md`.
 6. **Cortes e polimento.** Jukebox e enquete fora, carreira por posição, sensação de jogo no pênalti, detalhes, making-of e o checklist de submissão.
-   - *Pronto quando:* todos os itens de "Antes de submeter" estão marcados.
+   - *Pronto quando:* todos os itens de "Antes de submeter" estão marcados e o **TBT mobile da home está abaixo de 1 s**.
+   - *Diagnóstico (22/10):* no ambiente de medição (Chrome headless com SwiftShader, sem GPU), o TBT da home fica em ~1,7–2,2 s. Uns 0,5 s são a hidratação do React; o resto é a página esperando shaders compilarem no primeiro desenho de cada programa. Esse ambiente não tem `KHR_parallel_shader_compile` e compila na CPU, então a montagem em etapas não consegue esconder a espera (ficou ~190 ms pior aqui, e a cena demora mais para aparecer). Em aparelhos com a extensão, a montagem compila sem travar. O overlay do `?debug` mostra no celular se há compilação paralela, em quanto tempo a cena ficou pronta e o maior travamento durante a montagem. Próximos alavancas: shaders mais leves (a neblina e o gramado, com 12 cones e ruído) e hidratação mais enxuta.
 
 ## Fora do escopo (decidido)
 

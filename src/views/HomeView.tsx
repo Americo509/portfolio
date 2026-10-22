@@ -10,6 +10,7 @@ import { TeamTalk } from "@/components/home/TeamTalk";
 import { Academy } from "@/components/home/Academy";
 import { FinalWhistle } from "@/components/home/FinalWhistle";
 import { PenaltyGame } from "@/components/penalty/PenaltyGame";
+import { projectNumber } from "@/components/projects/BaseCover";
 
 export function HomeView({ locale }: { locale: Locale }) {
   const portfolio = getPortfolio(locale);
@@ -107,7 +108,12 @@ export function HomeView({ locale }: { locale: Locale }) {
       <section data-chapter="academy" aria-labelledby="ch-academy" className="pb-24 pt-24">
         <ChapterTitle id="ch-academy" number={ch.academy.number} title={ch.academy.title} kicker={ch.academy.kicker} />
         <div className="mt-10">
-          <Academy projects={base} openLabel={copy.matchCard.open} locale={locale} />
+          <Academy
+            projects={base}
+            numbers={Object.fromEntries(base.map((p) => [p.slug, projectNumber(portfolio.projects, p.slug)]))}
+            openLabel={copy.matchCard.open}
+            locale={locale}
+          />
         </div>
       </section>
 

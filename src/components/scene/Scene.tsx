@@ -12,46 +12,78 @@ import { TIER_SETTINGS } from "./stadium/config";
 import { Stadium, type SceneMode, type StadiumPalette } from "./stadium/Stadium";
 import { LensEffect, getLut } from "./stadium/lens";
 import { lens } from "./stadium/lens-state";
+import { perfLive } from "./debug";
+
+/** Quantas etapas a cena monta antes de ficar pronta (ver STAGES em Stadium.tsx). */
+const LAST_STAGE = 4;
+
+const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
+const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+/** Tempo que cada etapa espera, com o desenho parado, enquanto a GPU compila. */
+const COMPILE_WAIT_MS = 180;
 
 /**
- * Compila os shaders da cena em paralelo (KHR_parallel_shader_compile, via
- * compileAsync) antes do primeiro quadro: sem isso, a primeira renderização compila
- * tudo de uma vez e trava a página por quase um segundo no celular. Enquanto
- * compila, o canvas não desenha (o fallback estático continua na tela). Sem a
- * extensão (ex.: SwiftShader), não há ganho em esperar: desenha direto.
+ * Monta a cena em etapas (docs/plano-awwwards.md, revisão da etapa 1): gramado e
+ * estrutura; neblina e feixes; torcida; lâmpadas; pós-processamento.
+ *
+ * No Chrome os shaders compilam no processo da GPU; a página só trava quando
+ * pergunta se terminou, o que o three faz no primeiro desenho de cada programa. Por
+ * isso cada etapa é compilada antes de ser desenhada, com o desenho parado:
+ * - com KHR_parallel_shader_compile, compileAsync consulta sem bloquear;
+ * - sem a extensão, gl.compile só dispara a compilação (não pergunta nada) e a etapa
+ *   espera um instante; no primeiro desenho a resposta já está pronta.
+ * Só no fim a cena avisa que está pronta: o fade e a abertura começam com tudo
+ * compilado.
  */
-function Precompile({ onDone }: { onDone: () => void }) {
+function StageRunner({
+  stage,
+  onStage,
+  onCompiling,
+  onReady
+}: {
+  stage: number;
+  onStage: (s: number) => void;
+  onCompiling: (v: boolean) => void;
+  onReady: () => void;
+}) {
   const { gl, scene, camera } = useThree();
+  const started = React.useRef(0);
   React.useEffect(() => {
     let alive = true;
-    if (!gl.extensions.has("KHR_parallel_shader_compile")) {
-      onDone();
-      return;
-    }
-    gl.compileAsync(scene, camera)
-      .catch(() => undefined)
-      .then(() => {
-        if (alive) onDone();
-      });
+    (async () => {
+      if (stage === 0) {
+        started.current = performance.now();
+        perfLive.parallel = gl.extensions.has("KHR_parallel_shader_compile");
+      }
+      onCompiling(true);
+      if (gl.extensions.has("KHR_parallel_shader_compile")) {
+        await gl.compileAsync(scene, camera).catch(() => undefined);
+      } else {
+        gl.compile(scene, camera);
+        gl.getContext().flush();
+        await wait(COMPILE_WAIT_MS);
+      }
+      if (!alive) return;
+      onCompiling(false);
+      // Um quadro para a etapa ser desenhada antes de montar a próxima; o tempo dele
+      // (onde mora o travamento, se a compilação ainda não terminou) vai para o ?debug.
+      const t = performance.now();
+      await nextFrame();
+      await wait(0);
+      perfLive.worstMountFrame = Math.max(perfLive.worstMountFrame, performance.now() - t);
+      if (!alive) return;
+      if (stage < LAST_STAGE) onStage(stage + 1);
+      else {
+        perfLive.readyMs = performance.now() - started.current;
+        onReady();
+      }
+    })();
     return () => {
       alive = false;
     };
-    // Uma vez só, com a cena já montada (este componente é o último da árvore).
+    // Roda uma vez por etapa.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return null;
-}
-
-function ReadySignal({ onReady }: { onReady: () => void }) {
-  const frames = React.useRef(0);
-  const done = React.useRef(false);
-  useFrame(() => {
-    if (done.current) return;
-    if (++frames.current >= 2) {
-      done.current = true;
-      onReady();
-    }
-  });
+  }, [stage]);
   return null;
 }
 
@@ -76,7 +108,8 @@ function Effects({ level, resenha }: { level: "bloom" | "full"; resenha: boolean
   }, [lensEffect]);
 
   useFrame(() => {
-    lens.aberration = level === "full" ? 0.0006 + Math.abs(motionState.velocityNorm) * 0.006 : 0;
+    // Só com o scroll em movimento: parada, a franja de cor viraria contorno vermelho na LUT.
+    lens.aberration = level === "full" ? Math.abs(motionState.velocityNorm) * 0.006 : 0;
     const d = dof.current;
     if (!d) return;
     d.cocMaterial.focusDistance = lens.focus;
@@ -126,7 +159,15 @@ export default function Scene({
   const [dpr, setDpr] = React.useState(() => Math.min(settings.dpr, window.devicePixelRatio || 1));
   const [post, setPost] = React.useState(settings.post);
   const [hidden, setHidden] = React.useState(false);
-  const [compiled, setCompiled] = React.useState(false);
+  const [stage, setStage] = React.useState(0);
+  // Começa parado: nada é desenhado (e compilado às cegas) antes do StageRunner.
+  const [compiling, setCompiling] = React.useState(true);
+  // Para o overlay de desempenho do ?debug.
+  React.useEffect(() => {
+    perfLive.tier = tier;
+    perfLive.dpr = dpr;
+    perfLive.post = theme === "light" ? "none" : post;
+  }, [tier, dpr, post, theme]);
   const gameActive = useApp((s) => s.gameActive);
 
   React.useEffect(() => {
@@ -147,7 +188,7 @@ export default function Scene({
   return (
     <Canvas
       dpr={dpr}
-      frameloop={hidden || gameActive || !compiled ? "never" : "always"}
+      frameloop={hidden || gameActive || compiling ? "never" : "always"}
       camera={{ position: [52, 74, 130], fov: 28, near: 0.5, far: 600 }}
       gl={{ antialias: false, powerPreference: "high-performance" }}
       style={{ position: "absolute", inset: 0 }}
@@ -163,10 +204,9 @@ export default function Scene({
           setPost("none");
         }}
       />
-      <Stadium tier={tier} palette={palette} mode={mode} />
-      {post !== "none" && theme !== "light" ? <Effects level={post} resenha={theme === "resenha"} /> : null}
-      <ReadySignal onReady={onReady} />
-      <Precompile onDone={() => setCompiled(true)} />
+      <Stadium tier={tier} palette={palette} mode={mode} stage={stage} />
+      {stage >= 4 && post !== "none" && theme !== "light" ? <Effects level={post} resenha={theme === "resenha"} /> : null}
+      <StageRunner stage={stage} onStage={setStage} onCompiling={setCompiling} onReady={onReady} />
     </Canvas>
   );
 }

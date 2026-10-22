@@ -85,8 +85,11 @@ export const LIGHTS = [
   roofLight(3, [24, 24, -60], [14, 0, -26])
 ];
 
-/** Meia-abertura do cone de luz (tan do ângulo). */
-export const CONE_TAN = 0.16;
+/**
+ * Meia-abertura do cone de luz (tan do ângulo). Estreito de propósito: com 12
+ * grupos, cones largos se sobrepõem no meio do quadro e viram uma parede cinza.
+ */
+export const CONE_TAN = 0.11;
 
 /** Sinalizadores na mão da torcida, na arquibancada norte. O primeiro solta mais fumaça. */
 const flareAt = (x: number, absZ: number) => new THREE.Vector3(x, endStandHeight(absZ) + 2.1, -absZ);

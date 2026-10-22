@@ -305,6 +305,7 @@ const NORTH_OFFSET = PITCH.length / 2;
 
 function NorthEnd({ dark, reduce }: { dark: boolean; reduce: boolean }) {
   const shared = React.useMemo(() => createShared(NORTH_OFFSET), []);
+  const signal = React.useMemo(() => new THREE.Color(SIGNAL), []);
   React.useEffect(() => {
     shared.uFg.value.set(dark ? FG : "#080808");
     shared.uBg.value.set(dark ? "#080808" : "#F5F5F0");
@@ -319,7 +320,7 @@ function NorthEnd({ dark, reduce }: { dark: boolean; reduce: boolean }) {
     shared.uScale.value = (state.size.height * state.gl.getPixelRatio()) / (2 * Math.tan((cam.fov * Math.PI) / 360));
     shared.uCamPos.value.copy(cam.position);
   });
-  return <NorthCrowd shared={shared} crowd={1500} flags={10} smoke={260} additive={dark} offsetZ={NORTH_OFFSET} withStand />;
+  return <NorthCrowd shared={shared} crowd={1500} flags={10} smoke={260} additive={dark} signal={signal} offsetZ={NORTH_OFFSET} withStand />;
 }
 
 /** Flashes de fotógrafos na torcida atrás do gol (só no gol). */

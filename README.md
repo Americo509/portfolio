@@ -82,7 +82,16 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
   - Os shaders compilam em paralelo (`compileAsync`) quando o navegador tem `KHR_parallel_shader_compile`.
   - Arquibancadas, torcida e bandeiras usam uma luz barata por setor (4 barras em vez de 12 cones), mais rápida de compilar.
   - O estádio só pausa quando o jogo de pênalti está de fato na tela, e não 200 px antes, o que travava o apito final.
-- **QA:** `?debug` expõe `__camera` e `__intro` (o progresso da abertura) além de `__scene`/`__gl`.
+- **Vermelho e neblina (revisão da etapa 1):**
+  - A LUT devolve ao acento (vermelho no Expediente, âmbar na Resenha) a saturação que o AgX tira, em proporção à que sobrou.
+  - A neblina é preta onde não há luz e só aparece nos fachos e em volta dos sinalizadores.
+  - Os 12 cones de feixe são estreitos e quebrados pela poeira; eram eles que acinzentavam o meio do quadro.
+- **Montagem em etapas (`StageRunner` em `Scene.tsx`):** gramado e estrutura, neblina e feixes, torcida, lâmpadas e pós. Cada etapa é compilada antes de ser desenhada: com `compileAsync` quando há `KHR_parallel_shader_compile`; sem ele, com `gl.compile` e uma espera. Só no fim a cena fica pronta e a abertura começa.
+- **Ferramentas do `?debug`:**
+  - **Diretor de câmera:** câmera livre, slider que percorre a trilha, a spline desenhada na cena e um botão que copia o quadro-chave já no formato de `camera-track.ts`.
+  - **Overlay de desempenho:** fps, mediana e p95 dos últimos 10 s, tier, DPR, pós, compilação paralela, tempo até a cena ficar pronta e maior travamento na montagem. O botão "testar 10 s" diz se passou no critério (mediana ≥ 55 fps e p95 ≤ 20 ms).
+  - **Globais no `window`:** `__camera`, `__intro`, `__scene` e `__gl`.
+- **Categorias de base:** capa procedural única (`BaseCover`) com o número do projeto na Campanha, no lugar dos prints.
 - **Lighthouse mobile da home, medido aqui:** o ambiente varia muito entre execuções (a mesma versão foi de 1,7 s a 2,4 s de TBT), então a comparação é pareada, alternando as versões nas mesmas condições. Antes da etapa: 2,09 / 2,12 / 2,38 s. Depois: 1,99 / 2,02 / 2,21 s. Desempenho 59–63 nas duas, LCP 3,5–3,6 s, CLS 0. Os 60 fps no tier médio precisam ser medidos num Android de verdade: aqui não há GPU. Para forçar um tier em QA: `?tier=low|mid|high`. `?debug` expõe `__scene`/`__gl` no `window`.
 - A cena só compila depois que o preloader sai de cena (`bootDone`), para não travar a abertura.
 - Os testes funcionais rodam com `--disable-webgl` (fallback); o projeto `webgl` do Playwright testa a cena.

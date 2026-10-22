@@ -354,6 +354,7 @@ export function NorthCrowd({
   flags,
   smoke,
   additive,
+  signal,
   offsetZ = 0,
   withStand = false
 }: {
@@ -362,6 +363,8 @@ export function NorthCrowd({
   flags: number;
   smoke: number;
   additive: boolean;
+  /** Cor do acento do modo (vermelho no Expediente, âmbar na Resenha). */
+  signal: THREE.Color;
   offsetZ?: number;
   withStand?: boolean;
 }) {
@@ -375,7 +378,7 @@ export function NorthCrowd({
       </group>
       {/* Fumaça e núcleos já leem a posição dos sinalizadores (deslocada) nos uniforms. */}
       <FlareSmoke shared={shared} count={smoke} blending={blending} />
-      <FlareCores shared={shared} blending={blending} />
+      <FlareCores shared={shared} blending={blending} signal={signal} />
     </>
   );
 }
@@ -409,17 +412,17 @@ function FlareSmoke({ shared, count, blending }: { shared: Shared; count: number
 }
 
 /** O fogo na mão de cada torcedor. */
-function FlareCores({ shared, blending }: { shared: Shared; blending: THREE.Blending }) {
+function FlareCores({ shared, blending, signal }: { shared: Shared; blending: THREE.Blending; signal: THREE.Color }) {
   const geo = React.useMemo(() => {
     const flares = shared.uFlares.value;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(flares.flatMap((f) => [f.x, f.y, f.z]), 3));
     g.setAttribute("aSize", new THREE.Float32BufferAttribute(flares.map(() => 2.6), 1));
-    g.setAttribute("aColor", new THREE.Float32BufferAttribute(flares.flatMap(() => [1.3, 0.35, 0.3]), 3));
+    g.setAttribute("aColor", new THREE.Float32BufferAttribute(flares.flatMap(() => [signal.r * 1.2, signal.g * 1.2, signal.b * 1.2]), 3));
     // aLight 4: sempre aceso, mesmo com os setores apagados.
     g.setAttribute("aLight", new THREE.Float32BufferAttribute(flares.map(() => 4), 1));
     return g;
-  }, [shared]);
+  }, [shared, signal]);
   const uniforms = React.useMemo(
     () => ({ uScale: shared.uScale, uTime: shared.uTime, uDim: shared.uDim, uLightOn: shared.uLightOn, uFlicker: { value: 1 } }),
     [shared]

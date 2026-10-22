@@ -8,6 +8,8 @@ import { cn } from "@/lib/cn";
 import { motionState, useApp } from "@/lib/store";
 import { useReducedMotion } from "@/lib/use-media";
 import { guessTier, hasWebGL, type GpuTier } from "@/lib/webgl";
+import { DebugPanels } from "./DebugPanels";
+import { isDebug } from "./debug";
 import { Letterbox } from "./Letterbox";
 import { loadScene } from "./load";
 import { StaticStadium } from "./StaticStadium";
@@ -76,30 +78,36 @@ export function SceneRoot() {
   }, []);
 
   const showCanvas = tier !== null && !reduce && status !== "fallback";
+  // Ferramentas do ?debug (diretor de câmera e desempenho): só depois de montar, sem hidratar diferente.
+  const [debug, setDebug] = React.useState(false);
+  React.useEffect(() => setDebug(isDebug()), []);
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-      <StaticStadium
-        className={cn("transition-opacity duration-1000", status === "ready" ? "opacity-0" : "opacity-100")}
-      />
-      {showCanvas ? (
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-[1600ms]",
-            status === "ready" ? "opacity-100" : "opacity-0"
-          )}
-        >
-          <SceneBoundary onError={() => setStatus("fallback")}>
-            <Scene
-              tier={tier}
-              theme={resenha ? "resenha" : resolvedTheme === "light" ? "light" : "dark"}
-              mode={pathname === "/" || pathname === "/en" ? "hero" : "ambient"}
-              onReady={() => setStatus("ready")}
-            />
-          </SceneBoundary>
-          <Letterbox />
-        </div>
-      ) : null}
-    </div>
+    <>
+      <div aria-hidden="true" className="scene-layer pointer-events-none fixed inset-0 z-0">
+        <StaticStadium
+          className={cn("transition-opacity duration-1000", status === "ready" ? "opacity-0" : "opacity-100")}
+        />
+        {showCanvas ? (
+          <div
+            className={cn(
+              "absolute inset-0 transition-opacity duration-[1600ms]",
+              status === "ready" ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <SceneBoundary onError={() => setStatus("fallback")}>
+              <Scene
+                tier={tier}
+                theme={resenha ? "resenha" : resolvedTheme === "light" ? "light" : "dark"}
+                mode={pathname === "/" || pathname === "/en" ? "hero" : "ambient"}
+                onReady={() => setStatus("ready")}
+              />
+            </SceneBoundary>
+            <Letterbox />
+          </div>
+        ) : null}
+      </div>
+      {debug && showCanvas ? <DebugPanels /> : null}
+    </>
   );
 }

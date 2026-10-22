@@ -22,6 +22,58 @@ function contrast(x: number, pivot: number, low: number, high: number) {
 // são 32³ cores, e no celular a geração entra no tempo de bloqueio da abertura.
 type Grade = (r: number, g: number, b: number, out: Float32Array, i: number) => void;
 
+/** Matiz em graus (0–360) e saturação (0–1) de uma cor sRGB. */
+function hueSat(r: number, g: number, b: number): [number, number] {
+  const mx = Math.max(r, g, b);
+  const mn = Math.min(r, g, b);
+  const d = mx - mn;
+  if (d < 1e-6) return [0, 0];
+  let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h *= 60;
+  return [h < 0 ? h + 360 : h, d / mx];
+}
+
+/**
+ * O acento da identidade volta depois do AgX: dentro da faixa de matiz dele, a cor
+ * vai para o tom exato da marca (só a luminosidade varia), em proporção à saturação
+ * que sobrou. O núcleo do sinalizador chega no tom cheio; o rosado fraco em volta
+ * só esquenta um pouco, e as sombras ficam neutras. O AgX dessatura altas luzes;
+ * sem isso o sinalizador sai salmão.
+ */
+function accent(
+  r: number,
+  g: number,
+  b: number,
+  base: [number, number, number],
+  target: [number, number, number],
+  hue: number,
+  width: number,
+  satLow: number,
+  satHigh: number,
+  /** Fração da luminosidade do tom em que ele já sai cheio (o âmbar é claro e precisa de menos). */
+  reach: number,
+  out: Float32Array,
+  i: number
+) {
+  const [h, sat] = hueSat(r, g, b);
+  const dh = Math.min(Math.abs(h - hue), 360 - Math.abs(h - hue));
+  const y = luma(r, g, b);
+  const w =
+    (1 - THREE.MathUtils.smoothstep(dh, width, width * 1.8)) *
+    clamp01((sat - satLow) / (satHigh - satLow)) *
+    THREE.MathUtils.smoothstep(y, 0.05, 0.16);
+  // Luminosidade relativa à do tom da marca: o núcleo claro chega no tom cheio.
+  const k = Math.min(1, Math.max(0.16, y / (luma(...target) * reach)));
+  out[i] = base[0] + (target[0] * k - base[0]) * w;
+  out[i + 1] = base[1] + (target[1] * k - base[1]) * w;
+  out[i + 2] = base[2] + (target[2] * k - base[2]) * w;
+}
+
+/** #E61919 e #F59E0B em sRGB 0–1. */
+const SIGNAL: [number, number, number] = [0.902, 0.098, 0.098];
+const AMBER: [number, number, number] = [0.961, 0.62, 0.043];
+const tmp: [number, number, number] = [0, 0, 0];
+
 /** Expediente: preto e branco de cartaz, com o vermelho do sinalizador preservado. */
 const gradeNight: Grade = (r, g, b, out, i) => {
   const y = luma(r, g, b);
@@ -36,9 +88,11 @@ const gradeNight: Grade = (r, g, b, out, i) => {
   const yy = luma(cr, cg, cb);
   const shadow = (1 - yy) * (1 - yy) * (1 - yy);
   const high = yy * yy;
-  out[i] = clamp01(cr + high * 0.012 - shadow * 0.004);
-  out[i + 1] = clamp01(cg + high * 0.01);
-  out[i + 2] = clamp01(cb + shadow * 0.012 - high * 0.008);
+  tmp[0] = clamp01(cr + high * 0.012 - shadow * 0.004);
+  tmp[1] = clamp01(cg + high * 0.01);
+  tmp[2] = clamp01(cb + shadow * 0.012 - high * 0.008);
+  // Qualquer resto de vermelho (até o rosado que o AgX deixa) vira o vermelho do sinalizador.
+  accent(r, g, b, tmp, SIGNAL, 0, 16, 0.08, 0.46, 1, out, i);
 };
 
 /** Resenha: noite âmbar de balcão de bar; o dourado vira grading, não só troca de cor. */
@@ -48,9 +102,12 @@ const gradeResenha: Grade = (r, g, b, out, i) => {
   const warm = THREE.MathUtils.smoothstep(t, 0.0, 0.85);
   // Sombras em marrom de madeira escura, altas em dourado de chope; 28% da cor original fica.
   const keep = 0.28;
-  out[i] = clamp01(t * (0.62 + 0.38 * warm) * (1 - keep) + (y + (r - y) * 1.1) * keep);
-  out[i + 1] = clamp01(t * (0.4 + 0.44 * warm) * (1 - keep) + (y + (g - y) * 1.1) * keep);
-  out[i + 2] = clamp01(t * (0.22 + 0.34 * warm) * (1 - keep) + (y + (b - y) * 1.1) * keep);
+  tmp[0] = clamp01(t * (0.62 + 0.38 * warm) * (1 - keep) + (y + (r - y) * 1.1) * keep);
+  tmp[1] = clamp01(t * (0.4 + 0.44 * warm) * (1 - keep) + (y + (g - y) * 1.1) * keep);
+  tmp[2] = clamp01(t * (0.22 + 0.34 * warm) * (1 - keep) + (y + (b - y) * 1.1) * keep);
+  // Só o âmbar saturado (sinalizadores) vai para o tom cheio; o creme das luzes
+  // (#F7D9A8, mesma matiz, saturação 0,32) fica no grading.
+  accent(r, g, b, tmp, AMBER, 38, 14, 0.3, 0.5, 0.7, out, i);
 };
 
 function buildLut(grade: Grade, size = 32) {

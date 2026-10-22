@@ -7,9 +7,21 @@ import { gsap } from "@/lib/gsap";
 import { useFinePointer, useReducedMotion } from "@/lib/use-media";
 import { localeHref, type Locale } from "@/lib/i18n";
 import type { Project } from "@/types/portfolio.types";
+import { BaseCover } from "@/components/projects/BaseCover";
 
-/** Categorias de base: índice compacto dos projetos de estudo, com a capa seguindo o cursor. */
-export function Academy({ projects, openLabel, locale }: { projects: Project[]; openLabel: string; locale: Locale }) {
+/** Categorias de base: índice compacto dos projetos de estudo, com a capa (o número do projeto) seguindo o cursor. */
+export function Academy({
+  projects,
+  numbers,
+  openLabel,
+  locale
+}: {
+  projects: Project[];
+  /** Número de cada projeto na Campanha, o mesmo da súmula e da capa. */
+  numbers: Record<string, string>;
+  openLabel: string;
+  locale: Locale;
+}) {
   const fine = useFinePointer();
   const reduce = useReducedMotion();
   const preview = React.useRef<HTMLDivElement>(null);
@@ -32,7 +44,7 @@ export function Academy({ projects, openLabel, locale }: { projects: Project[]; 
   return (
     <div className="grid-editorial">
       <ul className="col-span-12 border-t border-line" onPointerLeave={() => setActive(null)}>
-        {projects.map((p, i) => (
+        {projects.map((p) => (
           <li key={p.slug} className="border-b border-line">
             <Link
               href={localeHref(locale, `/projects/${p.slug}`)}
@@ -42,7 +54,7 @@ export function Academy({ projects, openLabel, locale }: { projects: Project[]; 
               onBlur={() => setActive(null)}
               className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 py-5 transition-colors hover:text-fg md:grid-cols-[3rem_1.2fr_1fr_1fr_auto]"
             >
-              <span className="label tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</span>
+              <span className="label tabular-nums text-muted">{numbers[p.slug]}</span>
               <span className="text-[clamp(1.3rem,2.4vw,2.2rem)] leading-tight transition-transform duration-500 ease-cine group-hover:translate-x-2">
                 {p.title}
               </span>
@@ -61,7 +73,7 @@ export function Academy({ projects, openLabel, locale }: { projects: Project[]; 
           ref={preview}
           aria-hidden="true"
           className="pointer-events-none fixed left-0 top-0 z-30 h-44 w-72 overflow-hidden border border-line bg-surface transition-opacity duration-300"
-          style={{ opacity: active?.cover ? 1 : 0 }}
+          style={{ opacity: active ? 1 : 0 }}
         >
           {projects.map((p) =>
             p.cover ? (
@@ -74,7 +86,15 @@ export function Academy({ projects, openLabel, locale }: { projects: Project[]; 
                 className="object-cover object-top grayscale transition-opacity duration-300"
                 style={{ opacity: active?.slug === p.slug ? 1 : 0 }}
               />
-            ) : null
+            ) : (
+              <div
+                key={p.slug}
+                className="absolute inset-0 transition-opacity duration-300"
+                style={{ opacity: active?.slug === p.slug ? 1 : 0 }}
+              >
+                <BaseCover number={numbers[p.slug]} label={p.title} />
+              </div>
+            )
           )}
         </div>
       ) : null}
