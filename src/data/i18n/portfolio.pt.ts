@@ -133,11 +133,11 @@ export const portfolioPT: Portfolio = {
         label: "Defesa",
         subtitle: "AppSec / Blue Team",
         players: [
-          { number: 1, position: "Goleiro", role: "Autenticação & autorização", items: ["JWT", "RBAC", "2FA", "Argon2"] },
-          { number: 2, position: "Lateral", role: "Validação & sanitização", items: ["Zod", "Sanitização de entrada"] },
-          { number: 3, position: "Zagueiro", role: "Proteção de borda", items: ["Rate limiting", "WAF"] },
-          { number: 4, position: "Zagueiro", role: "Isolamento & criptografia", items: ["Isolamento estrito por tenant", "RLS", "AES-256-GCM"] },
-          { number: 6, position: "Lateral", role: "Antifraude", items: ["Geofence", "Validação de check-in"] }
+          { number: 1, position: "Goleiro", role: "Autenticação & senhas", items: ["JWT", "RBAC", "2FA", "Argon2 / bcrypt"] },
+          { number: 2, position: "Lateral", role: "Validação & sanitização", items: ["Zod", "Sanitização de entrada", "Prevenção de XSS/SQLi"] },
+          { number: 3, position: "Zagueiro", role: "Proteção de borda", items: ["Rate limiting", "WAF", "Hardening de CSP"] },
+          { number: 4, position: "Zagueiro", role: "Dados sensíveis & criptografia", items: ["Isolamento estrito por tenant", "RLS (Postgres)", "AES-256-GCM", "Gestão de segredos"] },
+          { number: 6, position: "Lateral", role: "Conformidade & antifraude", items: ["LGPD no banco", "Geofence", "Logs de auditoria"] }
         ]
       },
       {
@@ -146,8 +146,8 @@ export const portfolioPT: Portfolio = {
         subtitle: "O motor",
         players: [
           { number: 5, position: "Volante", role: "Modelagem de domínio", items: ["NestJS", "DDD", "Clean Architecture"] },
-          { number: 8, position: "Meia", role: "Dados", items: ["PostgreSQL", "TypeORM", "Drizzle", "Supabase"] },
-          { number: 10, position: "Meia", role: "Filas & eventos", items: ["Redis", "BullMQ", "Workers"] }
+          { number: 8, position: "Meia", role: "Dados", items: ["PostgreSQL", "TypeORM", "Prisma", "Drizzle", "Supabase"] },
+          { number: 10, position: "Meia", role: "Filas, eventos & tempo real", items: ["Redis", "BullMQ", "Workers", "Socket.io"] }
         ]
       },
       {
@@ -163,7 +163,7 @@ export const portfolioPT: Portfolio = {
     ],
     bench: {
       label: "Comissão técnica",
-      items: ["Docker", "Linux on-premise", "GitHub Actions (self-hosted)", "Observabilidade", "Testes"]
+      items: ["Docker", "Linux on-premise", "GitHub Actions (self-hosted)", "Observabilidade", "Testes", "Auditoria de segurança (P0–P3)", "Blue Team: OSINT & forense (FIAP)"]
     }
   },
   method: {
@@ -310,7 +310,7 @@ export const portfolioPT: Portfolio = {
       summary:
         "Marketplace mobile full-stack que conecta profissionais autônomos de beleza a clientes, com marca própria, arquitetura escalável em monorepo, tempo real e foco em experiência sem fricção.",
       tier: "sumula",
-      status: "development",
+      status: "done",
       competition: "Marketplace mobile on-demand",
       position: "Co-CEO · Arquiteto · Full Stack",
       featured: true,
