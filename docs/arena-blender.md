@@ -1,5 +1,7 @@
 # Arena no Blender: modelagem, bake e exportação
 
+> **Caminho alternativo (22/10).** O caminho principal agora é o bake no navegador, com o `ProgressiveLightMap` do three sobre a geometria procedural: [`docs/bake-luz.md`](bake-luz.md). Este guia fica de reserva. Se um dia for usado, o formato esperado mudou: em vez de um bake **Combined** colorido (§4), são 4 bakes de luz em escala de cinza, um por setor da cobertura (só os 3 Area Lights daquele setor acesos, Bake Type **Diffuse** com Direct e Indirect e sem Color), empacotados nos canais R (sul), G (leste), B (oeste) e A (norte), guardando a raiz quadrada da luz. O resto (unidades, eixos, nomes, UV `lightmap`, exportação) continua valendo, e o site lê o mesmo formato dos dois caminhos.
+
 Guia da parte da etapa 1 do plano Awwwards (`docs/plano-awwwards.md`, "Luz assada") que é do Gustavo. O código já está pronto para receber o modelo: basta colocar o arquivo em `public/models/arena.glb` e trocar `ARENA_MODEL` em `src/components/scene/stadium/config.ts` de `null` para `"/models/arena.glb"`. Sem o arquivo, a arena continua procedural.
 
 **O que vem do Blender:** só a estrutura, com a luz assada (arquibancadas, prédios, coberturas, treliça, arcos, pilares, tirantes, cobertura dos fundos e moldura do telão).

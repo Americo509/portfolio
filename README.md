@@ -77,7 +77,7 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
   - grão no pós-processamento (o grão em CSS some quando ele está ativo) e flare anamórfico nos 12 grupos de refletores;
   - letterbox 2.39:1 no túnel, na saída dele e no apito final (`Letterbox.tsx` e o preloader, que também tem a câmera na mão);
   - no tier alto, rack focus (profundidade de campo, o estádio desfoca nos capítulos de leitura) e motion blur só nos movimentos rápidos.
-- **Luz assada:** o código aceita o modelo do Blender (`ARENA_MODEL` em `stadium/config.ts`, glTF com meshopt e KTX2; o transcodificador fica em `public/basis/`). Enquanto o modelo não existe, a estrutura continua procedural. Passo a passo da modelagem e do bake em [`docs/arena-blender.md`](docs/arena-blender.md).
+- **Luz assada:** o código aceita o modelo com luz assada (`ARENA_MODEL` em `stadium/config.ts`, glTF com meshopt e KTX2; o transcodificador fica em `public/basis/`). Enquanto ele não existe, a estrutura continua procedural. O caminho escolhido é o bake no navegador, um por setor em RGBA ([`docs/bake-luz.md`](docs/bake-luz.md), em desenho); o Blender ficou como alternativa ([`docs/arena-blender.md`](docs/arena-blender.md)).
 - **Desempenho:**
   - Os shaders compilam em paralelo (`compileAsync`) quando o navegador tem `KHR_parallel_shader_compile`.
   - Arquibancadas, torcida e bandeiras usam uma luz barata por setor (4 barras em vez de 12 cones), mais rápida de compilar.

@@ -69,10 +69,10 @@ O salto de demo técnica para filme vem de luz e lente, não de mais geometria. 
 
 ### Luz assada
 
-- **Modelo híbrido.** Arena modelada no Blender em low-poly, com as medidas de `docs/estadio-arena.md` §7, AO e lightmap assados, exportada em glTF com meshopt e texturas KTX2.
+- **Modelo híbrido.** A geometria procedural da arena (medidas de `docs/estadio-arena.md` §7) com a luz assada por um script no navegador, com o `ProgressiveLightMap` do three: um bake por setor da cobertura, empacotado nos canais RGBA de uma textura KTX2, e UV do lightmap pelo xatlas. Exportada em glTF com meshopt. Desenho em [`docs/bake-luz.md`](bake-luz.md) (aprovado o caminho em 22/10; implementação depois do aval do desenho).
 - **Continua procedural.** Neblina, torcida, bandeiras, sinalizadores, fumaça e gramado.
 - **Por quê.** Luz assada é o maior salto visual isolado e costuma sair mais leve do que iluminar tudo em tempo real.
-- **Habilidade a aprender.** Do Blender, só modelagem por extrusão e o bake de luz. A arena é quase toda extrusão. Passo a passo em [`docs/arena-blender.md`](arena-blender.md).
+- **Caminho alternativo.** Modelar e assar no Blender ([`docs/arena-blender.md`](arena-blender.md)). Ficou de reserva: o Gustavo não usa Blender, e o bake no navegador reaproveita a geometria e as luzes que o site já tem.
 
 ### Cor
 
@@ -141,7 +141,7 @@ Tudo o que não é feito pelo Gustavo vem de fonte com licença limpa e fica reg
 | HDRIs, texturas, modelos | Poly Haven | CC0 |
 | Modelos simples | Kenney, Quaternius | CC0 |
 | Animação de torcedor | Mixamo | Para os torcedores com braços levantados e pulando |
-| Arena | Modelada pelo Gustavo no Blender | Não usar modelo pronto do Sketchfab: licença varia, costuma vir com marca e fica genérico |
+| Arena | Geometria procedural do projeto, luz assada pelo script (`docs/bake-luz.md`) | Não usar modelo pronto do Sketchfab: licença varia, costuma vir com marca e fica genérico |
 | Fontes | Archivo, Instrument Serif, JetBrains Mono | Já em uso no projeto |
 
 **Registro em `docs/assets-licenses.md`.** Uma linha por arquivo: caminho no repositório, origem, licença, data e quem fez. Serve de crédito na submissão e mostra a mesma disciplina de compliance do lado AppSec.
@@ -200,7 +200,7 @@ Um vídeo de 30 a 60 segundos do plano-sequência, com o mosaico e o telestrador
 
 Seis etapas, nesta ordem, cada uma com aprovação do Gustavo antes da próxima. Toda etapa fecha com a rotina de sempre: lint, typecheck, build, Playwright, screenshots em desktop e mobile (com reduced motion e sem WebGL), commit e resumo.
 
-1. **O look.** Arena no Blender com bake, glTF com meshopt e KTX2, LUTs, AgX, lente e câmera autorada com trilha mobile.
+1. **O look.** Arena com luz assada (bake no navegador, `docs/bake-luz.md`), glTF com meshopt e KTX2, LUTs, AgX, lente e câmera autorada com trilha mobile.
    - *Status (22/10):* a parte de código está pronta (LUTs, AgX, grão, flare anamórfico, letterbox, rack focus, motion blur, plano-sequência com trilha mobile, dolly zoom e o carregador do glTF com meshopt e KTX2). A tipografia cinética fica para a etapa 2, junto com o mosaico, porque mexe no h1 (o LCP); o HTML já nasce no estado final (wdth 62) e a animação não pode mexer no layout (CLS).
    - *Revisão (22/10), aprovadas:* troca do Theatre.js por `camera-track.ts` e tipografia cinética na etapa 2. Feito em seguida:
      - **Vermelho:** a LUT devolve a saturação na faixa de matiz do acento depois do AgX, em proporção à saturação que sobrou e com as sombras neutras. Núcleo do sinalizador medido em `#DF1B1A` (alvo `#E61919`); na Resenha, `#F0950A` (alvo `#F59E0B`). A aberração cromática só existe com o scroll em movimento (parada, a franja virava contorno vermelho).
@@ -215,7 +215,9 @@ Seis etapas, nesta ordem, cada uma com aprovação do Gustavo antes da próxima.
      - **Número da capa:** a lista de `/projects` numerava pela posição no filtro (o Spotify aparecia 05 com o filtro "base"); agora usa o número da Campanha, o mesmo da súmula e da capa. Teste novo em `smoke.spec.ts`.
      - **Páginas internas:** sem a abertura, sem sinalizadores e fumaça, refletores a 40% e a torcida mais parada. Atrás do texto do cabeçalho de `/projects/spotify`: vermelho saturado 16,5% → 0% e luminância média 0,127 → 0,114.
    - *Plano B do bake (avaliação, sem implementar):* recomendado o `ProgressiveLightMap` do próprio three r186, rodando offline num script com o Chromium headless e exportando um `.glb` com o lightmap para o `ARENA_MODEL`. O `@react-three/lightmap` foi descartado: feito para R3F 6 e three 0.128, grava a UV do lightmap como `uv2` (o three passou a usar `uv1` na r151). O `three-gpu-pathtracer` é compatível, mas não gera lightmap.
-   - *Falta para fechar:* o bake (plano B) e o teste no Android com o overlay (mediana ≥ 55 fps e p95 ≤ 20 ms por 10 s no hero, tier médio).
+   - *Bake (aprovado, desenho em [`docs/bake-luz.md`](bake-luz.md)):* um bake por setor em RGBA (luz branca, cor pela LUT), somado no shader com o peso de cada setor; UV do lightmap pelo xatlas no script; KTX2 UASTC de 512, 1024 e 2048 por tier, com raiz quadrada e dither contra degraus nos pretos. O código começa depois do aval do desenho.
+   - *Falta para fechar:* o bake e o teste no Android com o overlay (mediana ≥ 55 fps e p95 ≤ 20 ms por 10 s no hero, tier médio).
+   - *Depois do bake:* bandeirões como pano sem espessura, em escala compatível com a arquibancada de 14 m, com mastro visível e ondulação crescendo do mastro para a ponta.
    - *Pronto quando:* as screenshots de antes e depois mostram o salto; o hero roda a 60 fps no tier mid; o TBT da home no mobile não piora em relação ao registrado no README; os testes webgl e axe passam.
 2. **Mosaico da torcida.** Nome, 4-3-3, #08 e "BORA PRA RESENHA?".
    - *Pronto quando:* o LCP do h1 não muda; o tier low funciona; reduced motion e sem WebGL mostram só o cartaz do DOM.

@@ -1,6 +1,6 @@
 # Estádio inspirado na arena de Itaquera (plano para o futuro)
 
-> O [plano Awwwards](plano-awwwards.md) prevalece onde divergir: a estrutura passa a vir de um modelo do Blender com luz assada ([guia](arena-blender.md)), e a câmera vira plano-sequência.
+> O [plano Awwwards](plano-awwwards.md) prevalece onde divergir: a estrutura ganha luz assada por um script no navegador ([desenho](bake-luz.md); o [Blender](arena-blender.md) ficou como alternativa), e a câmera vira plano-sequência.
 
 Status: **fases 1 e 2 entregues em out/2026** (referências, esboço e estrutura com luz e torcida, inclusive no pênalti). Próximas: telão dinâmico e o 2D. Este documento registra a direção combinada para quando o estádio do site for trocado por um inspirado na arquitetura da arena do Corinthians (Neo Química Arena).
 
