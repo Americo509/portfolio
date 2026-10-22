@@ -1,6 +1,6 @@
 # Estádio inspirado na arena de Itaquera (plano para o futuro)
 
-Status: **não iniciado**. Este documento registra a direção combinada para quando o estádio do site for trocado por um inspirado na arquitetura da arena do Corinthians (Neo Química Arena).
+Status: **fase 1 (referências) entregue em out/2026**; a implementação ainda não começou. Este documento registra a direção combinada para quando o estádio do site for trocado por um inspirado na arquitetura da arena do Corinthians (Neo Química Arena).
 
 ## 1. Quem faz o quê
 
@@ -23,15 +23,27 @@ Resumo: o trabalho pesado é meu; do seu lado, fotos de referência e (opcional)
 - Nos textos do site, se precisar citar: "a arena de Itaquera" ou "a casa". De preferência, não citar: quem conhece reconhece pela silhueta.
 - A paleta não muda: preto e branco com o vermelho de sinalizador, e o âmbar no Modo Resenha. O alvinegro já combina.
 
-## 3. O que deixa a arena reconhecível
+## 3. Referências e o que elas confirmam
 
-Lista de memória: **conferir com as fotos de referência** antes de implementar.
+Arquivos em `design/reference/arena/` (fora do `public/`, nunca publicados):
 
-1. **Assimetria entre os lados:** o lado oeste é um prédio alto com fachada de vidro; o lado leste tem a fachada externa de LED gigante (o "telão" de fora).
-2. **Cobertura com estrutura metálica aparente:** treliças longas e cobertura clara. A silhueta da cobertura recortada contra a neblina é o que mais identifica o estádio de longe.
-3. **Luz na borda da cobertura**, não em quatro torres nos cantos. É a maior mudança em relação à cena atual.
-4. **Arquibancadas coladas no gramado**, com inclinação forte, e a torcida atrás do gol.
-5. **Contexto (opcional):** zona leste de São Paulo, com a linha do metrô ao lado. Um trem passando ao longe pode virar easter egg.
+| Arquivo | O que é | Pode publicar? |
+|---|---|---|
+| `concept-aerea-noite.webp` | Concept no estilo do site: vista aérea à noite, prédio alto num lado, cobertura em curva, neblina, sinalizador vermelho, traços de giz e espaço vazio à esquerda | Sim, se foi gerada por você (sem marca visível). Candidata a OG image ou à chegada à arena (fase 5) |
+| `concept-interior-prancheta.webp` | Concept no estilo do site: interior visto do campo, arquibancada atrás do gol com o telão em cima, luzes na borda da cobertura, jogadas em giz no gramado, sinalizador vermelho no canto | Sim, mesma ressalva. Candidata a OG image e ao fallback estático |
+| `torcida-sinalizadores-cobertura.webp` | Torcida atrás do gol com bandeiras, sinalizadores e fumaça, cobertura com luzes | **Não**: tem escudos e marca de patrocinador. Só referência de clima e de luz |
+| `interior-cobertura-telao.png` | Foto real à noite: linhas do campo acesas, arco da cobertura sobre o fundo, telão sobre a arquibancada atrás do gol | **Não** (foto de terceiros). Só referência de proporção |
+| `festa-fogos-sinalizadores.png` | Fogos e sinalizadores vermelhos atrás do gol | **Não** (foto de terceiros). Referência para o apito final |
+
+O que as referências mostram e muda o plano:
+
+1. **Laterais altas e cobertas, fundos baixos.** As arquibancadas laterais são altas e ficam sob a cobertura principal. O lado do prédio é um bloco maciço, alto e retangular, com fachada em painéis verticais. Atrás dos gols, a arquibancada tem um anel só e é bem mais baixa.
+2. **Cobertura em dois níveis.** Os lados longos têm a cobertura pesada, com treliça aparente e painéis translúcidos. Sobre os fundos passa um **arco metálico claro**, com tirantes verticais segurando uma cobertura fina. Esse arco é a assinatura que mais aparece nas fotos e deve ser a primeira coisa a ficar certa na cena.
+3. **Luz em dois tipos, os dois na borda da cobertura:** grupos de refletores espaçados ao longo da borda, como "lâmpadas penduradas", e uma linha contínua de LED contornando a borda interna. Nenhuma torre. Os grupos espaçados dão para manter o motivo dos "4" com quatro grupos maiores, um por setor.
+4. **Telão sobre a arquibancada atrás do gol**, centralizado. É o lugar natural para o placar dos pênaltis e para o "Bora pra resenha?".
+5. **Cantos abertos** entre as laterais e os fundos: a neblina e a luz vazam por ali, o que ajuda no recorte da silhueta.
+6. **Linhas do campo acesas** na foto noturna: o shader do gramado já desenha as linhas e pode ganhar brilho próprio quando os refletores apagam no apito final.
+7. **Clima atrás do gol:** sinalizadores vermelhos, fumaça e bandeiras (sem escudo). Os fogos da foto da festa encaixam no apito final como recompensa.
 
 ## 4. Impacto no que já existe
 
@@ -41,8 +53,9 @@ Lista de memória: **conferir com as fotos de referência** antes de implementar
 | Preloader "refletor 1/4 … ok" e apito final com "os refletores apagam um a um" | Manter o "4" como **os quatro setores da cobertura** (norte, sul, leste, oeste): `> setor leste ........ ok`. O apito final apaga setor por setor. Ajustar `copy.boot` (PT/EN) e `docs/art-direction.md` §4. |
 | 4 caixas inclinadas como arquibancadas (`Stands`) | Perfil em degraus por setor (`ExtrudeGeometry` a partir de uma seção transversal 2D), com o oeste mais alto que os outros. |
 | Sem cobertura | Novo `Roof`: treliças finas (`InstancedMesh` ou `LineSegments`) e uma placa semitransparente que recorta a neblina. |
-| Sem telão | Telão interno com shader de "pixels" mostrando conteúdo do site: número do capítulo, placar da disputa de pênaltis e "Bora pra resenha?" no Modo Resenha. |
-| Sinalizador na arquibancada do fundo (`FLARE`) | Continua atrás do gol, no meio da torcida. |
+| Sem cobertura sobre os fundos | Arco metálico claro com tirantes verticais sobre a arquibancada baixa atrás de cada gol (§3, item 2). |
+| Sem telão | Telão sobre a arquibancada atrás do gol, com shader de "pixels" mostrando conteúdo do site: número do capítulo, placar da disputa de pênaltis e "Bora pra resenha?" no Modo Resenha. |
+| Sinalizador na arquibancada do fundo (`FLARE`) | Continua atrás do gol, no meio da torcida, agora numa arquibancada baixa sob o telão. No apito final, fogos curtos sobre o fundo (partículas, só nos tiers `mid` e `high`). |
 | `CHAPTER_PRESETS` (enquadramentos por capítulo) | Revisar: a vista tática de cima vai bater na cobertura, então ela precisa de uma abertura central ou a câmera fica abaixo da borda. |
 | Fallback em CSS | Silhueta da cobertura em SVG + cortina de luz em gradiente. Continua sem imagem. |
 | Estádio do pênalti | Mesma silhueta e mesma luz de borda ao fundo. |
@@ -53,7 +66,7 @@ Lista de memória: **conferir com as fotos de referência** antes de implementar
 
 ## 5. Fases sugeridas
 
-1. **Referência:** você coloca as fotos em `design/reference/arena/` e, se quiser, gera 2–3 concept arts (§6, prompt A). Eu analiso e devolvo um esboço de proporções (planta e corte) para você aprovar.
+1. **Referência:** ✅ fotos e duas concept arts em `design/reference/arena/`, analisadas no §3. Próximo passo: eu devolvo um esboço de proporções (planta e corte) para você aprovar antes de mexer na cena.
 2. **Estrutura:** arquibancadas assimétricas, cobertura e luz da borda, substituindo as torres. Preloader e apito final passam a falar em setores.
 3. **Telão:** conteúdo dinâmico (capítulo, placar dos pênaltis, Modo Resenha).
 4. **2D:** key arts e OG image novas (se quiser), fallback estático e estádio do pênalti.
