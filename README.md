@@ -66,7 +66,10 @@ pnpm test:e2e   # Playwright contra o build de produção: smoke, lógica do pê
 
 - `src/components/scene/stadium/`: arena inspirada na de Itaquera (plano e medidas em [`docs/estadio-arena.md`](docs/estadio-arena.md)). Laterais iguais em dois anéis com o bloco do prédio atrás, fundos baixos com arco metálico e tirantes, telão atrás do gol norte, neblina em camadas (fBm) e gramado com as linhas do campo em shader. A câmera desce de cima da cobertura sul e depois é dirigida pelo scroll e pelo mouse.
 - Luz: 12 grupos de refletores na borda da cobertura (3 por setor) e uma linha de LED contornando a borda; sem torres. O liga/desliga é por setor (sul, leste, oeste, norte), na ordem do preloader e do apagar no apito final.
-- Torcida norte (`Arena.tsx`, `NorthCrowd`): torcedores em silhueta pulando, bandeirões e bandeiras de mastro balançando (alvinegras, sem escudo) e 6 sinalizadores com fumaça. O mesmo bloco aparece atrás do gol no pênalti.
+- Torcida norte (`Arena.tsx`, `NorthCrowd`): torcedores em silhueta pulando, bandeirões e bandeiras de mão balançando (alvinegras, sem escudo) e 6 sinalizadores com fumaça. O mesmo bloco aparece atrás do gol no pênalti.
+  - Bandeiras na escala da arquibancada de 14 m: bandeirão com mastro de 6 a 8,5 m e pano de até 6,6 × 4,2 m; bandeira de mão com mastro de 2,3 a 3 m. O pano é um plano sem espessura, de lado para a câmera; a onda corre do mastro para a ponta e cresce nessa direção, com dobras sombreadas. Mastro claro, visível contra a arquibancada.
+  - No pênalti, bandeirões e bandeiras ficam nas primeiras fileiras, onde a câmera baixa enxerga.
+  - `?debug`: `window.__cameraDebug.getState().set({ shot: { pos, look, fov } })` fixa um quadro (pré-visualização e closes).
 - Tiers de GPU (`low`, `mid`, `high`) controlam as camadas de neblina, a fumaça, o tamanho da torcida, as bandeiras, a treliça da cobertura, o DPR e o pós-processamento.
 
 ### O look (etapa 1 do [plano Awwwards](docs/plano-awwwards.md))

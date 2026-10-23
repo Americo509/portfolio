@@ -14,6 +14,8 @@ type CameraDebug = {
   scrub: number | null;
   /** Desenha a spline da trilha e os quadros-chave na cena. */
   showPath: boolean;
+  /** Quadro fixo no lugar da trilha (posição, alvo e FOV); null segue a trilha. */
+  shot: { pos: [number, number, number]; look: [number, number, number]; fov: number } | null;
   set: (patch: Partial<Omit<CameraDebug, "set">>) => void;
 };
 
@@ -21,6 +23,7 @@ export const useCameraDebug = create<CameraDebug>((set) => ({
   free: false,
   scrub: null,
   showPath: true,
+  shot: null,
   set: (patch) => set(patch)
 }));
 

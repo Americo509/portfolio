@@ -265,6 +265,12 @@ function CameraRig({ shared, mode, blur }: { shared: Shared; mode: SceneMode; bl
       Object.assign(sample.lens, a);
       if (!blur) sample.lens.dim = AMBIENT_DIM_NO_BLUR;
     }
+    // ?debug: quadro fixo (pré-visualização de quadro-chave, closes para conferência).
+    if (dbg.shot) {
+      sample.pos.set(...dbg.shot.pos);
+      sample.look.set(...dbg.shot.look);
+      sample.lens.fov = dbg.shot.fov;
+    }
 
     // Amortecimento independente de framerate.
     const k = 1 - Math.exp(-delta * 2.6);

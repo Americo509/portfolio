@@ -320,7 +320,7 @@ function NorthEnd({ dark, reduce }: { dark: boolean; reduce: boolean }) {
     shared.uScale.value = (state.size.height * state.gl.getPixelRatio()) / (2 * Math.tan((cam.fov * Math.PI) / 360));
     shared.uCamPos.value.copy(cam.position);
   });
-  return <NorthCrowd shared={shared} crowd={1500} flags={10} smoke={260} additive={dark} signal={signal} offsetZ={NORTH_OFFSET} withStand />;
+  return <NorthCrowd shared={shared} crowd={1500} flags={10} smoke={260} additive={dark} signal={signal} offsetZ={NORTH_OFFSET} withStand flagLayout="penalty" />;
 }
 
 /** Flashes de fotógrafos na torcida atrás do gol (só no gol). */

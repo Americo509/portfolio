@@ -588,11 +588,19 @@ export const crowdFragment = /* glsl */ `
   }
 `;
 
-/** Bandeiras e bandeirões: o pano ondula a partir do mastro; listras alvinegras, sem escudo. */
+/**
+ * Bandeiras e bandeirões: pano sem espessura (um plano), preso ao mastro pela borda
+ * esquerda. A onda corre do mastro para a ponta e cresce nessa direção (zero no mastro,
+ * máxima na ponta, onde também tremula mais e cai um pouco); a borda de baixo, solta,
+ * ondula mais que a de cima. As dobras sombreiam pela inclinação da onda. Listras
+ * alvinegras, sem escudo.
+ */
 export const flagVertex = /* glsl */ `
   uniform float uTime;
   uniform float uSeed;
   uniform float uSize;
+  uniform float uHeight;
+  uniform float uSpeed;
   uniform float uEnergy;
   varying vec2 vUv;
   varying vec3 vWorld;
@@ -600,11 +608,20 @@ export const flagVertex = /* glsl */ `
   void main() {
     vUv = uv;
     vec3 p = position;
-    float t = uTime * 3.0 + uSeed;
-    float wave = sin(uv.x * 5.0 - t) * 0.16 + sin(uv.x * 9.0 + uv.y * 3.0 - t * 1.4) * 0.05;
-    p.z += wave * uv.x * uSize * (0.4 + 0.6 * uEnergy);
-    p.y -= uv.x * uv.x * 0.06 * uSize;
-    vShade = 0.75 + 0.25 * cos(uv.x * 5.0 - t);
+    float u = uv.x;
+    float t = uTime * uSpeed + uSeed;
+    float ramp = pow(u, 1.35) * (1.0 + 0.25 * (1.0 - uv.y));
+    float k = 7.0;
+    float phase = u * k - t * 2.6;
+    float flutter = sin(u * 17.0 + uv.y * 4.0 - t * 5.3) * 0.035 * u * u;
+    float wave = sin(phase) * 0.17 + sin(phase * 2.1 + uv.y * 2.5 - t * 0.7) * 0.05 * u + flutter;
+    float energy = 0.4 + 0.6 * uEnergy;
+    p.z += wave * ramp * uSize * energy;
+    // Onde ondula, o pano encolhe em direção ao mastro (não estica) e a ponta cai um pouco.
+    p.x -= uSize * 0.06 * ramp * energy * (0.6 + 0.4 * sin(phase));
+    p.y -= u * u * 0.06 * uHeight * (1.0 + 0.4 * sin(t * 0.7));
+    float slope = cos(phase) * 0.17 * k * ramp * energy;
+    vShade = 0.72 + 0.3 * clamp(slope * 0.7, -1.0, 1.0);
     vec4 world = modelMatrix * vec4(p, 1.0);
     vWorld = world.xyz;
     gl_Position = projectionMatrix * viewMatrix * world;

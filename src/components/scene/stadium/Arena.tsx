@@ -272,7 +272,8 @@ export function NorthCrowd({
   additive,
   signal,
   offsetZ = 0,
-  withStand = false
+  withStand = false,
+  flagLayout = "arena"
 }: {
   shared: Shared;
   crowd: number;
@@ -283,6 +284,8 @@ export function NorthCrowd({
   signal: THREE.Color;
   offsetZ?: number;
   withStand?: boolean;
+  /** No pênalti, as bandeiras ficam nas primeiras fileiras (ver FLAG_LAYOUT). */
+  flagLayout?: FlagLayout;
 }) {
   const blending = additive ? THREE.AdditiveBlending : THREE.NormalBlending;
   return (
@@ -290,7 +293,7 @@ export function NorthCrowd({
       <group position={[0, 0, offsetZ]}>
         {withStand && <NorthStand shared={shared} additive={additive} />}
         <Crowd shared={shared} count={crowd} additive={additive} />
-        <Flags shared={shared} count={flags} />
+        <Flags shared={shared} count={flags} layout={flagLayout} />
       </group>
       {/* Fumaça e núcleos já leem a posição dos sinalizadores (deslocada) nos uniforms. */}
       <FlareSmoke shared={shared} count={smoke} blending={blending} />
@@ -424,60 +427,110 @@ function Crowd({ shared, count, additive }: { shared: Shared; count: number; add
   );
 }
 
-type FlagSpec = { x: number; z: number; pole: number; w: number; h: number; pattern: number; seed: number; swing: number; speed: number };
+type FlagSpec = {
+  x: number;
+  z: number;
+  /** Mastro (m), do punho do torcedor à ponta. */
+  pole: number;
+  /** Pano (m): largura a partir do mastro e altura. */
+  w: number;
+  h: number;
+  pattern: number;
+  seed: number;
+  /** Balanço do mastro (rad) e velocidade (do balanço e da onda). */
+  swing: number;
+  speed: number;
+  /** Direção do pano (rad em torno do mastro): de lado para a câmera, a onda aparece no contorno. */
+  yaw: number;
+};
 
 /**
- * Bandeirões e bandeiras de mastro balançando na torcida norte. O mastro gira
- * na base (o torcedor balança de um lado para o outro) e o pano ondula no shader.
+ * Onde ficam as bandeiras. Na arena, bandeirões espalhados pela arquibancada. No
+ * pênalti, a câmera baixa atrás da cobrança só enxerga ~7 m de altura nas primeiras
+ * fileiras: bandeirões e bandeiras ficam na frente, para entrarem no quadro atrás do gol.
  */
-function Flags({ shared, count }: { shared: Shared; count: number }) {
+type FlagLayout = "arena" | "penalty";
+const FLAG_LAYOUT: Record<FlagLayout, { big: FlagSpec[]; x: [number, number]; z: [number, number] }> = {
+  arena: {
+    big: [
+      { x: -22, z: 70, pole: 8.0, w: 6.2, h: 4.0, pattern: 0, seed: 0.3, swing: 0.4, speed: 0.8, yaw: 0.5 },
+      { x: -5, z: 76, pole: 8.4, w: 6.6, h: 4.2, pattern: 1, seed: 2.1, swing: 0.36, speed: 0.72, yaw: -0.42 },
+      { x: 10, z: 66, pole: 7.4, w: 5.6, h: 3.7, pattern: 2, seed: 4.4, swing: 0.44, speed: 0.9, yaw: 0.36 },
+      { x: 26, z: 73, pole: 7.8, w: 6.0, h: 3.9, pattern: 0, seed: 6.2, swing: 0.4, speed: 0.82, yaw: -0.5 }
+    ],
+    x: [-32, 32],
+    z: [62, 82]
+  },
+  penalty: {
+    big: [
+      { x: -11, z: 62.5, pole: 6.2, w: 4.6, h: 3.0, pattern: 0, seed: 0.3, swing: 0.42, speed: 0.85, yaw: 0.6 },
+      { x: 12, z: 63, pole: 6.4, w: 4.8, h: 3.1, pattern: 1, seed: 2.1, swing: 0.38, speed: 0.78, yaw: -0.6 },
+      { x: 1, z: 66, pole: 7.0, w: 5.2, h: 3.4, pattern: 2, seed: 4.4, swing: 0.4, speed: 0.9, yaw: 0.3 },
+      { x: -24, z: 64, pole: 6.6, w: 4.8, h: 3.2, pattern: 1, seed: 6.2, swing: 0.44, speed: 0.8, yaw: 0.5 }
+    ],
+    x: [-24, 24],
+    z: [61, 67]
+  }
+};
+
+/**
+ * Bandeirões e bandeiras de mão na torcida norte, na escala da arquibancada (14 m de
+ * altura, torcedor de ~1,75 m): bandeirão com mastro de 6 a 8,5 m e pano de até
+ * 6,6 × 4,2 m; bandeira de mão com mastro de 2,3 a 3 m. O torcedor segura o mastro na
+ * altura do peito e balança de um lado para o outro; o pano ondula no shader.
+ */
+function Flags({ shared, count, layout }: { shared: Shared; count: number; layout: FlagLayout }) {
   const specs = React.useMemo<FlagSpec[]>(() => {
     const rand = rng(1977);
-    const big: FlagSpec[] = [
-      { x: -19, z: 71, pole: 9, w: 11, h: 6.5, pattern: 0, seed: 0.3, swing: 0.55, speed: 1.1 },
-      { x: 4, z: 75, pole: 10, w: 12, h: 7, pattern: 1, seed: 2.1, swing: 0.5, speed: 0.95 },
-      { x: 23, z: 69, pole: 8.5, w: 10, h: 6, pattern: 2, seed: 4.4, swing: 0.6, speed: 1.2 }
-    ];
-    const small: FlagSpec[] = Array.from({ length: count }, () => ({
-      x: -32 + rand() * 64,
-      z: 62 + rand() * 20,
-      pole: 3 + rand() * 1.2,
-      w: 2.2 + rand() * 0.8,
-      h: 1.4 + rand() * 0.4,
-      pattern: Math.floor(rand() * 3),
-      seed: rand() * 10,
-      swing: 0.35 + rand() * 0.4,
-      speed: 1.4 + rand() * 1.2
-    }));
-    return [...big.slice(0, count >= 8 ? 3 : 2), ...small];
-  }, [count]);
+    const L = FLAG_LAYOUT[layout];
+    const small: FlagSpec[] = Array.from({ length: count }, () => {
+      const w = 1.3 + rand() * 0.5;
+      return {
+        x: L.x[0] + rand() * (L.x[1] - L.x[0]),
+        z: L.z[0] + rand() * (L.z[1] - L.z[0]),
+        pole: 2.3 + rand() * 0.7,
+        w,
+        h: w * (0.62 + rand() * 0.08),
+        pattern: Math.floor(rand() * 3),
+        seed: rand() * 10,
+        swing: 0.3 + rand() * 0.35,
+        speed: 1.3 + rand() * 0.9,
+        yaw: (rand() - 0.5) * 1.4
+      };
+    });
+    return [...L.big.slice(0, count >= 14 ? 4 : count >= 8 ? 3 : 2), ...small];
+  }, [count, layout]);
 
   const refs = React.useRef<(THREE.Group | null)[]>([]);
+  // Mastro claro (bambu/PVC): escuro, sumiria contra a arquibancada.
   const poleMat = React.useMemo(() => new THREE.MeshBasicMaterial(), []);
+  const poleGeo = React.useMemo(() => new THREE.CylinderGeometry(0.07, 0.09, 1, 6, 1), []);
   useFrame(() => {
     const t = shared.uTime.value;
     specs.forEach((f, i) => {
       const g = refs.current[i];
       if (g) g.rotation.z = Math.sin(t * f.speed + f.seed) * f.swing * shared.uEnergy.value;
     });
-    poleMat.color.copy(shared.uBg.value).lerp(shared.uFg.value, 0.25);
+    const on = shared.uLightOn.value.reduce((a, b) => a + b, 0) / 4;
+    poleMat.color
+      .copy(shared.uBg.value)
+      .lerp(shared.uFg.value, 0.58 * (0.5 + 0.5 * on))
+      .lerp(shared.uBg.value, shared.uDim.value * 0.6);
   });
-  React.useEffect(() => () => poleMat.dispose(), [poleMat]);
+  React.useEffect(() => () => (poleMat.dispose(), poleGeo.dispose()), [poleMat, poleGeo]);
 
   return (
     <group>
       {specs.map((f, i) => (
-        <group
-          key={i}
-          position={[f.x, endStandHeight(f.z) + 1.6, -f.z]}
-          ref={(g) => {
-            refs.current[i] = g;
-          }}
-        >
-          <mesh position={[0, f.pole / 2, 0]} material={poleMat} renderOrder={1}>
-            <boxGeometry args={[0.12, f.pole, 0.12]} />
-          </mesh>
-          <Flag shared={shared} spec={f} />
+        <group key={i} position={[f.x, endStandHeight(f.z) + 1.1, -f.z]} rotation={[0, f.yaw, 0]}>
+          <group
+            ref={(g) => {
+              refs.current[i] = g;
+            }}
+          >
+            <mesh position={[0, f.pole / 2, 0]} scale={[1, f.pole, 1]} geometry={poleGeo} material={poleMat} renderOrder={1} />
+            <Flag shared={shared} spec={f} />
+          </group>
         </group>
       ))}
     </group>
@@ -486,13 +539,21 @@ function Flags({ shared, count }: { shared: Shared; count: number }) {
 
 function Flag({ shared, spec }: { shared: Shared; spec: FlagSpec }) {
   const geo = React.useMemo(() => {
-    const g = new THREE.PlaneGeometry(spec.w, spec.h, 20, 8);
-    // Pano preso ao mastro pela borda esquerda, no topo.
-    g.translate(spec.w / 2, spec.pole - spec.h / 2, 0);
+    // Pano preso ao mastro pela borda esquerda, logo abaixo da ponta. Bem subdividido:
+    // a onda cresce até a ponta e precisa de vértices para não quebrar em facetas.
+    const g = new THREE.PlaneGeometry(spec.w, spec.h, 36, 12);
+    g.translate(spec.w / 2, spec.pole - spec.h / 2 - 0.12, 0);
     return g;
   }, [spec]);
   const uniforms = React.useMemo(
-    () => ({ ...shared, uSeed: { value: spec.seed }, uSize: { value: spec.w }, uPattern: { value: spec.pattern } }),
+    () => ({
+      ...shared,
+      uSeed: { value: spec.seed },
+      uSize: { value: spec.w },
+      uHeight: { value: spec.h },
+      uSpeed: { value: spec.speed * 2.2 },
+      uPattern: { value: spec.pattern }
+    }),
     [shared, spec]
   );
   React.useEffect(() => () => geo.dispose(), [geo]);
